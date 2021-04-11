@@ -6,9 +6,9 @@ import ba.grbo.currencyconverter.R
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class CurrencyConverterActivity : AppCompatActivity() {
+class ConverterActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_currency_converter)
+        setContentView(R.layout.activity_converter)
     }
 }
