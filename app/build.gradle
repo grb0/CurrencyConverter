@@ -38,6 +38,21 @@ android {
     buildFeatures {
         dataBinding true
     }
+
+    sourceSets {
+        String sharedTestDir = 'src/sharedTest/java'
+        androidTest {
+            java.srcDirs sharedTestDir
+        }
+        test {
+            java.srcDirs sharedTestDir
+        }
+    }
+
+    testOptions.unitTests {
+        includeAndroidResources = true
+        returnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -71,8 +86,8 @@ dependencies {
     // endregion
 
     // region test
-    //region Defaults
+    // region Defaults
     testImplementation "junit:junit:4.13.2"
-    //endregion
+    // endregion
     // endregion
 }
