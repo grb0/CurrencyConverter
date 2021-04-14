@@ -1,15 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/currency"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:drawablePadding="8dp"
-    android:ellipsize="end"
-    android:gravity="center_vertical"
-    android:maxLines="1"
-    android:padding="16dp"
-    android:textSize="16sp"
-    tools:drawableStartCompat="@sample/data.json/countries/flag"
-    tools:text="@sample/data.json/countries/code" />
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="ba.grbo.currencyconverter.data.models.CurrencyName" />
+
+        <variable
+            name="country"
+            type="ba.grbo.currencyconverter.data.models.Country" />
+
+        <variable
+            name="currencyName"
+            type="ba.grbo.currencyconverter.data.models.CurrencyName" />
+    </data>
+
+    <TextView
+        android:id="@+id/country_txt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawablePadding="8dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto"
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:padding="16dp"
+        android:text="@{country.currency.getCurrencyName(currencyName, context)}"
+        android:textSize="16sp"
+        app:startDrawable="@{country.flag}"
+        tools:drawableStartCompat="@sample/data.json/countries/flag"
+        tools:text="@sample/data.json/countries/code" />
+</layout>

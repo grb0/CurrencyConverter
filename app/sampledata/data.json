@@ -2,43 +2,43 @@
   "countries": [
     {
       "code": "@string/currency_united_arab_emirates",
-      "flag": "@drawable/ic_united_arab_emirates"
+      "flag": "@drawable/ic_flag_united_arab_emirates"
     },
     {
       "code": "@string/currency_afghanistan",
-      "flag": "@drawable/ic_afghanistan"
+      "flag": "@drawable/ic_flag_afghanistan"
     },
     {
       "code": "@string/currency_albania",
-      "flag": "@drawable/ic_albania"
+      "flag": "@drawable/ic_flag_albania"
     },
     {
       "code": "@string/currency_armenia",
-      "flag": "@drawable/ic_armenia"
+      "flag": "@drawable/ic_flag_armenia"
     },
     {
       "code": "@string/currency_netherlands",
-      "flag": "@drawable/ic_netherlands"
+      "flag": "@drawable/ic_flag_netherlands"
     },
     {
       "code": "@string/currency_angola",
-      "flag": "@drawable/ic_angola"
+      "flag": "@drawable/ic_flag_angola"
     },
     {
       "code": "@string/currency_argentina",
-      "flag": "@drawable/ic_argentina"
+      "flag": "@drawable/ic_flag_argentina"
     },
     {
       "code": "@string/currency_australia",
-      "flag": "@drawable/ic_australia"
+      "flag": "@drawable/ic_flag_australia"
     },
     {
       "code": "@string/currency_aruba",
-      "flag": "@drawable/ic_aruba"
+      "flag": "@drawable/ic_flag_aruba"
     },
     {
       "code": "@string/currency_azerbaijan",
-      "flag": "@drawable/ic_azerbaijan"
+      "flag": "@drawable/ic_flag_azerbaijan"
     }
   ]
 }
