@@ -16,7 +16,7 @@
 
 
         <include
-            android:id="@+id/dropdown_currency_chooser"
+            android:id="@+id/from_currency_chooser"
             layout="@layout/dropdown_currency_chooser"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

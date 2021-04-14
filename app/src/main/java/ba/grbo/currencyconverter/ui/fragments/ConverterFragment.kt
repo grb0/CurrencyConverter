@@ -29,7 +29,7 @@ class ConverterFragment : Fragment() {
             lifecycleOwner = viewLifecycleOwner
         }
         val adapter = CountryAdapter(viewLifecycleOwner, CurrencyName.BOTH)
-        binding.dropdownCurrencyChooser.countries.adapter = adapter
+        binding.fromCurrencyChooser.currencies.adapter = adapter
         viewModel.countries.onEach { adapter.submitList(it) }
                 .launchIn(lifecycleScope) // just for testing, needs to be done differently
 

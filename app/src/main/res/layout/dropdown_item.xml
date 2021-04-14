@@ -18,7 +18,7 @@
     </data>
 
     <TextView
-        android:id="@+id/country_txt"
+        android:id="@+id/currency"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:drawablePadding="8dp"
@@ -28,6 +28,7 @@
         android:maxLines="1"
         android:padding="16dp"
         android:text="@{country.currency.getCurrencyName(currencyName, context)}"
+        android:textColor="@color/black"
         android:textSize="16sp"
         app:startDrawable="@{country.flag}"
         tools:drawableStartCompat="@sample/data.json/countries/flag"

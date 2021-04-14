@@ -14,7 +14,7 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/country_layout"
+            android:id="@+id/currency_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -32,30 +32,23 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
-                android:id="@+id/flag"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="@string/img_description_country_flag"
-                android:src="@drawable/ic_flag_bosnia_and_herzegovina" />
-
             <TextView
                 android:id="@+id/currency"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
+                android:drawablePadding="8dp"
                 android:ellipsize="end"
                 android:fontFamily="@font/roboto"
+                android:gravity="center_vertical"
                 android:maxLines="1"
                 android:text="@string/currency_bosnia_and_herzegovina"
                 android:textColor="@color/black"
                 android:textSize="16sp"
-                tools:text="@string/currency_bosnia_and_herzegovina" />
+                app:drawableStartCompat="@drawable/ic_flag_bosnia_and_herzegovina" />
 
             <ImageButton
-                android:id="@+id/action"
+                android:id="@+id/dropdown_action"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/ripple_action_btn"
@@ -65,22 +58,22 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/countries_layout"
+            android:id="@+id/currencies_layout"
             android:layout_width="0dp"
             android:layout_height="300dp"
             android:layout_marginTop="0.5dp"
             android:background="@drawable/border_recycler_view"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/country_layout"
-            app:layout_constraintStart_toStartOf="@+id/country_layout"
-            app:layout_constraintTop_toBottomOf="@+id/country_layout"
+            app:layout_constraintEnd_toEndOf="@+id/currency_layout"
+            app:layout_constraintStart_toStartOf="@+id/currency_layout"
+            app:layout_constraintTop_toBottomOf="@+id/currency_layout"
             app:layout_constraintVertical_bias="0.0"
             tools:listitem="@layout/dropdown_item">
 
 
             <EditText
-                android:id="@+id/search"
+                android:id="@+id/currencies_searcher"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
@@ -101,7 +94,7 @@
             <View style="@style/Divider" />
 
             <com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
-                android:id="@+id/fast_scroller"
+                android:id="@+id/currencies_fast_scroller"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:handleDrawable="@drawable/thumb_fast_scroll"
@@ -110,7 +103,7 @@
                 app:trackMarginStart="1dp">
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/countries"
+                    android:id="@+id/currencies"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
