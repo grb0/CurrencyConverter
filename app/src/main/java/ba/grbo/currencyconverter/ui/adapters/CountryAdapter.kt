@@ -9,10 +9,10 @@ import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.data.models.CurrencyName
 import ba.grbo.currencyconverter.databinding.DropdownItemBinding
 
-
 class CountryAdapter(
         private val lifecycleOwner: LifecycleOwner,
-        private val currencyName: CurrencyName
+        private val currencyName: CurrencyName,
+        private val onClick: (Country) -> Unit
 ) : ListAdapter<Country, CountryAdapter.ViewHolder>(CountryDiffCallbacks()) {
     class ViewHolder private constructor(
             private val binding: DropdownItemBinding
@@ -27,7 +27,8 @@ class CountryAdapter(
             )
         }
 
-        fun bind(country: Country, currencyName: CurrencyName) {
+        fun bind(country: Country, currencyName: CurrencyName, onClick: (Country) -> Unit) {
+            binding.root.setOnClickListener { onClick(country) }
             binding.country = country
             binding.currencyName = currencyName
             binding.executePendingBindings()
@@ -39,6 +40,6 @@ class CountryAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position), currencyName)
+        holder.bind(getItem(position), currencyName, onClick)
     }
 }

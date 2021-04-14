@@ -6,6 +6,13 @@
 
     <data>
 
+        <variable
+            name="fromCurrency"
+            type="ba.grbo.currencyconverter.data.models.Currency" />
+
+        <variable
+            name="currencyName"
+            type="ba.grbo.currencyconverter.data.models.CurrencyName" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -18,9 +25,11 @@
         <include
             android:id="@+id/from_currency_chooser"
             layout="@layout/dropdown_currency_chooser"
+            app:currencyName="@{fromCurrency.getCurrencyName(currencyName, context)}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:title="@{`From`}" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
