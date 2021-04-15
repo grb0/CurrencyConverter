@@ -7,10 +7,6 @@
     <data>
 
         <variable
-            name="currencyName"
-            type="String" />
-
-        <variable
             name="title"
             type="String" />
     </data>
@@ -67,7 +63,6 @@
                 android:fontFamily="@font/roboto"
                 android:gravity="center_vertical"
                 android:maxLines="1"
-                android:text="@{currencyName}"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 app:drawableStartCompat="@drawable/ic_flag_united_arab_emirates" />
@@ -132,7 +127,7 @@
                     android:layout_height="match_parent"
                     app:handleDrawable="@drawable/thumb_fast_scroll"
                     app:handleHeight="48dp"
-                    app:trackMarginEnd="2dp"
+                    app:trackMarginEnd="1dp"
                     app:trackMarginStart="1dp">
 
                     <androidx.recyclerview.widget.RecyclerView

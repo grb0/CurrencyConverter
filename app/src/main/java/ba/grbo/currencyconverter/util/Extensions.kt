@@ -5,8 +5,8 @@ import android.util.TypedValue
 import androidx.annotation.AttrRes
 import androidx.core.content.ContextCompat
 
-fun Context.getColorFromAttr(@AttrRes attrRes: Int): Int {
+fun Context.getColorFromAttribute(@AttrRes id: Int): Int {
     val typedValue = TypedValue()
-    theme.resolveAttribute(attrRes, typedValue, true)
+    theme.resolveAttribute(id, typedValue, true)
     return ContextCompat.getColor(this, typedValue.resourceId)
 }

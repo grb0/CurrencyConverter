@@ -84,6 +84,10 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
     // endregion
+
+    // region Safe way to collect Flows
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.4.0-alpha01"
+    // endregion
     // endregion
 
     // region androidTest
