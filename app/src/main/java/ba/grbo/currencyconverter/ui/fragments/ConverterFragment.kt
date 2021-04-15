@@ -1,6 +1,7 @@
 package ba.grbo.currencyconverter.ui.fragments
 
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.Typeface
@@ -14,10 +15,8 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.flowWithLifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.RecyclerView
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.data.models.CurrencyName
@@ -27,10 +26,9 @@ import ba.grbo.currencyconverter.ui.adapters.CountryAdapter
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
+import ba.grbo.currencyconverter.util.collectWhenStarted
 import ba.grbo.currencyconverter.util.getColorFromAttribute
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
@@ -59,34 +57,7 @@ class ConverterFragment : Fragment() {
         }
         initializeColors()
         setOnClickListeners()
-        val adapter = CountryAdapter(viewLifecycleOwner, currencyName) {
-            viewModel.onCurrencyClicked(it)
-        }
-        binding.fromCurrencyChooser.currencies.addItemDecoration(DividerItemDecoration(
-                requireContext(), DividerItemDecoration.VERTICAL
-        ))
-        binding.fromCurrencyChooser.currencies.adapter = adapter
-
-        viewModel.fromSelectedCurrency
-                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-                .onEach { onSelectedCurrencyChanged(it) }
-                .launchIn(lifecycleScope)
-
-        viewModel.fromCurrencyDropdownState
-                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-                .onEach { onDropdownStateChanged(it) }
-                .launchIn(lifecycleScope)
-
-//        viewModel.onScreenTouchedSet
-//                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-//                .onEach { setOnScreenTouched(it) }
-//                .launchIn(lifecycleScope)
-
-        viewModel.countries
-                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-                .onEach { adapter.submitList(it) }
-                .launchIn(lifecycleScope)
-
+        setUpRecyclerViewAndViewModel()
         return binding.root
     }
 
@@ -121,6 +92,45 @@ class ConverterFragment : Fragment() {
                 viewModel.onTitleClicked()
             }
         }
+    }
+
+    private fun setUpRecyclerViewAndViewModel() {
+        viewModel.collectFlows(binding.fromCurrencyChooser.currencies.setUp())
+    }
+
+    private fun RecyclerView.setUp(): CountryAdapter {
+        val adapter = CountryAdapter(viewLifecycleOwner, currencyName) {
+            viewModel.onCurrencyClicked(it)
+        }
+        this.adapter = adapter
+
+        val verticalDivider = DividerItemDecoration(
+                requireContext(),
+                DividerItemDecoration.VERTICAL
+        )
+        addItemDecoration(verticalDivider)
+
+        // Only in portrait mode
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            val viewHolder = adapter.createViewHolder(
+                    binding.fromCurrencyChooser.currencies,
+                    0
+            )
+            val verticalDividersHeight = ((verticalDivider.drawable?.intrinsicHeight ?: 3) * 4)
+            val viewHolderHeight = viewHolder.itemView.layoutParams.height * 4
+            val height = verticalDividersHeight + viewHolderHeight
+            binding.fromCurrencyChooser.currenciesFastScroller.layoutParams.height = height
+
+            // Let it not be in vain :)
+            recycledViewPool.putRecycledView(viewHolder)
+        }
+        return adapter
+    }
+
+    private fun ConverterViewModel.collectFlows(adapter: CountryAdapter) {
+        collectWhenStarted(fromSelectedCurrency, ::onSelectedCurrencyChanged)
+        collectWhenStarted(fromCurrencyDropdownState, ::onDropdownStateChanged)
+        collectWhenStarted(countries, adapter::submitList)
     }
 
     private fun onSelectedCurrencyChanged(country: Country) {
