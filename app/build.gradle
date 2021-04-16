@@ -67,7 +67,7 @@ dependencies {
 
     // region Hilt
     implementation "com.google.dagger:hilt-android:$hilt_version"
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation "androidx.legacy:legacy-support-v4:1.0.0"
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
     // endregion
 
@@ -87,6 +87,10 @@ dependencies {
 
     // region Safe way to collect Flows
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.4.0-alpha01"
+    // endregion
+
+    // region Listen for Keyboard events
+    implementation "net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC3"
     // endregion
     // endregion
 

@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Currency Converter</string>
 
+    <!--Application wide-->
+    <string name="preference_file_key">Currency Converter</string>
+
     <!--Bottom navigation menu-->
     <string name="bottom_navigation_converter">Converter</string>
     <string name="bottom_navigation_history">History</string>

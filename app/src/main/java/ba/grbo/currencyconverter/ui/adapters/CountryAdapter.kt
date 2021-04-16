@@ -13,12 +13,12 @@ class CountryAdapter(
         private val lifecycleOwner: LifecycleOwner,
         private val currencyName: CurrencyName,
         private val onClick: (Country) -> Unit
-) : ListAdapter<Country, CountryAdapter.ViewHolder>(CountryDiffCallbacks()) {
-    class ViewHolder private constructor(
+) : ListAdapter<Country, CountryAdapter.CountryHolder>(CountryDiffCallbacks()) {
+    class CountryHolder private constructor(
             private val binding: DropdownItemBinding
     ) : RecyclerView.ViewHolder(binding.root) {
         companion object {
-            fun from(parent: ViewGroup, lifecycleOwner: LifecycleOwner) = ViewHolder(
+            fun from(parent: ViewGroup, lifecycleOwner: LifecycleOwner) = CountryHolder(
                     DropdownItemBinding.inflate(
                             LayoutInflater.from(parent.context),
                             parent,
@@ -35,11 +35,11 @@ class CountryAdapter(
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder.from(parent, lifecycleOwner)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CountryHolder {
+        return CountryHolder.from(parent, lifecycleOwner)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: CountryHolder, position: Int) {
         holder.bind(getItem(position), currencyName, onClick)
     }
 }

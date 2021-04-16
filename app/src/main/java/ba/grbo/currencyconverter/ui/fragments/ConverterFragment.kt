@@ -12,7 +12,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorRes
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -26,9 +28,14 @@ import ba.grbo.currencyconverter.ui.adapters.CountryAdapter
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
+import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState
+import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.FOCUSING
+import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.UNFOCUSING
 import ba.grbo.currencyconverter.util.collectWhenStarted
 import ba.grbo.currencyconverter.util.getColorFromAttribute
 import dagger.hilt.android.AndroidEntryPoint
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
+import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
@@ -36,6 +43,8 @@ class ConverterFragment : Fragment() {
     private val viewModel: ConverterViewModel by viewModels()
     private lateinit var binding: FragmentConverterBinding
     private lateinit var currencyName: CurrencyName
+    private var orientation = Int.MIN_VALUE
+    private var recyclerViewHeight = Int.MIN_VALUE
 
     object Colors {
         var WHITE = 0
@@ -55,8 +64,9 @@ class ConverterFragment : Fragment() {
         binding = FragmentConverterBinding.inflate(inflater, container, false).apply {
             lifecycleOwner = viewLifecycleOwner
         }
+        orientation = resources.configuration.orientation
         initializeColors()
-        setOnClickListeners()
+        setListeners()
         setUpRecyclerViewAndViewModel()
         return binding.root
     }
@@ -79,23 +89,28 @@ class ConverterFragment : Fragment() {
         return requireContext().getColorFromAttribute(id)
     }
 
-    private fun setOnClickListeners() {
+    private fun setListeners() {
         binding.fromCurrencyChooser.run {
-            dropdownAction.setOnClickListener {
-                viewModel.onExpandClicked()
+            dropdownAction.setOnClickListener { viewModel.onExpandClicked() }
+            currencyLayout.setOnClickListener { viewModel.onDropdownClicked() }
+            dropdownTitle.setOnClickListener { viewModel.onTitleClicked() }
+            currenciesSearcher.setOnFocusChangeListener { _, hasFocus ->
+                viewModel.onSearcherFocusChanged(hasFocus)
             }
-            currencyLayout.setOnClickListener {
-                viewModel.onDropdownClicked()
+            currenciesSearcher.addTextChangedListener {
+                it?.let { viewModel.onTextChanged(it.toString()) }
             }
-
-            dropdownTitle.setOnClickListener {
-                viewModel.onTitleClicked()
-            }
+        }
+        KeyboardVisibilityEvent.setEventListener(
+                requireActivity(),
+                viewLifecycleOwner
+        ) {
+            if (it) modifyCurrenciesCardHeight() else restoreOriginalCurrenciesCardHeight()
         }
     }
 
     private fun setUpRecyclerViewAndViewModel() {
-        viewModel.collectFlows(binding.fromCurrencyChooser.currencies.setUp())
+        viewModel.collectFlowsWhenStarted(binding.fromCurrencyChooser.currencies.setUp())
     }
 
     private fun RecyclerView.setUp(): CountryAdapter {
@@ -111,26 +126,27 @@ class ConverterFragment : Fragment() {
         addItemDecoration(verticalDivider)
 
         // Only in portrait mode
-        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            val viewHolder = adapter.createViewHolder(
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            val countryHolder = adapter.createViewHolder(
                     binding.fromCurrencyChooser.currencies,
                     0
             )
             val verticalDividersHeight = ((verticalDivider.drawable?.intrinsicHeight ?: 3) * 4)
-            val viewHolderHeight = viewHolder.itemView.layoutParams.height * 4
-            val height = verticalDividersHeight + viewHolderHeight
-            binding.fromCurrencyChooser.currenciesFastScroller.layoutParams.height = height
+            val countryHoldersHeight = countryHolder.itemView.layoutParams.height * 4
+            recyclerViewHeight = verticalDividersHeight + countryHoldersHeight
+            binding.fromCurrencyChooser.currenciesFastScroller.layoutParams.height = recyclerViewHeight
 
             // Let it not be in vain :)
-            recycledViewPool.putRecycledView(viewHolder)
+            recycledViewPool.putRecycledView(countryHolder)
         }
         return adapter
     }
 
-    private fun ConverterViewModel.collectFlows(adapter: CountryAdapter) {
+    private fun ConverterViewModel.collectFlowsWhenStarted(adapter: CountryAdapter) {
         collectWhenStarted(fromSelectedCurrency, ::onSelectedCurrencyChanged)
         collectWhenStarted(fromCurrencyDropdownState, ::onDropdownStateChanged)
         collectWhenStarted(countries, adapter::submitList)
+        collectWhenStarted(searcherState, ::onSearcherStateChanged)
     }
 
     private fun onSelectedCurrencyChanged(country: Country) {
@@ -151,6 +167,79 @@ class ConverterFragment : Fragment() {
         }
         COLLAPSED -> {
         } // When collapsed do nothing
+    }
+
+    private fun onSearcherStateChanged(state: SearcherState) = when (state) {
+        FOCUSING -> onSearcherFocused()
+        UNFOCUSING -> onSearcherUnfocused()
+        else -> {
+            // Do nothing
+        }
+    }
+
+    private fun onSearcherFocused() {
+        modifyOnScreenTouched()
+    }
+
+    private fun modifyOnScreenTouched() {
+        val activity = (requireActivity() as ConverterActivity)
+        val currentOnScreenTouched = activity.onScreenTouched
+        activity.onScreenTouched = {
+            val (isHandled, touchPoint) = currentOnScreenTouched!!.invoke(it)
+            if (!isHandled) {
+                val currenciesCardTouched = isPointInsideViewBounds(
+                        binding.fromCurrencyChooser.currenciesCard,
+                        touchPoint
+                )
+                val currenciesSearcherTouched = isPointInsideViewBounds(
+                        binding.fromCurrencyChooser.currenciesSearcher,
+                        touchPoint
+                )
+
+                val handled = viewModel.onScreenTouched(
+                        currenciesCardTouched,
+                        currenciesSearcherTouched
+                )
+                handled to touchPoint
+            } else isHandled to touchPoint
+        }
+    }
+
+    private fun modifyCurrenciesCardHeight() {
+        setCurrenciesCardHeight(ConstraintLayout.LayoutParams.MATCH_CONSTRAINT)
+    }
+
+    private fun onSearcherUnfocused() {
+        releaseFocus()
+        hideKeyboard()
+        restoreOriginalOnScreenTouched()
+        viewModel.onSearcherUnfocused()
+    }
+
+    private fun releaseFocus() {
+        binding.fromCurrencyChooser.currenciesSearcher.clearFocus()
+    }
+
+
+    private fun hideKeyboard() {
+        UIUtil.hideKeyboard(requireActivity())
+    }
+
+    private fun restoreOriginalCurrenciesCardHeight() {
+        setCurrenciesCardHeight(ConstraintLayout.LayoutParams.WRAP_CONTENT, false)
+    }
+
+    private fun restoreOriginalOnScreenTouched() {
+        setOnScreenTouched(true)
+    }
+
+    private fun setCurrenciesCardHeight(height: Int, onKeyboardShown: Boolean = true) {
+        val isKeyboardShown = KeyboardVisibilityEvent.isKeyboardVisible(requireActivity())
+        if (orientation == Configuration.ORIENTATION_PORTRAIT && isKeyboardShown == onKeyboardShown) {
+            val cLP = binding.fromCurrencyChooser.currenciesCard.layoutParams as ConstraintLayout.LayoutParams
+            cLP.height = height
+            binding.fromCurrencyChooser.currenciesCard.layoutParams = cLP
+        }
     }
 
     private fun expandDropdown() {
@@ -176,7 +265,7 @@ class ConverterFragment : Fragment() {
         else { event -> getOnScreenTouched(event) }
     }
 
-    private fun getOnScreenTouched(event: MotionEvent) {
+    private fun getOnScreenTouched(event: MotionEvent): Pair<Boolean, Point> {
         val touchPoint = Point(event.rawX.roundToInt(), event.rawY.roundToInt())
         val dropdownActionTouched = isPointInsideViewBounds(
                 binding.fromCurrencyChooser.dropdownAction,
@@ -194,12 +283,13 @@ class ConverterFragment : Fragment() {
                 binding.fromCurrencyChooser.currenciesCard,
                 touchPoint
         )
-        viewModel.onScreenTouched(
+        val isHandled = viewModel.onScreenTouched(
                 dropdownActionTouched,
                 currencyLayoutTouched,
                 dropdownTitleTouched,
                 currenciesCardTouched
         )
+        return isHandled to touchPoint
     }
 
     private fun isPointInsideViewBounds(view: View, point: Point): Boolean = Rect().run {

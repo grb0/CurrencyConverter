@@ -1,5 +1,6 @@
 package ba.grbo.currencyconverter.ui.activities
 
+import android.graphics.Point
 import android.os.Bundle
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
@@ -8,7 +9,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class ConverterActivity : AppCompatActivity() {
-    var onScreenTouched: ((event: MotionEvent) -> Unit)? = null
+    var onScreenTouched: ((event: MotionEvent) -> Pair<Boolean, Point>)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
