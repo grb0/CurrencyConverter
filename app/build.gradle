@@ -77,7 +77,7 @@ dependencies {
     // endregion
 
     // region Fast Scroller
-    implementation "com.quiph.ui:recyclerviewfastscroller:1.0.0"
+    implementation 'me.zhanghai.android.fastscroll:library:1.1.5'
     // endregion
 
     // region Kotlin Coroutines

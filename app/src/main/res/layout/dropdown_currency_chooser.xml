@@ -123,22 +123,12 @@
                     android:id="@+id/divider"
                     style="@style/Divider" />
 
-                <com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller
-                    android:id="@+id/currencies_fast_scroller"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/currencies"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    app:handleDrawable="@drawable/thumb_fast_scroll"
-                    app:handleHeight="48dp"
-                    app:trackMarginEnd="1dp"
-                    app:trackMarginStart="1dp">
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/currencies"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                        tools:listitem="@layout/dropdown_item" />
-                </com.qtalk.recyclerviewfastscroller.RecyclerViewFastScroller>
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/dropdown_item" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </androidx.constraintlayout.widget.ConstraintLayout>

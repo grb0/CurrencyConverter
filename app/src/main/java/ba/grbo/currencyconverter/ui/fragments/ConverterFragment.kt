@@ -34,6 +34,7 @@ import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.
 import ba.grbo.currencyconverter.util.collectWhenStarted
 import ba.grbo.currencyconverter.util.getColorFromAttribute
 import dagger.hilt.android.AndroidEntryPoint
+import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import kotlin.math.roundToInt
@@ -61,14 +62,27 @@ class ConverterFragment : Fragment() {
             savedInstanceState: Bundle?
     ): View {
         currencyName = CurrencyName.BOTH
+        initializeColors()
         binding = FragmentConverterBinding.inflate(inflater, container, false).apply {
             lifecycleOwner = viewLifecycleOwner
+            initializeFastScroller(fromCurrencyChooser.currencies)
         }
         orientation = resources.configuration.orientation
-        initializeColors()
         setListeners()
         setUpRecyclerViewAndViewModel()
         return binding.root
+    }
+
+    private fun initializeFastScroller(recyclerView: RecyclerView) {
+        val thumb = ContextCompat.getDrawable(
+                requireContext(),
+                R.drawable.afs_md2_thumb
+        )!!.apply { setTintList(ColorStateList.valueOf(Colors.PURPLE_500)) }
+
+        FastScrollerBuilder(recyclerView)
+                .useMd2Style()
+                .setThumbDrawable(thumb)
+                .build()
     }
 
     private fun initializeColors() {
@@ -134,7 +148,7 @@ class ConverterFragment : Fragment() {
             val verticalDividersHeight = ((verticalDivider.drawable?.intrinsicHeight ?: 3) * 4)
             val countryHoldersHeight = countryHolder.itemView.layoutParams.height * 4
             recyclerViewHeight = verticalDividersHeight + countryHoldersHeight
-            binding.fromCurrencyChooser.currenciesFastScroller.layoutParams.height = recyclerViewHeight
+            binding.fromCurrencyChooser.currencies.layoutParams.height = recyclerViewHeight
 
             // Let it not be in vain :)
             recycledViewPool.putRecycledView(countryHolder)
@@ -151,7 +165,7 @@ class ConverterFragment : Fragment() {
 
     private fun onSelectedCurrencyChanged(country: Country) {
         binding.fromCurrencyChooser.currency.run {
-            text = country.currency.getCurrencyName(currencyName, requireContext())
+            text = country.currency.name
             setCompoundDrawablesWithIntrinsicBounds(country.flag, 0, 0, 0)
         }
     }
