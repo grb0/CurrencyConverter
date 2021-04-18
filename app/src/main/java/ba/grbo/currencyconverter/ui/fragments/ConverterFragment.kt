@@ -38,7 +38,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Country
-import ba.grbo.currencyconverter.data.models.CurrencyName
 import ba.grbo.currencyconverter.databinding.FragmentConverterBinding
 import ba.grbo.currencyconverter.ui.activities.CurrencyConverterActivity
 import ba.grbo.currencyconverter.ui.adapters.CountryAdapter
@@ -57,6 +56,7 @@ import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
+import javax.inject.Inject
 import kotlin.math.roundToInt
 
 
@@ -64,7 +64,8 @@ import kotlin.math.roundToInt
 class ConverterFragment : Fragment() {
     private val viewModel: ConverterViewModel by viewModels()
     private lateinit var binding: FragmentConverterBinding
-    private lateinit var currencyName: CurrencyName
+    @Inject
+    lateinit var currencyName: String
     private lateinit var dropdownActionAnimator: ObjectAnimator
     private lateinit var converterLayoutAnimator: ObjectAnimator
     private lateinit var dropdownTitleAnimator: ObjectAnimator
@@ -88,7 +89,6 @@ class ConverterFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
-        currencyName = CurrencyName.BOTH_CODE
         orientation = resources.configuration.orientation
         initializeColors()
         binding = FragmentConverterBinding.inflate(inflater, container, false).apply {
@@ -118,7 +118,6 @@ class ConverterFragment : Fragment() {
         setColor(backgroundColor)
         cornerRadius = 5f.toPixels(resources)
     }
-
 
     private fun initializeFastScroller(recyclerView: RecyclerView) {
         val thumb = ContextCompat.getDrawable(

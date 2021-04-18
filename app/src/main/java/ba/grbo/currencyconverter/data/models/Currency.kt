@@ -2,7 +2,10 @@ package ba.grbo.currencyconverter.data.models
 
 import android.content.Context
 import androidx.annotation.StringRes
-import ba.grbo.currencyconverter.data.models.CurrencyName.*
+import ba.grbo.currencyconverter.data.models.CurrencyName.BOTH_CODE
+import ba.grbo.currencyconverter.data.models.CurrencyName.BOTH_NAME
+import ba.grbo.currencyconverter.data.models.CurrencyName.CODE
+import ba.grbo.currencyconverter.data.models.CurrencyName.NAME
 
 data class Currency(
         @StringRes val nameRes: Int,
@@ -10,11 +13,12 @@ data class Currency(
 ) {
     lateinit var name: String
 
-    fun getCurrencyName(currencyName: CurrencyName, context: Context) = when (currencyName) {
-        NAME -> context.getString(nameRes)
+    fun getCurrencyName(currencyName: String, context: Context) = when (currencyName) {
         CODE -> code.name
+        NAME -> context.getString(nameRes)
         BOTH_CODE -> "${code.name} — ${context.getString(nameRes)}"
         BOTH_NAME -> "${context.getString(nameRes)} — ${code.name}"
+        else -> throw IllegalArgumentException("Unknown currencyName: $currencyName")
     }.also { name = it }
 
     val isNameInitialized

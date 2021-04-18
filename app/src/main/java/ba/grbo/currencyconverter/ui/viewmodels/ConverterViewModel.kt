@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Country
-import ba.grbo.currencyconverter.data.models.CurrencyName
 import ba.grbo.currencyconverter.data.source.local.static.Countries
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.CurrencyNamesState.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
@@ -23,7 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ConverterViewModel @Inject constructor(
         @ApplicationContext context: Context,
-        currencyName: CurrencyName
+        currencyName: String
 ) : ViewModel() {
     companion object {
         const val DIVIDER_START_HEIGHT = 1.8f
@@ -82,7 +81,7 @@ class ConverterViewModel @Inject constructor(
                 .launchIn(viewModelScope)
     }
 
-    private fun initializeCurrencyNames(currencyName: CurrencyName, context: Context) {
+    private fun initializeCurrencyNames(currencyName: String, context: Context) {
         viewModelScope.launch(Dispatchers.Default) {
             currencyNamesState = INITIALIZING
             Countries.value.forEach { it.currency.getCurrencyName(currencyName, context) }

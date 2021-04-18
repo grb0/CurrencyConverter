@@ -14,7 +14,7 @@
 
         <variable
             name="currencyName"
-            type="ba.grbo.currencyconverter.data.models.CurrencyName" />
+            type="String" />
     </data>
 
     <com.balysv.materialripple.MaterialRippleLayout
