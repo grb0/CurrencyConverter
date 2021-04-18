@@ -11,9 +11,10 @@ data class Currency(
     lateinit var name: String
 
     fun getCurrencyName(currencyName: CurrencyName, context: Context) = when (currencyName) {
-        BOTH -> "${code.name} — ${context.getString(nameRes)}"
-        CODE -> code.name
         NAME -> context.getString(nameRes)
+        CODE -> code.name
+        BOTH_CODE -> "${code.name} — ${context.getString(nameRes)}"
+        BOTH_NAME -> "${context.getString(nameRes)} — ${code.name}"
     }.also { name = it }
 
     val isNameInitialized

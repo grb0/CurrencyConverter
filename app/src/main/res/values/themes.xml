@@ -12,5 +12,20 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        <item name="android:colorControlHighlight">@color/ripple
+        </item> <!--Settings ripple effect-->
+        <item name="android:colorControlActivated">?colorPrimary
+        </item> <!--Settings active switchs-->
+        <item name="alertDialogTheme">@style/Theme.CurrencyConverter.AlertDialogStyle</item>
+    </style>
+
+    <style name="CustomPreferenceCategoryTitleTextStyle">
+        <item name="android:textAppearance">?attr/preferenceCategoryTitleTextAppearance</item>
+        <item name="android:textColor">?android:textColorPrimary</item>
+    </style>
+
+    <style name="Theme.CurrencyConverter.AlertDialogStyle" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <item name="android:colorControlHighlight">@color/ripple</item>
+        <item name="android:colorControlActivated">?colorPrimary</item>
     </style>
 </resources>

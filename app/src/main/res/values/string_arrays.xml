@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="language_names">
+        <item>@string/bosnian_name</item>
+        <item>@string/english_name</item>
+        <item>@string/german_name</item>
+    </string-array>
+
+    <string-array name="language_values">
+        <item>@string/bosnian_value</item>
+        <item>@string/english_value</item>
+        <item>@string/german_value</item>
+    </string-array>
+
+    <string-array name="search_by_names">
+        <item>@string/code_name</item>
+        <item>@string/name_name</item>
+        <item>@string/code_and_name_name</item>
+    </string-array>
+
+    <string-array name="search_by_values">
+        <item>@string/code_value</item>
+        <item>@string/name_value</item>
+        <item>@string/code_and_name_value</item>
+    </string-array>
+
+    <string-array name="currency_name_names">
+        <item>@string/code_only_name</item>
+        <item>@string/name_only_name</item>
+        <item>@string/both_code_and_name_name</item>
+        <item>@string/both_name_and_code_name</item>
+    </string-array>
+
+    <string-array name="currency_name_values">
+        <item>@string/code_only_value</item>
+        <item>@string/name_only_value</item>
+        <item>@string/both_code_and_name_value</item>
+        <item>@string/both_name_and_code_value</item>
+    </string-array>
+</resources>

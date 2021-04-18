@@ -22,6 +22,6 @@ object CurrencyNameProvider {
         // val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(application)
         // sharedPreferences.
 
-        return CurrencyName.BOTH
+        return CurrencyName.BOTH_CODE
     }
 }

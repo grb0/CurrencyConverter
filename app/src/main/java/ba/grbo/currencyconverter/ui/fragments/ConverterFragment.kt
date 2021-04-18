@@ -88,7 +88,7 @@ class ConverterFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
-        currencyName = CurrencyName.BOTH
+        currencyName = CurrencyName.BOTH_CODE
         orientation = resources.configuration.orientation
         initializeColors()
         binding = FragmentConverterBinding.inflate(inflater, container, false).apply {

@@ -1,4 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <PreferenceCategory
+        android:key="@string/key_miscellaneous"
+        android:title="@string/title_miscellaneous"
+        app:layout="@layout/preferences_category">
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/key_auto_hide_scrollbar"
+            android:title="@string/title_auto_hide_scrollbar"
+            app:icon="@drawable/ic_hide" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="@string/key_maintain_search_query"
+            android:title="@string/title_maintain_search_query"
+            app:icon="@drawable/ic_maintain_search" />
+
+        <ListPreference
+            android:defaultValue="@string/english_value"
+            android:entries="@array/language_names"
+            android:entryValues="@array/language_values"
+            android:key="@string/key_language"
+            android:title="@string/title_language"
+            app:icon="@drawable/ic_language"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:defaultValue="@string/code_and_name_value"
+            android:entries="@array/search_by_names"
+            android:entryValues="@array/search_by_values"
+            android:key="@string/key_search_by"
+            android:title="@string/title_search_by"
+            app:icon="@drawable/ic_search"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:defaultValue="@string/both_code_and_name_value"
+            android:entries="@array/currency_name_names"
+            android:entryValues="@array/currency_name_values"
+            android:key="@string/key_currency_name"
+            android:title="@string/title_currency_name"
+            app:icon="@drawable/ic_coin"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
 </PreferenceScreen>
