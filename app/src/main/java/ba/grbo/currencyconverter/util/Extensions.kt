@@ -6,6 +6,7 @@ import android.content.res.Resources
 import android.util.TypedValue
 import android.view.animation.LinearInterpolator
 import androidx.annotation.AttrRes
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -15,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.FOCUSING
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.UNFOCUSING
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 
 fun Context.getColorFromAttribute(@AttrRes id: Int): Int {
@@ -78,8 +80,40 @@ fun <T> Fragment.collectWhenStarted(
     collect(flow, action, Lifecycle.State.STARTED, shouldDebounce, debounceTimeout)
 }
 
+private fun <T> AppCompatActivity.collect(
+        flow: Flow<T>,
+        action: suspend (T) -> Unit,
+        lifecycleState: Lifecycle.State,
+        shouldDebounce: Boolean = false,
+        debounceTimeout: Long = 500
+) {
+    flow.collect(
+            lifecycle,
+            lifecycleState,
+            lifecycleScope,
+            action,
+            shouldDebounce,
+            debounceTimeout
+    )
+}
+
+fun <T> AppCompatActivity.collectWhenStarted(
+        flow: Flow<T>,
+        action: suspend (T) -> Unit,
+        shouldDebounce: Boolean = false,
+        debounceTimeout: Long = 500
+) {
+    collect(flow, action, Lifecycle.State.STARTED, shouldDebounce, debounceTimeout)
+}
+
 fun ObjectAnimator.setUp(resources: Resources): ObjectAnimator {
     interpolator = LinearInterpolator()
     duration = resources.getInteger(R.integer.anim_time).toLong()
     return this
 }
+
+@Suppress("FunctionName", "UNCHECKED_CAST")
+fun <T> SingleSharedFlow() = MutableSharedFlow<T>(
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        extraBufferCapacity = 1
+)

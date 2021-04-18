@@ -40,7 +40,7 @@ import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.data.models.CurrencyName
 import ba.grbo.currencyconverter.databinding.FragmentConverterBinding
-import ba.grbo.currencyconverter.ui.activities.ConverterActivity
+import ba.grbo.currencyconverter.ui.activities.CurrencyConverterActivity
 import ba.grbo.currencyconverter.ui.adapters.CountryAdapter
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState
@@ -479,7 +479,7 @@ class ConverterFragment : Fragment() {
     }
 
     private fun modifyOnScreenTouched() {
-        val activity = (requireActivity() as ConverterActivity)
+        val activity = (requireActivity() as CurrencyConverterActivity)
         val currentOnScreenTouched = activity.onScreenTouched
         activity.onScreenTouched = {
             val (isHandled, touchPoint) = currentOnScreenTouched!!.invoke(it)
@@ -574,7 +574,7 @@ class ConverterFragment : Fragment() {
     }
 
     private fun setOnScreenTouched(shouldSet: Boolean) {
-        (requireActivity() as ConverterActivity).onScreenTouched = if (!shouldSet) null
+        (requireActivity() as CurrencyConverterActivity).onScreenTouched = if (!shouldSet) null
         else { event -> getOnScreenTouched(event) }
     }
 

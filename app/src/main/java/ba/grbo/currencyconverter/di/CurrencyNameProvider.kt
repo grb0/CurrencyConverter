@@ -19,6 +19,9 @@ object CurrencyNameProvider {
         //         Context.MODE_PRIVATE
         // )
 
+        // val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(application)
+        // sharedPreferences.
+
         return CurrencyName.BOTH
     }
 }

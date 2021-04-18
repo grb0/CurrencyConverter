@@ -19,7 +19,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 class ConverterActivityTest {
-    private lateinit var activityScenario: ActivityScenario<ConverterActivity>
+    private lateinit var activityScenario: ActivityScenario<CurrencyConverterActivity>
 
     companion object {
         const val PASSWAY_NUMBER = 40
@@ -28,7 +28,7 @@ class ConverterActivityTest {
 
     @Before
     fun init() {
-        activityScenario = ActivityScenario.launch(ConverterActivity::class.java)
+        activityScenario = ActivityScenario.launch(CurrencyConverterActivity::class.java)
     }
 
     @After

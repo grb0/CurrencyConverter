@@ -11,4 +11,13 @@
         android:name="ba.grbo.currencyconverter.ui.fragments.ConverterFragment"
         android:label="fragment_converter"
         tools:layout="@layout/fragment_converter" />
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="ba.grbo.currencyconverter.ui.fragments.SettingsFragment"
+        android:label="SettingsFragment" />
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="ba.grbo.currencyconverter.ui.fragments.HistoryFragment"
+        android:label="fragment_history"
+        tools:layout="@layout/fragment_history" />
 </navigation>
