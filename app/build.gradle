@@ -92,6 +92,10 @@ dependencies {
     // region Listen for Keyboard events
     implementation "net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC3"
     // endregion
+
+    // region Ripple effect
+    implementation "com.balysv:material-ripple:1.0.2"
+    // endregion
     // endregion
 
     // region androidTest

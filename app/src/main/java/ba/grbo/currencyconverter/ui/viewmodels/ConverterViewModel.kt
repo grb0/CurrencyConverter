@@ -3,6 +3,7 @@ package ba.grbo.currencyconverter.ui.viewmodels
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.data.models.CurrencyName
 import ba.grbo.currencyconverter.data.source.local.static.Countries
@@ -14,7 +15,6 @@ import ba.grbo.currencyconverter.util.toSearcherState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,7 +26,8 @@ class ConverterViewModel @Inject constructor(
         currencyName: CurrencyName
 ) : ViewModel() {
     companion object {
-        const val DROPDOWN_CURRENCY_CLICKED_DELAY_MS = 200L
+        const val DIVIDER_START_HEIGHT = 1.8f
+        const val DIVIDER_MODIFIED_HEIGHT = 3.5f
     }
 
     private val _countries = MutableStateFlow(Countries.value)
@@ -44,6 +45,10 @@ class ConverterViewModel @Inject constructor(
     private val _searcherState = MutableStateFlow(UNFOCUSED)
     val searcherState: StateFlow<SearcherState>
         get() = _searcherState
+
+    private val _modifyDivider = MutableStateFlow(DIVIDER_START_HEIGHT to R.drawable.divider_shadow)
+    val modifyDivider: StateFlow<Pair<Float, Int>>
+        get() = _modifyDivider
 
     private val onTextChanged = MutableStateFlow("")
 
@@ -98,11 +103,8 @@ class ConverterViewModel @Inject constructor(
     }
 
     fun onCurrencyClicked(country: Country) {
-        viewModelScope.launch {
-            delay(DROPDOWN_CURRENCY_CLICKED_DELAY_MS)
-            updateSelectedCurrency(country)
-            collapseDropdown()
-        }
+        updateSelectedCurrency(country)
+        collapseDropdown()
     }
 
     fun onScreenTouched(
@@ -148,6 +150,11 @@ class ConverterViewModel @Inject constructor(
 
     fun onTextChanged(query: String) {
         onTextChanged.value = query
+    }
+
+    fun onCountriesScrolled(topReached: Boolean) {
+        if (topReached) _modifyDivider.value = DIVIDER_START_HEIGHT to R.drawable.divider_shadow
+        else _modifyDivider.value = DIVIDER_MODIFIED_HEIGHT to R.drawable.divider_shadow
     }
 
     private fun filterCountries(query: String) {
