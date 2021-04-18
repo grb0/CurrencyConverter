@@ -13,13 +13,17 @@ data class Currency(
 ) {
     lateinit var name: String
 
-    fun getCurrencyName(currencyName: String, context: Context) = when (currencyName) {
+    fun initializeName(currencyName: String, context: Context): String {
+        return provideName(currencyName, context).also { name = it }
+    }
+
+    private fun provideName(currencyName: String, context: Context) = when (currencyName) {
         CODE -> code.name
         NAME -> context.getString(nameRes)
         BOTH_CODE -> "${code.name} — ${context.getString(nameRes)}"
         BOTH_NAME -> "${context.getString(nameRes)} — ${code.name}"
         else -> throw IllegalArgumentException("Unknown currencyName: $currencyName")
-    }.also { name = it }
+    }
 
     val isNameInitialized
         get() = ::name.isInitialized

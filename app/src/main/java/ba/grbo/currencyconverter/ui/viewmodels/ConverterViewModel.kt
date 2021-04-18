@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Country
+import ba.grbo.currencyconverter.data.models.Currency
+import ba.grbo.currencyconverter.data.models.CurrencyName
+import ba.grbo.currencyconverter.data.models.FilterBy
 import ba.grbo.currencyconverter.data.source.local.static.Countries
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.CurrencyNamesState.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
@@ -22,7 +25,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ConverterViewModel @Inject constructor(
         @ApplicationContext context: Context,
-        currencyName: String
+        @ba.grbo.currencyconverter.di.CurrencyName currencyName: String,
+        @ba.grbo.currencyconverter.di.FilterBy filterBy: String
 ) : ViewModel() {
     companion object {
         const val DIVIDER_START_HEIGHT = 1.8f
@@ -53,6 +57,8 @@ class ConverterViewModel @Inject constructor(
 
     private var currencyNamesState = UNINITIALIZED
 
+    private val filter: (Currency, String) -> Boolean
+
     // No Expanded state, since we want to preserve state upon rotation
     enum class DropdownState {
         EXPANDING,
@@ -75,6 +81,7 @@ class ConverterViewModel @Inject constructor(
 
     init {
         initializeCurrencyNames(currencyName, context)
+        filter = initializeFilter(currencyName, filterBy)
         onTextChanged
                 .debounce(500)
                 .onEach { filterCountries(it) }
@@ -84,8 +91,29 @@ class ConverterViewModel @Inject constructor(
     private fun initializeCurrencyNames(currencyName: String, context: Context) {
         viewModelScope.launch(Dispatchers.Default) {
             currencyNamesState = INITIALIZING
-            Countries.value.forEach { it.currency.getCurrencyName(currencyName, context) }
+            Countries.value.forEach { it.currency.initializeName(currencyName, context) }
             currencyNamesState = INITIALIZED
+        }
+    }
+
+    private fun initializeFilter(
+            currencyName: String,
+            filterBy: String
+    ): (Currency, String) -> Boolean {
+        return when (filterBy) {
+            FilterBy.CODE -> { currency, query -> currency.code.name.contains(query, true) }
+            FilterBy.NAME -> when (currencyName) {
+                CurrencyName.NAME -> { currency, query -> currency.name.contains(query, true) }
+                CurrencyName.BOTH_CODE -> { currency, query ->
+                    currency.name.substring(6).contains(query, true)
+                }
+                CurrencyName.BOTH_NAME -> { currency, query ->
+                    currency.name.substring(0, currency.name.lastIndex - 5).contains(query, true)
+                }
+                else -> throw IllegalArgumentException("Wrong currencyName: $currencyName")
+            }
+            FilterBy.BOTH -> { currency, query -> currency.name.contains(query, true) }
+            else -> throw IllegalArgumentException("Unknown filterBy: $filterBy")
         }
     }
 
@@ -161,11 +189,7 @@ class ConverterViewModel @Inject constructor(
         else viewModelScope.launch {
             if (currencyNamesState == INITIALIZED) {
                 _countries.value = withContext(Dispatchers.Default) {
-                    Countries.value.filter {
-                        it.currency.run {
-                            code.name.contains(query, true) || name.contains(query, true)
-                        }
-                    }
+                    Countries.value.filter { filter(it.currency, query) }
                 }
             } // TODO else notify the user
         }

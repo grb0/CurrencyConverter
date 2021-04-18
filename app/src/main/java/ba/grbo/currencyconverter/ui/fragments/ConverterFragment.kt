@@ -39,6 +39,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.databinding.FragmentConverterBinding
+import ba.grbo.currencyconverter.di.CurrencyName
 import ba.grbo.currencyconverter.ui.activities.CurrencyConverterActivity
 import ba.grbo.currencyconverter.ui.adapters.CountryAdapter
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel
@@ -64,8 +65,11 @@ import kotlin.math.roundToInt
 class ConverterFragment : Fragment() {
     private val viewModel: ConverterViewModel by viewModels()
     private lateinit var binding: FragmentConverterBinding
+
+    @CurrencyName
     @Inject
     lateinit var currencyName: String
+
     private lateinit var dropdownActionAnimator: ObjectAnimator
     private lateinit var converterLayoutAnimator: ObjectAnimator
     private lateinit var dropdownTitleAnimator: ObjectAnimator

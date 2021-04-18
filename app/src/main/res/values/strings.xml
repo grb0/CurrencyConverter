@@ -15,8 +15,8 @@
     <string name="title_maintain_search_query">Maintain search query</string>
     <string name="key_language">language</string>
     <string name="title_language">Language</string>
-    <string name="key_search_by">search_by</string>
-    <string name="title_search_by">Search by</string>
+    <string name="key_filter_by">filter_by</string>
+    <string name="title_filter_by">Search by</string>
     <string name="key_currency_name">currency_name</string>
     <string name="title_currency_name">Show currency name as</string>
     <string name="bosnian_name">Bosnian</string>
@@ -26,11 +26,11 @@
     <string name="german_name">German</string>
     <string name="german_value">german</string>
     <string name="code_name">Currency code</string>
-    <string name="code_value">code</string>
+    <string name="code_value">CODE</string>
     <string name="name_name">Currency name</string>
-    <string name="name_value">name</string>
+    <string name="name_value">NAME</string>
     <string name="code_and_name_name">Currency code and name</string>
-    <string name="code_and_name_value">both</string>
+    <string name="code_and_name_value">BOTH</string>
     <string name="code_only_name">Code only</string>
     <string name="code_only_value">CODE</string>
     <string name="name_only_name">Name only </string>
