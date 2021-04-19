@@ -1,39 +1,31 @@
 package ba.grbo.currencyconverter.ui.viewmodels
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.data.models.Currency
-import ba.grbo.currencyconverter.data.models.CurrencyName
 import ba.grbo.currencyconverter.data.models.FilterBy
-import ba.grbo.currencyconverter.data.source.local.static.Countries
-import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.CurrencyNamesState.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.UNFOCUSED
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.UNFOCUSING
 import ba.grbo.currencyconverter.util.toSearcherState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class ConverterViewModel @Inject constructor(
-        @ApplicationContext context: Context,
-        @ba.grbo.currencyconverter.di.CurrencyName currencyName: String,
-        @ba.grbo.currencyconverter.di.FilterBy filterBy: String
+    private val plainCountries: List<Country>,
+    @ba.grbo.currencyconverter.di.FilterBy filterBy: FilterBy,
 ) : ViewModel() {
     companion object {
         const val DIVIDER_START_HEIGHT = 1.8f
         const val DIVIDER_MODIFIED_HEIGHT = 3.5f
     }
 
-    private val _countries = MutableStateFlow(Countries.value)
+    private val _countries = MutableStateFlow(plainCountries)
     val countries: StateFlow<List<Country>>
         get() = _countries
 
@@ -41,7 +33,7 @@ class ConverterViewModel @Inject constructor(
     val fromCurrencyDropdownState: StateFlow<DropdownState>
         get() = _fromCurrencyDropdownState
 
-    private val _fromSelectedCurrency = MutableStateFlow(Countries.value[0])
+    private val _fromSelectedCurrency = MutableStateFlow(plainCountries[0])
     val fromSelectedCurrency: StateFlow<Country>
         get() = _fromSelectedCurrency
 
@@ -55,8 +47,6 @@ class ConverterViewModel @Inject constructor(
 
     private val onTextChanged = MutableStateFlow("")
 
-    private var currencyNamesState = UNINITIALIZED
-
     private val filter: (Currency, String) -> Boolean
 
     // No Expanded state, since we want to preserve state upon rotation
@@ -64,12 +54,6 @@ class ConverterViewModel @Inject constructor(
         EXPANDING,
         COLLAPSING,
         COLLAPSED
-    }
-
-    enum class CurrencyNamesState {
-        UNINITIALIZED,
-        INITIALIZING,
-        INITIALIZED
     }
 
     // No Focused state, since we want to preserve state upon rotation
@@ -80,41 +64,20 @@ class ConverterViewModel @Inject constructor(
     }
 
     init {
-        initializeCurrencyNames(currencyName, context)
-        filter = initializeFilter(currencyName, filterBy)
+        filter = initializeFilter(filterBy)
         onTextChanged
-                .debounce(500)
-                .onEach { filterCountries(it) }
-                .launchIn(viewModelScope)
-    }
-
-    private fun initializeCurrencyNames(currencyName: String, context: Context) {
-        viewModelScope.launch(Dispatchers.Default) {
-            currencyNamesState = INITIALIZING
-            Countries.value.forEach { it.currency.initializeName(currencyName, context) }
-            currencyNamesState = INITIALIZED
-        }
+            .debounce(500)
+            .onEach { filterCountries(it) }
+            .flowOn(Dispatchers.Default)
+            .launchIn(viewModelScope)
     }
 
     private fun initializeFilter(
-            currencyName: String,
-            filterBy: String
-    ): (Currency, String) -> Boolean {
-        return when (filterBy) {
-            FilterBy.CODE -> { currency, query -> currency.code.name.contains(query, true) }
-            FilterBy.NAME -> when (currencyName) {
-                CurrencyName.NAME -> { currency, query -> currency.name.contains(query, true) }
-                CurrencyName.BOTH_CODE -> { currency, query ->
-                    currency.name.substring(6).contains(query, true)
-                }
-                CurrencyName.BOTH_NAME -> { currency, query ->
-                    currency.name.substring(0, currency.name.lastIndex - 5).contains(query, true)
-                }
-                else -> throw IllegalArgumentException("Wrong currencyName: $currencyName")
-            }
-            FilterBy.BOTH -> { currency, query -> currency.name.contains(query, true) }
-            else -> throw IllegalArgumentException("Unknown filterBy: $filterBy")
-        }
+        filterBy: FilterBy
+    ): (Currency, String) -> Boolean = when (filterBy) {
+        FilterBy.CODE -> { currency, query -> currency.name.code.contains(query, true) }
+        FilterBy.NAME -> { currency, query -> currency.name.name.contains(query, true) }
+        FilterBy.BOTH -> { currency, query -> currency.name.codeAndName.contains(query, true) }
     }
 
     fun onExpandClicked() {
@@ -135,10 +98,10 @@ class ConverterViewModel @Inject constructor(
     }
 
     fun onScreenTouched(
-            dropdownActionTouched: Boolean,
-            currencyLayoutTouched: Boolean,
-            dropdownTitleTouched: Boolean,
-            currenciesCardTouched: Boolean
+        dropdownActionTouched: Boolean,
+        currencyLayoutTouched: Boolean,
+        dropdownTitleTouched: Boolean,
+        currenciesCardTouched: Boolean
     ): Boolean {
         val shouldCollapse = !dropdownActionTouched && !currencyLayoutTouched &&
                 !dropdownTitleTouched && !currenciesCardTouched
@@ -147,8 +110,8 @@ class ConverterViewModel @Inject constructor(
     }
 
     fun onScreenTouched(
-            currenciesCardTouched: Boolean,
-            currenciesSearcherTouched: Boolean
+        currenciesCardTouched: Boolean,
+        currenciesSearcherTouched: Boolean
     ): Boolean {
         val shouldUnfocus = currenciesCardTouched && !currenciesSearcherTouched
         if (shouldUnfocus) _searcherState.value = UNFOCUSING
@@ -185,14 +148,8 @@ class ConverterViewModel @Inject constructor(
     }
 
     private fun filterCountries(query: String) {
-        if (query.isEmpty()) _countries.value = Countries.value
-        else viewModelScope.launch {
-            if (currencyNamesState == INITIALIZED) {
-                _countries.value = withContext(Dispatchers.Default) {
-                    Countries.value.filter { filter(it.currency, query) }
-                }
-            } // TODO else notify the user
-        }
+        _countries.value = if (query.isEmpty()) plainCountries
+        else plainCountries.filter { filter(it.currency, query) }
     }
 
     private fun mutateDropdown() {

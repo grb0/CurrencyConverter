@@ -4,7 +4,7 @@ import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class CurrencyName
+annotation class CurrencyUiName
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)

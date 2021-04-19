@@ -4,15 +4,17 @@ import android.os.Bundle
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import ba.grbo.currencyconverter.R
-import ba.grbo.currencyconverter.data.models.CurrencyName
+import ba.grbo.currencyconverter.data.models.Currency
 import ba.grbo.currencyconverter.data.models.FilterBy
-import ba.grbo.currencyconverter.data.source.local.static.Countries
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 
 class SettingsFragment : PreferenceFragmentCompat() {
     private val job = Job()
     private val scope = CoroutineScope(Dispatchers.Default + job)
-    private lateinit var currencyNamePreference: ListPreference
+    private lateinit var uiNamePreference: ListPreference
     private lateinit var filterByPreference: ListPreference
     private var currencyCode = ""
     private var currencyName = ""
@@ -33,11 +35,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     private fun observeCurrencyName() {
         findPreference<ListPreference>(getString(R.string.key_currency_name))?.run {
-            currencyNamePreference = this
+            uiNamePreference = this
             setOnPreferenceChangeListener { _, newValue ->
                 newValue as String
-                if (currencyNamePreference.value != newValue) {
-                    redefineCountryNames(newValue)
+                if (uiNamePreference.value != newValue) {
                     syncSearchBy(newValue)
                     true
                 } else false
@@ -58,23 +59,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
     }
 
-    private fun redefineCountryNames(currencyName: String) {
-        scope.launch {
-            Countries.value.forEach {
-                while (isActive) it.currency.initializeName(
-                        currencyName,
-                        requireContext()
-                )
-            }
-        }
-    }
-
-    private fun syncSearchBy(value: String) {
-        when (value) {
-            CurrencyName.CODE -> {
+    private fun syncSearchBy(uiName: String) {
+        when (uiName) {
+            Currency.UiName.CODE.name -> {
                 if (filterByPreference.value != filterCode) filterByPreference.value = filterCode
             }
-            CurrencyName.NAME -> {
+            Currency.UiName.NAME.name -> {
                 if (filterByPreference.value != filterName) filterByPreference.value = filterName
             }
         }
@@ -82,21 +72,21 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     private fun synchCurrencyName(value: String) {
         when (value) {
-            FilterBy.CODE -> {
-                if (currencyNamePreference.value == currencyName) {
-                    currencyNamePreference.value = currencyCode
+            FilterBy.CODE.name -> {
+                if (uiNamePreference.value == currencyName) {
+                    uiNamePreference.value = currencyCode
                 }
             }
-            FilterBy.NAME -> {
-                if (currencyNamePreference.value == currencyCode) {
-                    currencyNamePreference.value = currencyName
+            FilterBy.NAME.name -> {
+                if (uiNamePreference.value == currencyCode) {
+                    uiNamePreference.value = currencyName
                 }
             }
-            FilterBy.BOTH -> {
-                if (currencyNamePreference.value == currencyCode ||
-                        currencyNamePreference.value == currencyName
+            FilterBy.BOTH.name -> {
+                if (uiNamePreference.value == currencyCode ||
+                    uiNamePreference.value == currencyName
                 ) {
-                    currencyNamePreference.value = currencyBothCode
+                    uiNamePreference.value = currencyBothCode
                 }
             }
         }

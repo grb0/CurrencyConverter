@@ -10,7 +10,7 @@ fun isNotDisplayed(): ViewAssertion {
     return ViewAssertion { view, _ ->
         if (view != null && isDisplayed().matches(view)) {
             throw AssertionError(
-                    "View is present in the hierarchy and Displayed: " + HumanReadables.describe(view)
+                "View is present in the hierarchy and Displayed: " + HumanReadables.describe(view)
             )
         }
     }

@@ -25,7 +25,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.collectFlowsWhenStarted()
+        collectFlows()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_currency_converter)
         setUpBottomNavigation()
         setUpNavController()
@@ -54,9 +54,9 @@ class CurrencyConverterActivity : AppCompatActivity() {
         }
     }
 
-    private fun CurrencyConverterViewModel.collectFlowsWhenStarted() {
-        collectWhenStarted(toFragment, ::navigateToDestination)
-        collectWhenStarted(actionBarTitle, ::changeActionBarTitle)
+    private fun collectFlows() {
+        collectWhenStarted(viewModel.toFragment, ::navigateToDestination)
+        collectWhenStarted(viewModel.actionBarTitle, ::changeActionBarTitle)
     }
 
     private fun navigateToDestination(@IdRes destinationId: Int) {

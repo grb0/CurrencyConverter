@@ -4,7 +4,7 @@
     package="ba.grbo.currencyconverter">
 
     <application
-        android:name=".ConverterApplication"
+        android:name=".CurrencyConverterApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"

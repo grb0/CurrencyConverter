@@ -6,15 +6,15 @@
 
     <data>
 
-        <import type="ba.grbo.currencyconverter.data.models.CurrencyName" />
+        <import type="ba.grbo.currencyconverter.data.models.Currency.UiName" />
 
         <variable
             name="country"
             type="ba.grbo.currencyconverter.data.models.Country" />
 
         <variable
-            name="currencyName"
-            type="String" />
+            name="uiName"
+            type="UiName" />
     </data>
 
     <com.balysv.materialripple.MaterialRippleLayout
@@ -35,7 +35,7 @@
             android:gravity="center_vertical"
             android:maxLines="1"
             android:padding="16dp"
-            android:text="@{country.currency.isNameInitialized ? country.currency.name : country.currency.initializeName(currencyName, context)}"
+            android:text="@{country.currency.getUiName(uiName)}"
             android:textColor="@color/black"
             android:textSize="16sp"
             app:autoSizeMaxTextSize="16sp"

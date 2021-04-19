@@ -1,30 +1,27 @@
 package ba.grbo.currencyconverter.data.models
 
-import android.content.Context
-import androidx.annotation.StringRes
-import ba.grbo.currencyconverter.data.models.CurrencyName.BOTH_CODE
-import ba.grbo.currencyconverter.data.models.CurrencyName.BOTH_NAME
-import ba.grbo.currencyconverter.data.models.CurrencyName.CODE
-import ba.grbo.currencyconverter.data.models.CurrencyName.NAME
-
 data class Currency(
-        @StringRes val nameRes: Int,
-        val code: Code,
+    val name: Name,
+    val code: Code,
 ) {
-    lateinit var name: String
-
-    fun initializeName(currencyName: String, context: Context): String {
-        return provideName(currencyName, context).also { name = it }
+    fun getUiName(type: UiName) = when (type) {
+        UiName.CODE -> name.code
+        UiName.NAME -> name.name
+        UiName.CODE_AND_NAME -> name.codeAndName
+        UiName.NAME_AND_CODE -> name.nameAndCode
     }
 
-    private fun provideName(currencyName: String, context: Context) = when (currencyName) {
-        CODE -> code.name
-        NAME -> context.getString(nameRes)
-        BOTH_CODE -> "${code.name} — ${context.getString(nameRes)}"
-        BOTH_NAME -> "${context.getString(nameRes)} — ${code.name}"
-        else -> throw IllegalArgumentException("Unknown currencyName: $currencyName")
+    enum class UiName {
+        CODE,
+        NAME,
+        CODE_AND_NAME,
+        NAME_AND_CODE
     }
 
-    val isNameInitialized
-        get() = ::name.isInitialized
+    data class Name(
+        val code: String,
+        val name: String,
+        val codeAndName: String = "$code — $name",
+        val nameAndCode: String = "$name — $code",
+    )
 }

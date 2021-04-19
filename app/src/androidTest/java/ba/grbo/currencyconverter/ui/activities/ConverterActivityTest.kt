@@ -164,18 +164,18 @@ class ConverterActivityTest {
     @Test
     fun bottomNavigation_randomPasswayThroughButtonsWithDeviceRotations() {
         for (i in 1..PASSWAY_NUMBER) clickRandomBottomNavigationButtonAndCheckIfClickedWithRotation(
-                ::converterClicked,
-                ::historyClicked,
-                ::settingsClicked
+            ::converterClicked,
+            ::historyClicked,
+            ::settingsClicked
         )
     }
 
     @Test
     fun bottomNavigation_randomPasswayThroughButtonsWithRandomRotations() {
         for (i in 1..PASSWAY_NUMBER) clickRandomBottomNavigationButtonAndCheckIfClickedWithRandomRotations(
-                ::converterClicked,
-                ::historyClicked,
-                ::settingsClicked
+            ::converterClicked,
+            ::historyClicked,
+            ::settingsClicked
         )
     }
 
@@ -198,9 +198,9 @@ class ConverterActivityTest {
     }
 
     private fun clickRandomBottomNavigationButtonAndCheckIfClickedWithRandomRotations(
-            converter: () -> Unit = {},
-            history: () -> Unit = {},
-            settings: () -> Unit = {}
+        converter: () -> Unit = {},
+        history: () -> Unit = {},
+        settings: () -> Unit = {}
     ) {
         // 33% to rotate
         val shouldRotate = when ((1..3).random()) {
@@ -230,9 +230,9 @@ class ConverterActivityTest {
     }
 
     private fun clickRandomBottomNavigationButtonAndCheckIfClickedWithRotation(
-            converter: () -> Unit = {},
-            history: () -> Unit = {},
-            settings: () -> Unit = {}
+        converter: () -> Unit = {},
+        history: () -> Unit = {},
+        settings: () -> Unit = {}
     ) {
         when ((1..3).random()) {
             1 -> {

@@ -26,82 +26,82 @@ fun Context.getColorFromAttribute(@AttrRes id: Int): Int {
 }
 
 fun Float.toPixels(resources: Resources) = TypedValue.applyDimension(
-        TypedValue.COMPLEX_UNIT_DIP,
-        this,
-        resources.displayMetrics
+    TypedValue.COMPLEX_UNIT_DIP,
+    this,
+    resources.displayMetrics
 )
 
 fun Boolean.toSearcherState() = if (this) FOCUSING else UNFOCUSING
 
 private fun <T> Flow<T>.collect(
-        lifecycle: Lifecycle,
-        lifecycleState: Lifecycle.State,
-        scope: LifecycleCoroutineScope,
-        action: suspend (T) -> Unit,
-        shouldDebounce: Boolean,
-        debounceTimeout: Long
+    lifecycle: Lifecycle,
+    lifecycleState: Lifecycle.State,
+    scope: LifecycleCoroutineScope,
+    action: suspend (T) -> Unit,
+    shouldDebounce: Boolean,
+    debounceTimeout: Long
 ) {
     if (!shouldDebounce) distinctUntilChanged()
-            .flowWithLifecycle(lifecycle, lifecycleState)
-            .onEach { action(it) }
-            .launchIn(scope)
+        .flowWithLifecycle(lifecycle, lifecycleState)
+        .onEach { action(it) }
+        .launchIn(scope)
     else debounce(debounceTimeout)
-            .distinctUntilChanged()
-            .flowWithLifecycle(lifecycle, lifecycleState)
-            .onEach { action(it) }
-            .launchIn(scope)
+        .distinctUntilChanged()
+        .flowWithLifecycle(lifecycle, lifecycleState)
+        .onEach { action(it) }
+        .launchIn(scope)
 
 }
 
 private fun <T> Fragment.collect(
-        flow: Flow<T>,
-        action: suspend (T) -> Unit,
-        lifecycleState: Lifecycle.State,
-        shouldDebounce: Boolean = false,
-        debounceTimeout: Long = 500
+    flow: Flow<T>,
+    action: suspend (T) -> Unit,
+    lifecycleState: Lifecycle.State,
+    shouldDebounce: Boolean = false,
+    debounceTimeout: Long = 500
 ) {
     flow.collect(
-            viewLifecycleOwner.lifecycle,
-            lifecycleState,
-            viewLifecycleOwner.lifecycleScope,
-            action,
-            shouldDebounce,
-            debounceTimeout
+        viewLifecycleOwner.lifecycle,
+        lifecycleState,
+        viewLifecycleOwner.lifecycleScope,
+        action,
+        shouldDebounce,
+        debounceTimeout
     )
 
 }
 
 fun <T> Fragment.collectWhenStarted(
-        flow: Flow<T>,
-        action: suspend (T) -> Unit,
-        shouldDebounce: Boolean = false,
-        debounceTimeout: Long = 500
+    flow: Flow<T>,
+    action: suspend (T) -> Unit,
+    shouldDebounce: Boolean = false,
+    debounceTimeout: Long = 500
 ) {
     collect(flow, action, Lifecycle.State.STARTED, shouldDebounce, debounceTimeout)
 }
 
 private fun <T> AppCompatActivity.collect(
-        flow: Flow<T>,
-        action: suspend (T) -> Unit,
-        lifecycleState: Lifecycle.State,
-        shouldDebounce: Boolean = false,
-        debounceTimeout: Long = 500
+    flow: Flow<T>,
+    action: suspend (T) -> Unit,
+    lifecycleState: Lifecycle.State,
+    shouldDebounce: Boolean = false,
+    debounceTimeout: Long = 500
 ) {
     flow.collect(
-            lifecycle,
-            lifecycleState,
-            lifecycleScope,
-            action,
-            shouldDebounce,
-            debounceTimeout
+        lifecycle,
+        lifecycleState,
+        lifecycleScope,
+        action,
+        shouldDebounce,
+        debounceTimeout
     )
 }
 
 fun <T> AppCompatActivity.collectWhenStarted(
-        flow: Flow<T>,
-        action: suspend (T) -> Unit,
-        shouldDebounce: Boolean = false,
-        debounceTimeout: Long = 500
+    flow: Flow<T>,
+    action: suspend (T) -> Unit,
+    shouldDebounce: Boolean = false,
+    debounceTimeout: Long = 500
 ) {
     collect(flow, action, Lifecycle.State.STARTED, shouldDebounce, debounceTimeout)
 }
@@ -114,6 +114,6 @@ fun ObjectAnimator.setUp(resources: Resources): ObjectAnimator {
 
 @Suppress("FunctionName", "UNCHECKED_CAST")
 fun <T> SingleSharedFlow() = MutableSharedFlow<T>(
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-        extraBufferCapacity = 1
+    onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    extraBufferCapacity = 1
 )

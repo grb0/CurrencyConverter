@@ -1,10 +1,10 @@
 package ba.grbo.currencyconverter.ui.adapters
 
+import android.graphics.drawable.Drawable
 import android.widget.TextView
-import androidx.annotation.DrawableRes
 import androidx.databinding.BindingAdapter
 
 @BindingAdapter("startDrawable")
-fun TextView.bindStartDrawable(@DrawableRes flag: Int) {
-    setCompoundDrawablesWithIntrinsicBounds(flag, 0, 0, 0)
+fun TextView.bindStartDrawable(flag: Drawable?) {
+    setCompoundDrawablesWithIntrinsicBounds(flag, null, null, null)
 }

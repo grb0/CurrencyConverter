@@ -36,9 +36,9 @@
     <string name="name_only_name">Name only </string>
     <string name="name_only_value">NAME</string>
     <string name="both_code_and_name_name">Code and name</string>
-    <string name="both_code_and_name_value">BOTH_CODE</string>
+    <string name="both_code_and_name_value">CODE_AND_NAME</string>
     <string name="both_name_and_code_name">Name and code</string>
-    <string name="both_name_and_code_value">BOTH_NAME</string>
+    <string name="both_name_and_code_value">NAME_AND_CODE</string>
 
     <!--Bottom navigation menu-->
     <string name="bottom_navigation_converter">Converter</string>
