@@ -24,6 +24,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
     var onScreenTouched: ((event: MotionEvent) -> Pair<Boolean, Point>)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.Theme_CurrencyConverter)
         super.onCreate(savedInstanceState)
         collectFlows()
         binding = DataBindingUtil.setContentView(this, R.layout.activity_currency_converter)

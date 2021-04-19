@@ -28,4 +28,10 @@
         <item name="android:colorControlHighlight">@color/ripple</item>
         <item name="android:colorControlActivated">?colorPrimary</item>
     </style>
+
+    <!--Splash screen theme-->
+    <style name="Theme.SplashScreen" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+        <item name="android:statusBarColor">@color/white</item>
+    </style>
 </resources>
