@@ -13,7 +13,7 @@ import dagger.hilt.android.scopes.ActivityRetainedScoped
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
-class CountriesProvider {
+object CountriesProvider {
     // Intentionaly doing mapping on the main thread, so it blocks until countries are ready, in
     // meantime a splash will be shown
     @ActivityRetainedScoped

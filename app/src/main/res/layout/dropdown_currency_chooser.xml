@@ -148,6 +148,7 @@
                     android:id="@+id/currencies"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:scrollbars="none"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:listitem="@layout/dropdown_item" />
             </LinearLayout>

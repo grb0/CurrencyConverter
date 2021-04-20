@@ -303,28 +303,17 @@ class ConverterFragment : Fragment() {
         viewModel.collectFlowsWhenStarted()
     }
 
-    private fun setUpRecyclerView(): CountryAdapter {
+    private fun setUpRecyclerView() {
+        assignAdapter()
+        modifyHeightInPortraitMode(addVerticalDivider())
         initializeFastScroller(binding.fromCurrencyChooser.currencies)
-
-        val adapter = assignAdapter(binding.fromCurrencyChooser.currencies)
-
-        val verticalDivider = addVerticalDivider()
-
-        modifyHeightInPortraitMode(
-            binding.fromCurrencyChooser.currencies,
-            adapter,
-            verticalDivider
-        )
-
-        return adapter
     }
 
-    private fun assignAdapter(currencies: RecyclerView): CountryAdapter {
+    private fun assignAdapter() {
         val adapter = CountryAdapter(viewLifecycleOwner, uiName) {
             viewModel.onCurrencyClicked(it)
         }
-        currencies.adapter = adapter
-        return adapter
+        binding.fromCurrencyChooser.currencies.adapter = adapter
     }
 
     private fun addVerticalDivider(): DividerItemDecoration {
@@ -334,16 +323,12 @@ class ConverterFragment : Fragment() {
         ).also { binding.fromCurrencyChooser.currencies.addItemDecoration(it) }
     }
 
-    private fun modifyHeightInPortraitMode(
-            currencies: RecyclerView,
-            adapter: CountryAdapter,
-            verticalDivider: DividerItemDecoration
-    ) {
+    private fun modifyHeightInPortraitMode(verticalDivider: DividerItemDecoration) {
         // Only in portrait mode
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            val countryHolder = adapter.createViewHolder(
-                    binding.fromCurrencyChooser.currencies,
-                    0
+            val countryHolder = binding.fromCurrencyChooser.currencies.adapter!!.createViewHolder(
+                binding.fromCurrencyChooser.currencies,
+                0
             )
             val verticalDividersHeight = ((verticalDivider.drawable?.intrinsicHeight ?: 3) * 4)
             val countryHoldersHeight = countryHolder.itemView.layoutParams.height * 4
@@ -351,7 +336,7 @@ class ConverterFragment : Fragment() {
             binding.fromCurrencyChooser.currencies.layoutParams.height = recyclerViewHeight
 
             // Let it not be in vain :)
-            currencies.recycledViewPool.putRecycledView(countryHolder)
+            binding.fromCurrencyChooser.currencies.recycledViewPool.putRecycledView(countryHolder)
         }
     }
 
