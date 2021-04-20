@@ -89,9 +89,9 @@ class ConverterFragment : Fragment() {
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View {
         orientation = resources.configuration.orientation
         initializeColors()
@@ -109,9 +109,9 @@ class ConverterFragment : Fragment() {
     }
 
     private fun getCurrencyLayoutDrawable(
-            strokeWidth: Float = 1f,
-            strokeColor: Int = Colors.BORDER,
-            backgroundColor: Int = Colors.WHITE
+        strokeWidth: Float = 1f,
+        strokeColor: Int = Colors.BORDER,
+        backgroundColor: Int = Colors.WHITE
     ) = GradientDrawable().apply {
         shape = GradientDrawable.RECTANGLE
         setStroke(strokeWidth.toPixels(resources).roundToInt(), strokeColor)
@@ -121,14 +121,14 @@ class ConverterFragment : Fragment() {
 
     private fun initializeFastScroller(recyclerView: RecyclerView) {
         val thumb = ContextCompat.getDrawable(
-                requireContext(),
-                R.drawable.afs_md2_thumb
+            requireContext(),
+            R.drawable.afs_md2_thumb
         )!!.apply { setTintList(ColorStateList.valueOf(Colors.PRIMARY)) }
 
         FastScrollerBuilder(recyclerView)
-                .useMd2Style()
-                .setThumbDrawable(thumb).apply { disableScrollbarAutoHide() }
-                .build()
+            .useMd2Style()
+            .setThumbDrawable(thumb).apply { disableScrollbarAutoHide() }
+            .build()
     }
 
     private fun initializeAnimations() {
@@ -210,15 +210,15 @@ class ConverterFragment : Fragment() {
         )
 
         val typeFaceProperty = PropertyValuesHolder.ofObject(
-                Property.of(TextView::class.java, Typeface::class.java, "typeface"),
-                { fraction, startValue, endValue ->
-                    if (fraction < 0.33) startValue
-                    else if (fraction > 0.33 && fraction < 0.66) ResourcesCompat.getFont(
-                            requireContext(), R.font.roboto_medium
-                    ) else endValue
-                },
-                ResourcesCompat.getFont(requireContext(), R.font.roboto),
-                ResourcesCompat.getFont(requireContext(), R.font.roboto_bold)
+            Property.of(TextView::class.java, Typeface::class.java, "typeface"),
+            { fraction, startValue, endValue ->
+                if (fraction < 0.33) startValue
+                else if (fraction > 0.33 && fraction < 0.66) ResourcesCompat.getFont(
+                    requireContext(), R.font.roboto_medium
+                ) else endValue
+            },
+            ResourcesCompat.getFont(requireContext(), R.font.roboto),
+            ResourcesCompat.getFont(requireContext(), R.font.roboto_bold)
         )
 
         dropdownTitleAnimator = ObjectAnimator.ofPropertyValuesHolder(
@@ -318,8 +318,8 @@ class ConverterFragment : Fragment() {
 
     private fun addVerticalDivider(): DividerItemDecoration {
         return DividerItemDecoration(
-                requireContext(),
-                DividerItemDecoration.VERTICAL
+            requireContext(),
+            DividerItemDecoration.VERTICAL
         ).also { binding.fromCurrencyChooser.currencies.addItemDecoration(it) }
     }
 
@@ -373,25 +373,25 @@ class ConverterFragment : Fragment() {
             }
             binding.fromCurrencyChooser.currencySecondary.isVisible -> {
                 changeCurrencyState(
-                        binding.fromCurrencyChooser.currencyMain,
-                        binding.fromCurrencyChooser.currencySecondary,
-                        country
+                    binding.fromCurrencyChooser.currencyMain,
+                    binding.fromCurrencyChooser.currencySecondary,
+                    country
                 )
             }
             binding.fromCurrencyChooser.currencyMain.isVisible -> {
                 changeCurrencyState(
-                        binding.fromCurrencyChooser.currencySecondary,
-                        binding.fromCurrencyChooser.currencyMain,
-                        country
+                    binding.fromCurrencyChooser.currencySecondary,
+                    binding.fromCurrencyChooser.currencyMain,
+                    country
                 )
             }
         }
     }
 
     private fun changeCurrencyState(
-            fadedIn: TextView,
-            fadedOut: TextView,
-            country: Country
+        fadedIn: TextView,
+        fadedOut: TextView,
+        country: Country
     ) {
         fadedIn.run {
             text = country.currency.getUiName(uiName)
@@ -408,8 +408,8 @@ class ConverterFragment : Fragment() {
     }
 
     private fun getAnimationListener(
-            view: TextView,
-            fadinIn: Boolean
+        view: TextView,
+        fadinIn: Boolean
     ) = object : Animation.AnimationListener {
         override fun onAnimationStart(animation: Animation?) {
         }
@@ -468,17 +468,17 @@ class ConverterFragment : Fragment() {
             val (isHandled, touchPoint) = currentOnScreenTouched!!.invoke(it)
             if (!isHandled) {
                 val currenciesCardTouched = isPointInsideViewBounds(
-                        binding.fromCurrencyChooser.currenciesCard,
-                        touchPoint
+                    binding.fromCurrencyChooser.currenciesCard,
+                    touchPoint
                 )
                 val currenciesSearcherTouched = isPointInsideViewBounds(
-                        binding.fromCurrencyChooser.currenciesSearcher,
-                        touchPoint
+                    binding.fromCurrencyChooser.currenciesSearcher,
+                    touchPoint
                 )
 
                 val handled = viewModel.onScreenTouched(
-                        currenciesCardTouched,
-                        currenciesSearcherTouched
+                    currenciesCardTouched,
+                    currenciesSearcherTouched
                 )
                 handled to touchPoint
             } else isHandled to touchPoint
@@ -492,7 +492,7 @@ class ConverterFragment : Fragment() {
     private fun onSearcherUnfocused() {
         releaseFocus()
         hideKeyboard()
-        restoreOriginalOnScreenTouched()
+        if (viewModel.fromCurrencyDropdownState.value != COLLAPSED) restoreOriginalOnScreenTouched()
         viewModel.onSearcherUnfocused()
     }
 
@@ -517,7 +517,7 @@ class ConverterFragment : Fragment() {
         val isKeyboardShown = KeyboardVisibilityEvent.isKeyboardVisible(requireActivity())
         if (orientation == Configuration.ORIENTATION_PORTRAIT && isKeyboardShown == onKeyboardShown) {
             val cLP =
-                    binding.fromCurrencyChooser.currenciesCard.layoutParams as ConstraintLayout.LayoutParams
+                binding.fromCurrencyChooser.currenciesCard.layoutParams as ConstraintLayout.LayoutParams
             cLP.height = height
             binding.fromCurrencyChooser.currenciesCard.layoutParams = cLP
         }
@@ -564,26 +564,26 @@ class ConverterFragment : Fragment() {
     private fun getOnScreenTouched(event: MotionEvent): Pair<Boolean, Point> {
         val touchPoint = Point(event.rawX.roundToInt(), event.rawY.roundToInt())
         val dropdownActionTouched = isPointInsideViewBounds(
-                binding.fromCurrencyChooser.dropdownAction,
-                touchPoint
+            binding.fromCurrencyChooser.dropdownAction,
+            touchPoint
         )
         val currencyLayoutTouched = isPointInsideViewBounds(
-                binding.fromCurrencyChooser.currencyLayout,
-                touchPoint
+            binding.fromCurrencyChooser.currencyLayout,
+            touchPoint
         )
         val dropdownTitleTouched = isPointInsideViewBounds(
-                binding.fromCurrencyChooser.dropdownTitle,
-                touchPoint
+            binding.fromCurrencyChooser.dropdownTitle,
+            touchPoint
         )
         val currenciesCardTouched = isPointInsideViewBounds(
-                binding.fromCurrencyChooser.currenciesCard,
-                touchPoint
+            binding.fromCurrencyChooser.currenciesCard,
+            touchPoint
         )
         val isHandled = viewModel.onScreenTouched(
-                dropdownActionTouched,
-                currencyLayoutTouched,
-                dropdownTitleTouched,
-                currenciesCardTouched
+            dropdownActionTouched,
+            currencyLayoutTouched,
+            dropdownTitleTouched,
+            currenciesCardTouched
         )
         return isHandled to touchPoint
     }
