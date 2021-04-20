@@ -13,12 +13,14 @@
     <string name="title_auto_hide_scrollbar">Auto-hide scrollbar</string>
     <string name="key_maintain_search_query">maintain_search_query</string>
     <string name="title_maintain_search_query">Maintain search query</string>
+    <string name="key_theme">theme</string>
+    <string name="title_theme">Theme</string>
     <string name="key_language">language</string>
     <string name="title_language">Language</string>
     <string name="key_filter_by">filter_by</string>
     <string name="title_filter_by">Search by</string>
-    <string name="key_currency_name">currency_name</string>
-    <string name="title_currency_name">Show currency name as</string>
+    <string name="key_ui_name">currency_name</string>
+    <string name="title_ui_name">Show currency name as</string>
     <string name="bosnian_name">Bosnian</string>
     <string name="bosnian_value">bosnian</string>
     <string name="english_name">English</string>
@@ -39,6 +41,12 @@
     <string name="both_code_and_name_value">CODE_AND_NAME</string>
     <string name="both_name_and_code_name">Name and code</string>
     <string name="both_name_and_code_value">NAME_AND_CODE</string>
+    <string name="light_name">Light</string>
+    <string name="dark_name">Dark</string>
+    <string name="device_name">Device</string>
+    <string name="light_value">light</string>
+    <string name="dark_value">dark</string>
+    <string name="device_value">device</string>
 
     <!--Bottom navigation menu-->
     <string name="bottom_navigation_converter">Converter</string>

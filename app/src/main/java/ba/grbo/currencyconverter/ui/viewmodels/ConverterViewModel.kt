@@ -18,7 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ConverterViewModel @Inject constructor(
     private val plainCountries: List<Country>,
-    @ba.grbo.currencyconverter.di.FilterBy filterBy: FilterBy,
+    filterBy: FilterBy,
 ) : ViewModel() {
     companion object {
         const val DIVIDER_START_HEIGHT = 1.8f

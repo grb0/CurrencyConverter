@@ -3,6 +3,7 @@ package ba.grbo.currencyconverter.ui.fragments
 import android.os.Bundle
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
+import ba.grbo.currencyconverter.CurrencyConverterApplication
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Currency
 import ba.grbo.currencyconverter.data.models.FilterBy
@@ -22,9 +23,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private var filterCode = ""
     private var filterName = ""
 
+    companion object {
+        const val LIGHT = "light"
+        const val DARK = "dark"
+        const val DEVICE = "device"
+    }
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
-        observeCurrencyName()
+        observeDarkMode()
+        observeUiName()
         observeSearchBy()
     }
 
@@ -33,8 +41,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
         initializeValues()
     }
 
-    private fun observeCurrencyName() {
-        findPreference<ListPreference>(getString(R.string.key_currency_name))?.run {
+    private fun observeDarkMode() {
+        findPreference<ListPreference>(getString(R.string.key_theme))?.run {
+            setOnPreferenceChangeListener { _, newValue ->
+                (requireActivity().application as CurrencyConverterApplication).setTheme(newValue as String)
+            }
+        }
+    }
+
+    private fun observeUiName() {
+        findPreference<ListPreference>(getString(R.string.key_ui_name))?.run {
             uiNamePreference = this
             setOnPreferenceChangeListener { _, newValue ->
                 newValue as String

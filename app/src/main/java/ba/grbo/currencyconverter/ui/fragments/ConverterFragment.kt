@@ -39,7 +39,6 @@ import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.data.models.Currency
 import ba.grbo.currencyconverter.databinding.FragmentConverterBinding
-import ba.grbo.currencyconverter.di.CurrencyUiName
 import ba.grbo.currencyconverter.ui.activities.CurrencyConverterActivity
 import ba.grbo.currencyconverter.ui.adapters.CountryAdapter
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel
@@ -66,7 +65,6 @@ class ConverterFragment : Fragment() {
     private val viewModel: ConverterViewModel by viewModels()
     private lateinit var binding: FragmentConverterBinding
 
-    @CurrencyUiName
     @Inject
     lateinit var uiName: Currency.UiName
 

@@ -30,7 +30,6 @@ object CountriesProvider {
                 ),
                 ContextCompat.getDrawable(application, it.flag)!!
             )
-
         }
     }
 }

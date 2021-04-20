@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CurrencyConverterViewModel @Inject constructor(
-    // Injecting, so we force first access in activi
+    // Injecting, so we force first access in activity
     @Suppress("UNUSED_PARAMETER") countries: List<Country>
 ) : ViewModel() {
     private val _toFragment = SingleSharedFlow<@IdRes Int>()
@@ -37,13 +37,11 @@ class CurrencyConverterViewModel @Inject constructor(
     }
 
     fun onDestinationChanged(@IdRes destinationId: Int) {
-        _actionBarTitle.tryEmit(
-            when (destinationId) {
-                R.id.converterFragment -> R.string.title_converter
-                R.id.historyFragment -> R.string.title_history
-                R.id.settingsFragment -> R.string.title_settings
-                else -> throw IllegalArgumentException("Unknown destinationId: $destinationId")
-            }
-        )
+        _actionBarTitle.value = when (destinationId) {
+            R.id.converterFragment -> R.string.title_converter
+            R.id.historyFragment -> R.string.title_history
+            R.id.settingsFragment -> R.string.title_settings
+            else -> throw IllegalArgumentException("Unknown destinationId: $destinationId")
+        }
     }
 }

@@ -1,7 +1,7 @@
 package ba.grbo.currencyconverter.di
 
 import android.app.Application
-import androidx.preference.PreferenceManager
+import android.content.SharedPreferences
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Currency
 import ba.grbo.currencyconverter.data.models.FilterBy
@@ -13,22 +13,24 @@ import dagger.hilt.android.components.ActivityRetainedComponent
 @Module
 @InstallIn(ActivityRetainedComponent::class)
 object PreferencesProvider {
-    @ba.grbo.currencyconverter.di.CurrencyUiName
     @Provides
-    fun provideUiName(application: Application): Currency.UiName {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(application)
+    fun provideUiName(
+        sharedPreferences: SharedPreferences,
+        application: Application,
+    ): Currency.UiName {
         val uiName = sharedPreferences.getString(
-            application.getString(R.string.key_currency_name),
+            application.getString(R.string.key_ui_name),
             Currency.UiName.CODE_AND_NAME.name
         ) ?: Currency.UiName.CODE_AND_NAME.name
 
         return Currency.UiName.valueOf(uiName)
     }
 
-    @ba.grbo.currencyconverter.di.FilterBy
     @Provides
-    fun provideFilterBy(application: Application): FilterBy {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(application)
+    fun provideFilterBy(
+        sharedPreferences: SharedPreferences,
+        application: Application
+    ): FilterBy {
         val filterBy = sharedPreferences.getString(
             application.getString(R.string.key_filter_by),
             FilterBy.BOTH.name

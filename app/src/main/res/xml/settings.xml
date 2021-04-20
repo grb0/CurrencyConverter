@@ -31,8 +31,8 @@
 
         <ListPreference
             android:defaultValue="@string/code_and_name_value"
-            android:entries="@array/search_by_names"
-            android:entryValues="@array/search_by_values"
+            android:entries="@array/filter_by_names"
+            android:entryValues="@array/filter_by_values"
             android:key="@string/key_filter_by"
             android:title="@string/title_filter_by"
             app:icon="@drawable/ic_search"
@@ -40,11 +40,20 @@
 
         <ListPreference
             android:defaultValue="@string/both_code_and_name_value"
-            android:entries="@array/currency_name_names"
-            android:entryValues="@array/currency_name_values"
-            android:key="@string/key_currency_name"
-            android:title="@string/title_currency_name"
+            android:entries="@array/ui_name_names"
+            android:entryValues="@array/ui_name_values"
+            android:key="@string/key_ui_name"
+            android:title="@string/title_ui_name"
             app:icon="@drawable/ic_coin"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:defaultValue="@string/device_value"
+            android:entries="@array/dark_mode_names"
+            android:entryValues="@array/dark_mode_values"
+            android:key="@string/key_theme"
+            android:title="@string/title_theme"
+            app:icon="@drawable/ic_night"
             app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 </PreferenceScreen>

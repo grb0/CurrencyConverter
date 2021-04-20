@@ -12,29 +12,41 @@
         <item>@string/german_value</item>
     </string-array>
 
-    <string-array name="search_by_names">
+    <string-array name="filter_by_names">
         <item>@string/code_name</item>
         <item>@string/name_name</item>
         <item>@string/code_and_name_name</item>
     </string-array>
 
-    <string-array name="search_by_values">
+    <string-array name="filter_by_values">
         <item>@string/code_value</item>
         <item>@string/name_value</item>
         <item>@string/code_and_name_value</item>
     </string-array>
 
-    <string-array name="currency_name_names">
+    <string-array name="ui_name_names">
         <item>@string/code_only_name</item>
         <item>@string/name_only_name</item>
         <item>@string/both_code_and_name_name</item>
         <item>@string/both_name_and_code_name</item>
     </string-array>
 
-    <string-array name="currency_name_values">
+    <string-array name="ui_name_values">
         <item>@string/code_only_value</item>
         <item>@string/name_only_value</item>
         <item>@string/both_code_and_name_value</item>
         <item>@string/both_name_and_code_value</item>
+    </string-array>
+
+    <string-array name="dark_mode_names">
+        <item>@string/light_name</item>
+        <item>@string/dark_name</item>
+        <item>@string/device_name</item>
+    </string-array>
+
+    <string-array name="dark_mode_values">
+        <item>@string/light_value</item>
+        <item>@string/dark_value</item>
+        <item>@string/device_value</item>
     </string-array>
 </resources>
