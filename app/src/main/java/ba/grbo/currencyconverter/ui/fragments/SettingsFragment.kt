@@ -6,7 +6,9 @@ import androidx.preference.PreferenceFragmentCompat
 import ba.grbo.currencyconverter.CurrencyConverterApplication
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Currency
-import ba.grbo.currencyconverter.data.models.FilterBy
+import ba.grbo.currencyconverter.data.models.preferences.FilterBy
+import ba.grbo.currencyconverter.data.models.preferences.Language
+import ba.grbo.currencyconverter.data.models.preferences.Theme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,14 +25,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
     private var filterCode = ""
     private var filterName = ""
 
-    companion object {
-        const val LIGHT = "light"
-        const val DARK = "dark"
-        const val DEVICE = "device"
-    }
-
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
+        observeLanguage()
         observeDarkMode()
         observeUiName()
         observeSearchBy()
@@ -41,10 +38,23 @@ class SettingsFragment : PreferenceFragmentCompat() {
         initializeValues()
     }
 
+    private fun observeLanguage() {
+        findPreference<ListPreference>(getString(R.string.key_language))?.run {
+            setOnPreferenceChangeListener { _, newValue ->
+                if (value != newValue as String) {
+                    onLanguageChanged(newValue)
+                    true
+                } else false
+            }
+        }
+    }
+
     private fun observeDarkMode() {
         findPreference<ListPreference>(getString(R.string.key_theme))?.run {
             setOnPreferenceChangeListener { _, newValue ->
-                (requireActivity().application as CurrencyConverterApplication).setTheme(newValue as String)
+                (requireActivity().application as CurrencyConverterApplication).setTheme(
+                    Theme.valueOf(newValue as String)
+                )
             }
         }
     }
@@ -114,6 +124,17 @@ class SettingsFragment : PreferenceFragmentCompat() {
         currencyBothCode = getString(R.string.both_code_and_name_value)
         filterCode = getString(R.string.code_value)
         filterName = getString(R.string.name_value)
+    }
+
+    private fun onLanguageChanged(language: String) {
+        (requireActivity().application as CurrencyConverterApplication).setLanguage(
+            Language.valueOf(language)
+        )
+        recreateActivity()
+    }
+
+    private fun recreateActivity() {
+        requireActivity().recreate()
     }
 
     override fun onDestroy() {

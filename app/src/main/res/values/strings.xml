@@ -22,11 +22,11 @@
     <string name="key_ui_name">currency_name</string>
     <string name="title_ui_name">Show currency name as</string>
     <string name="bosnian_name">Bosnian</string>
-    <string name="bosnian_value">bosnian</string>
+    <string name="bosnian_value">BOSNIAN</string>
     <string name="english_name">English</string>
-    <string name="english_value">english</string>
+    <string name="english_value">ENGLISH</string>
     <string name="german_name">German</string>
-    <string name="german_value">german</string>
+    <string name="german_value">GERMAN</string>
     <string name="code_name">Currency code</string>
     <string name="code_value">CODE</string>
     <string name="name_name">Currency name</string>
@@ -44,9 +44,9 @@
     <string name="light_name">Light</string>
     <string name="dark_name">Dark</string>
     <string name="device_name">Device</string>
-    <string name="light_value">light</string>
-    <string name="dark_value">dark</string>
-    <string name="device_value">device</string>
+    <string name="light_value">LIGHT</string>
+    <string name="dark_value">DARK</string>
+    <string name="device_value">DEVICE</string>
 
     <!--Bottom navigation menu-->
     <string name="bottom_navigation_converter">Converter</string>

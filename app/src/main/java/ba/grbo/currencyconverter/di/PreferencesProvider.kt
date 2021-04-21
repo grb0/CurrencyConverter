@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.SharedPreferences
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Currency
-import ba.grbo.currencyconverter.data.models.FilterBy
+import ba.grbo.currencyconverter.data.models.preferences.FilterBy
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

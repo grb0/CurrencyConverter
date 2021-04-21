@@ -2,7 +2,10 @@ package ba.grbo.currencyconverter.util
 
 import android.animation.ObjectAnimator
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.Resources
+import android.os.Build
+import android.os.LocaleList
 import android.util.TypedValue
 import android.view.animation.LinearInterpolator
 import androidx.annotation.AttrRes
@@ -16,8 +19,8 @@ import androidx.lifecycle.lifecycleScope
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.FOCUSING
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.UNFOCUSING
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
+import java.util.*
 
 fun Context.getColorFromAttribute(@AttrRes id: Int): Int {
     val typedValue = TypedValue()
@@ -97,23 +100,23 @@ private fun <T> AppCompatActivity.collect(
     )
 }
 
-fun <T> AppCompatActivity.collectWhenStarted(
-    flow: Flow<T>,
-    action: suspend (T) -> Unit,
-    shouldDebounce: Boolean = false,
-    debounceTimeout: Long = 500
-) {
-    collect(flow, action, Lifecycle.State.STARTED, shouldDebounce, debounceTimeout)
-}
-
 fun ObjectAnimator.setUp(resources: Resources): ObjectAnimator {
     interpolator = LinearInterpolator()
     duration = resources.getInteger(R.integer.anim_time).toLong()
     return this
 }
 
-@Suppress("FunctionName", "UNCHECKED_CAST")
-fun <T> SingleSharedFlow() = MutableSharedFlow<T>(
-    onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    extraBufferCapacity = 1
-)
+fun Context.updateLocale(locale: Locale): ContextWrapper {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        val localeList = LocaleList(locale)
+        LocaleList.setDefault(localeList)
+        resources.configuration.setLocales(localeList)
+    } else resources.configuration.locale = locale
+
+    var context: Context = this
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+        context = context.createConfigurationContext(resources.configuration)
+    } else resources.updateConfiguration(resources.configuration, resources.displayMetrics)
+
+    return ContextWrapper(context)
+}

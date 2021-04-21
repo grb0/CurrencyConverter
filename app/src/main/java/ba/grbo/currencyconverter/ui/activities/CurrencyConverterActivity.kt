@@ -1,5 +1,6 @@
 package ba.grbo.currencyconverter.ui.activities
 
+import android.content.Context
 import android.graphics.Point
 import android.os.Bundle
 import android.view.MotionEvent
@@ -9,8 +10,10 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import ba.grbo.currencyconverter.CurrencyConverterApplication
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.databinding.ActivityCurrencyConverterBinding
+import ba.grbo.currencyconverter.util.updateLocale
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -22,8 +25,12 @@ class CurrencyConverterActivity : AppCompatActivity() {
         setTheme(R.style.Theme_CurrencyConverter)
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_currency_converter)
-
         setUp()
+    }
+
+    override fun attachBaseContext(newBase: Context?) {
+        val language = (newBase?.applicationContext as CurrencyConverterApplication).language
+        super.attachBaseContext(newBase.updateLocale(language))
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {

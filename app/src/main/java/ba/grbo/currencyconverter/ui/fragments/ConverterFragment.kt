@@ -602,7 +602,7 @@ class ConverterFragment : Fragment() {
 
     private fun collapseDropdown() {
         reverseObjectAnimators()
-        binding.fromCurrencyChooser.currenciesCard.visibility = View.GONE
+        binding.fromCurrencyChooser.currenciesCard.visibility = View.INVISIBLE
         viewModel.onDropdownCollapsed()
     }
 }

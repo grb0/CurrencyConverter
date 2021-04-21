@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.data.models.Currency
-import ba.grbo.currencyconverter.data.models.FilterBy
+import ba.grbo.currencyconverter.data.models.preferences.FilterBy
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.UNFOCUSED
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.UNFOCUSING

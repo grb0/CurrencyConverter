@@ -4,11 +4,13 @@ import android.app.Application
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import ba.grbo.currencyconverter.R
-import ba.grbo.currencyconverter.ui.fragments.SettingsFragment
+import ba.grbo.currencyconverter.data.models.preferences.Language
+import ba.grbo.currencyconverter.data.models.preferences.Theme
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import java.util.*
 import javax.inject.Singleton
 
 @Module
@@ -20,15 +22,31 @@ object ThemeProvider {
         return PreferenceManager.getDefaultSharedPreferences(application)
     }
 
-
+    @Singleton
     @Provides
     fun provideTheme(
         sharedPreferences: SharedPreferences,
         application: Application
-    ): String {
-        return sharedPreferences.getString(
+    ): Theme {
+        val theme = sharedPreferences.getString(
             application.getString(R.string.key_theme),
-            SettingsFragment.DEVICE
-        ) ?: SettingsFragment.DEVICE
+            Theme.DEVICE.name
+        ) ?: Theme.DEVICE.name
+
+        return Theme.valueOf(theme)
+    }
+
+    @Singleton
+    @Provides
+    fun provideLanguage(
+        sharedPreferences: SharedPreferences,
+        application: Application
+    ): Locale {
+        val language = sharedPreferences.getString(
+            application.getString(R.string.key_language),
+            Language.ENGLISH.name
+        ) ?: Language.ENGLISH.name
+
+        return Language.valueOf(language).toLocale()
     }
 }
