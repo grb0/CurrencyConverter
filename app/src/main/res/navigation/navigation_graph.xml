@@ -4,20 +4,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigation_graph"
-    app:startDestination="@id/converterFragment">
+    app:startDestination="@id/navigation_converter">
 
     <fragment
-        android:id="@+id/converterFragment"
+        android:id="@+id/navigation_converter"
         android:name="ba.grbo.currencyconverter.ui.fragments.ConverterFragment"
-        android:label="fragment_converter"
+        android:label="@string/title_converter"
         tools:layout="@layout/fragment_converter" />
     <fragment
-        android:id="@+id/settingsFragment"
-        android:name="ba.grbo.currencyconverter.ui.fragments.SettingsFragment"
-        android:label="SettingsFragment" />
-    <fragment
-        android:id="@+id/historyFragment"
+        android:id="@+id/navigation_history"
         android:name="ba.grbo.currencyconverter.ui.fragments.HistoryFragment"
-        android:label="fragment_history"
+        android:label="@string/title_history"
         tools:layout="@layout/fragment_history" />
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="ba.grbo.currencyconverter.ui.fragments.SettingsFragment"
+        android:label="@string/title_settings" />
 </navigation>
