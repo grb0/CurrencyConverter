@@ -5,11 +5,9 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.Resources
 import android.os.Build
-import android.os.LocaleList
 import android.util.TypedValue
 import android.view.animation.LinearInterpolator
 import androidx.annotation.AttrRes
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
@@ -83,40 +81,21 @@ fun <T> Fragment.collectWhenStarted(
     collect(flow, action, Lifecycle.State.STARTED, shouldDebounce, debounceTimeout)
 }
 
-private fun <T> AppCompatActivity.collect(
-    flow: Flow<T>,
-    action: suspend (T) -> Unit,
-    lifecycleState: Lifecycle.State,
-    shouldDebounce: Boolean = false,
-    debounceTimeout: Long = 500
-) {
-    flow.collect(
-        lifecycle,
-        lifecycleState,
-        lifecycleScope,
-        action,
-        shouldDebounce,
-        debounceTimeout
-    )
-}
-
 fun ObjectAnimator.setUp(resources: Resources): ObjectAnimator {
     interpolator = LinearInterpolator()
     duration = resources.getInteger(R.integer.anim_time).toLong()
     return this
 }
 
-fun Context.updateLocale(locale: Locale): ContextWrapper {
+fun Context.updateLocale(language: Locale): ContextWrapper {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        val localeList = LocaleList(locale)
-        LocaleList.setDefault(localeList)
-        resources.configuration.setLocales(localeList)
-    } else resources.configuration.locale = locale
+        resources.configuration.setLocale(language)
+    } else resources.configuration.locale = language
 
     var context: Context = this
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
         context = context.createConfigurationContext(resources.configuration)
-    } else resources.updateConfiguration(resources.configuration, resources.displayMetrics)
+    } else resources.updateConfiguration(context.resources.configuration, resources.displayMetrics)
 
     return ContextWrapper(context)
 }

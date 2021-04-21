@@ -8,7 +8,7 @@ enum class Language {
     GERMAN;
 
     fun toLocale(): Locale = when (this) {
-        BOSNIAN -> Locale("ba")
+        BOSNIAN -> Locale("bs")
         ENGLISH -> Locale.ENGLISH
         GERMAN -> Locale.GERMAN
     }

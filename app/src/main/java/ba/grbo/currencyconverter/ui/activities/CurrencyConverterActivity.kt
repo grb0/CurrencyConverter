@@ -15,11 +15,16 @@ import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.databinding.ActivityCurrencyConverterBinding
 import ba.grbo.currencyconverter.util.updateLocale
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.*
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class CurrencyConverterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCurrencyConverterBinding
     var onScreenTouched: ((event: MotionEvent) -> Pair<Boolean, Point>)? = null
+
+    @Inject
+    lateinit var language: Locale
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_CurrencyConverter)

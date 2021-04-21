@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Currency Converter</string>
+    <string name="app_name" translatable="false">Currency Converter</string>
 
     <!--Action bar title-->
     <string name="title_converter">Converter</string>
@@ -8,55 +8,50 @@
 
     <!--Settings-->
     <string name="title_miscellaneous">Miscellaneous</string>
-    <string name="key_miscellaneous">miscellaneous</string>
-    <string name="key_auto_hide_scrollbar">autohide_scrollbar</string>
+    <string name="key_miscellaneous" translatable="false">miscellaneous</string>
+    <string name="key_auto_hide_scrollbar" translatable="false">autohide_scrollbar</string>
     <string name="title_auto_hide_scrollbar">Auto-hide scrollbar</string>
-    <string name="key_maintain_search_query">maintain_search_query</string>
+    <string name="key_maintain_search_query" translatable="false">maintain_search_query</string>
     <string name="title_maintain_search_query">Maintain search query</string>
-    <string name="key_theme">theme</string>
+    <string name="key_theme" translatable="false">theme</string>
     <string name="title_theme">Theme</string>
-    <string name="key_language">language</string>
+    <string name="key_language" translatable="false">language</string>
     <string name="title_language">Language</string>
-    <string name="key_filter_by">filter_by</string>
+    <string name="key_filter_by" translatable="false">filter_by</string>
     <string name="title_filter_by">Search by</string>
-    <string name="key_ui_name">currency_name</string>
+    <string name="key_ui_name" translatable="false">currency_name</string>
     <string name="title_ui_name">Show currency name as</string>
     <string name="bosnian_name">Bosnian</string>
-    <string name="bosnian_value">BOSNIAN</string>
+    <string name="bosnian_value" translatable="false">BOSNIAN</string>
     <string name="english_name">English</string>
-    <string name="english_value">ENGLISH</string>
+    <string name="english_value" translatable="false">ENGLISH</string>
     <string name="german_name">German</string>
-    <string name="german_value">GERMAN</string>
+    <string name="german_value" translatable="false">GERMAN</string>
     <string name="code_name">Currency code</string>
-    <string name="code_value">CODE</string>
+    <string name="code_value" translatable="false">CODE</string>
     <string name="name_name">Currency name</string>
-    <string name="name_value">NAME</string>
+    <string name="name_value" translatable="false">NAME</string>
     <string name="code_and_name_name">Currency code and name</string>
-    <string name="code_and_name_value">BOTH</string>
+    <string name="code_and_name_value" translatable="false">BOTH</string>
     <string name="code_only_name">Code only</string>
-    <string name="code_only_value">CODE</string>
+    <string name="code_only_value" translatable="false">CODE</string>
     <string name="name_only_name">Name only </string>
-    <string name="name_only_value">NAME</string>
+    <string name="name_only_value" translatable="false">NAME</string>
     <string name="both_code_and_name_name">Code and name</string>
-    <string name="both_code_and_name_value">CODE_AND_NAME</string>
+    <string name="both_code_and_name_value" translatable="false">CODE_AND_NAME</string>
     <string name="both_name_and_code_name">Name and code</string>
-    <string name="both_name_and_code_value">NAME_AND_CODE</string>
+    <string name="both_name_and_code_value" translatable="false">NAME_AND_CODE</string>
     <string name="light_name">Light</string>
     <string name="dark_name">Dark</string>
     <string name="device_name">Device</string>
-    <string name="light_value">LIGHT</string>
-    <string name="dark_value">DARK</string>
-    <string name="device_value">DEVICE</string>
-
-    <!--Bottom navigation menu-->
-    <string name="bottom_navigation_converter">Converter</string>
-    <string name="bottom_navigation_history">History</string>
-    <string name="bottom_navigation_settings">Settings</string>
+    <string name="light_value" translatable="false">LIGHT</string>
+    <string name="dark_value" translatable="false">DARK</string>
+    <string name="device_value" translatable="false">DEVICE</string>
 
     <!--dropdown_currency_chooser-->
     <string name="img_description_country_flag">Country flag</string>
     <string name="img_description_expand">Expand</string>
-    <string name="search_hint">Search</string>
+    <string name="search_hint">Currency</string>
 
     <!--Country codes-->
     <string name="currency_united_arab_emirates">United Arab Emirates Dirham</string>
@@ -80,7 +75,7 @@
     <string name="currency_bolivia">Bolivian Boliviano</string>
     <string name="currency_brazil">Brazilian Real</string>
     <string name="currency_bahamas">Bahamian Dollar</string>
-    <string name="currency_bitcoin">Bitcoin</string>
+    <string name="currency_bitcoin" translatable="false">Bitcoin</string>
     <string name="currency_bhutan">Bhutanese Ngultrum</string>
     <string name="currency_botswana">Botswanan Pula</string>
     <string name="currency_belarus">Belarusian Ruble</string>
