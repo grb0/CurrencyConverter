@@ -59,7 +59,6 @@ import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-
 @AndroidEntryPoint
 class ConverterFragment : Fragment() {
     private val viewModel: ConverterViewModel by viewModels()
@@ -67,6 +66,10 @@ class ConverterFragment : Fragment() {
 
     @Inject
     lateinit var uiName: Currency.UiName
+
+    @Inject
+    @JvmField
+    var autohideScroller: Boolean = false
 
     private lateinit var dropdownActionAnimator: ObjectAnimator
     private lateinit var converterLayoutAnimator: ObjectAnimator
@@ -125,7 +128,7 @@ class ConverterFragment : Fragment() {
 
         FastScrollerBuilder(recyclerView)
             .useMd2Style()
-            .setThumbDrawable(thumb).apply { disableScrollbarAutoHide() }
+            .setThumbDrawable(thumb).apply { if (!autohideScroller) disableScrollbarAutoHide() }
             .build()
     }
 

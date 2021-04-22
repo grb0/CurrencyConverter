@@ -1,6 +1,6 @@
 package ba.grbo.currencyconverter.di
 
-import android.app.Application
+import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import ba.grbo.currencyconverter.R
@@ -12,57 +12,30 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityRetainedComponent
+import dagger.hilt.android.components.FragmentComponent
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.scopes.FragmentScoped
 import dagger.hilt.components.SingletonComponent
 import java.util.*
 import javax.inject.Singleton
-
-@Module
-@InstallIn(ActivityRetainedComponent::class)
-object ActivityScopedPreferences {
-    @Provides
-    fun provideUiName(
-        sharedPreferences: SharedPreferences,
-        application: Application,
-    ): Currency.UiName {
-        val uiName = sharedPreferences.getString(
-            application.getString(R.string.key_ui_name),
-            Currency.UiName.CODE_AND_NAME.name
-        ) ?: Currency.UiName.CODE_AND_NAME.name
-
-        return Currency.UiName.valueOf(uiName)
-    }
-
-    @Provides
-    fun provideFilterBy(
-        sharedPreferences: SharedPreferences,
-        application: Application
-    ): FilterBy {
-        val filterBy = sharedPreferences.getString(
-            application.getString(R.string.key_filter_by),
-            FilterBy.BOTH.name
-        ) ?: FilterBy.BOTH.name
-
-        return FilterBy.valueOf(filterBy)
-    }
-}
 
 @Module
 @InstallIn(SingletonComponent::class)
 object ApplicationScopedPreferences {
     @Singleton
     @Provides
-    fun provideSharedPreferences(application: Application): SharedPreferences {
-        return PreferenceManager.getDefaultSharedPreferences(application)
+    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences {
+        return PreferenceManager.getDefaultSharedPreferences(context)
     }
 
     @Singleton
     @Provides
     fun provideTheme(
         sharedPreferences: SharedPreferences,
-        application: Application
+        @ApplicationContext context: Context
     ): Theme {
         val theme = sharedPreferences.getString(
-            application.getString(R.string.key_theme),
+            context.getString(R.string.key_theme),
             Theme.DEVICE.name
         ) ?: Theme.DEVICE.name
 
@@ -72,13 +45,57 @@ object ApplicationScopedPreferences {
     @Provides
     fun provideLanguage(
         sharedPreferences: SharedPreferences,
-        application: Application
+        @ApplicationContext context: Context
     ): Locale {
         val language = sharedPreferences.getString(
-            application.getString(R.string.key_language),
+            context.getString(R.string.key_language),
             Language.ENGLISH.name
         ) ?: Language.ENGLISH.name
 
         return Language.valueOf(language).toLocale()
     }
+}
+
+@Module
+@InstallIn(ActivityRetainedComponent::class)
+object ActivityScopedPreferences {
+    @Provides
+    fun provideUiName(
+        sharedPreferences: SharedPreferences,
+        @ApplicationContext context: Context,
+    ): Currency.UiName {
+        val uiName = sharedPreferences.getString(
+            context.getString(R.string.key_ui_name),
+            Currency.UiName.CODE_AND_NAME.name
+        ) ?: Currency.UiName.CODE_AND_NAME.name
+
+        return Currency.UiName.valueOf(uiName)
+    }
+
+    @Provides
+    fun provideFilterBy(
+        sharedPreferences: SharedPreferences,
+        @ApplicationContext context: Context
+    ): FilterBy {
+        val filterBy = sharedPreferences.getString(
+            context.getString(R.string.key_filter_by),
+            FilterBy.BOTH.name
+        ) ?: FilterBy.BOTH.name
+
+        return FilterBy.valueOf(filterBy)
+    }
+}
+
+@Module
+@InstallIn(FragmentComponent::class)
+object FragmentScoped {
+    @FragmentScoped
+    @Provides
+    fun provideAutohideScrollbar(
+        sharedPreferences: SharedPreferences,
+        @ApplicationContext context: Context
+    ) = sharedPreferences.getBoolean(
+        context.getString(R.string.key_auto_hide_scrollbar),
+        false
+    )
 }

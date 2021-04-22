@@ -14,12 +14,6 @@
             android:title="@string/title_auto_hide_scrollbar"
             app:icon="@drawable/ic_hide" />
 
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="@string/key_maintain_search_query"
-            android:title="@string/title_maintain_search_query"
-            app:icon="@drawable/ic_maintain_search" />
-
         <ListPreference
             android:defaultValue="@string/english_value"
             android:entries="@array/language_names"
