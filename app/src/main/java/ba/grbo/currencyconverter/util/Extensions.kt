@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.FOCUSING
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.UNFOCUSING
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import java.util.*
 
@@ -39,46 +40,38 @@ private fun <T> Flow<T>.collect(
     lifecycleState: Lifecycle.State,
     scope: LifecycleCoroutineScope,
     action: suspend (T) -> Unit,
-    shouldDebounce: Boolean,
-    debounceTimeout: Long
+    distinctUntilChanged: Boolean = true
 ) {
-    if (!shouldDebounce) distinctUntilChanged()
+    if (distinctUntilChanged) distinctUntilChanged()
         .flowWithLifecycle(lifecycle, lifecycleState)
         .onEach { action(it) }
         .launchIn(scope)
-    else debounce(debounceTimeout)
-        .distinctUntilChanged()
-        .flowWithLifecycle(lifecycle, lifecycleState)
+    else flowWithLifecycle(lifecycle, lifecycleState)
         .onEach { action(it) }
         .launchIn(scope)
-
 }
 
 private fun <T> Fragment.collect(
     flow: Flow<T>,
     action: suspend (T) -> Unit,
     lifecycleState: Lifecycle.State,
-    shouldDebounce: Boolean = false,
-    debounceTimeout: Long = 500
+    distinctUntilChanged: Boolean = true,
 ) {
     flow.collect(
         viewLifecycleOwner.lifecycle,
         lifecycleState,
         viewLifecycleOwner.lifecycleScope,
         action,
-        shouldDebounce,
-        debounceTimeout
+        distinctUntilChanged,
     )
-
 }
 
 fun <T> Fragment.collectWhenStarted(
     flow: Flow<T>,
     action: suspend (T) -> Unit,
-    shouldDebounce: Boolean = false,
-    debounceTimeout: Long = 500
+    distinctUntilChanged: Boolean = true
 ) {
-    collect(flow, action, Lifecycle.State.STARTED, shouldDebounce, debounceTimeout)
+    collect(flow, action, Lifecycle.State.STARTED, distinctUntilChanged)
 }
 
 fun ObjectAnimator.setUp(resources: Resources): ObjectAnimator {
@@ -99,3 +92,9 @@ fun Context.updateLocale(language: Locale): ContextWrapper {
 
     return ContextWrapper(context)
 }
+
+@Suppress("FunctionName", "UNCHECKED_CAST")
+fun <T> SingleSharedFlow() = MutableSharedFlow<T>(
+    onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    extraBufferCapacity = 1
+)

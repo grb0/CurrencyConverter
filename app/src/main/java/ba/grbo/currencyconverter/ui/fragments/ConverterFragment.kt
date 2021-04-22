@@ -21,6 +21,7 @@ import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.AttrRes
@@ -283,6 +284,7 @@ class ConverterFragment : Fragment() {
         binding.fromCurrencyChooser.run {
             dropdownAction.setOnClickListener { viewModel.onExpandClicked() }
             currencyLayout.setOnClickListener { viewModel.onDropdownClicked() }
+            resetSearcher.setOnClickListener { viewModel.onResetSearcherClicked() }
             dropdownTitle.setOnClickListener { viewModel.onTitleClicked() }
             currenciesSearcher.setOnFocusChangeListener { _, hasFocus ->
                 viewModel.onSearcherFocusChanged(hasFocus)
@@ -298,10 +300,6 @@ class ConverterFragment : Fragment() {
         ) {
             if (it) modifyCurrenciesCardHeight() else restoreOriginalCurrenciesCardHeight()
         }
-    }
-
-    private fun collectFlows() {
-        viewModel.collectFlowsWhenStarted()
     }
 
     private fun setUpRecyclerView() {
@@ -352,12 +350,16 @@ class ConverterFragment : Fragment() {
         })
     }
 
-    private fun ConverterViewModel.collectFlowsWhenStarted() {
-        collectWhenStarted(fromSelectedCurrency, ::onSelectedCurrencyChanged)
-        collectWhenStarted(fromCurrencyDropdownState, ::onDropdownStateChanged)
-        collectWhenStarted(modifyDivider, ::onDividerHeightChanged)
-        collectWhenStarted(countries, ::onCountriesUpdated)
-        collectWhenStarted(searcherState, ::onSearcherStateChanged)
+    private fun collectFlows() {
+        viewModel.run {
+            collectWhenStarted(fromSelectedCurrency, ::onSelectedCurrencyChanged)
+            collectWhenStarted(fromCurrencyDropdownState, ::onDropdownStateChanged)
+            collectWhenStarted(showResetButton, ::showResetButton)
+            collectWhenStarted(resetSearcher, { resetSearcher() }, false)
+            collectWhenStarted(modifyDivider, ::onDividerHeightChanged)
+            collectWhenStarted(countries, ::onCountriesUpdated)
+            collectWhenStarted(searcherState, ::onSearcherStateChanged)
+        }
     }
 
     private fun onCountriesUpdated(countries: List<Country>) {
@@ -409,10 +411,12 @@ class ConverterFragment : Fragment() {
     }
 
     private fun getAnimationListener(
-        view: TextView,
+        view: View,
         fadinIn: Boolean
     ) = object : Animation.AnimationListener {
         override fun onAnimationStart(animation: Animation?) {
+            if (!fadinIn && view is ImageButton) view.isEnabled = false
+            else if (view is ImageButton) view.isEnabled = true
         }
 
         override fun onAnimationEnd(animation: Animation?) {
@@ -440,6 +444,22 @@ class ConverterFragment : Fragment() {
         }
         COLLAPSED -> {
         } // When collapsed do nothing
+    }
+
+    private fun showResetButton(showButton: Boolean) {
+        binding.fromCurrencyChooser.resetSearcher.run {
+            if (showButton) {
+                fadeIn.setAnimationListener(getAnimationListener(this, true))
+                startAnimation(fadeIn)
+            } else {
+                fadeOut.setAnimationListener(getAnimationListener(this, false))
+                startAnimation(fadeOut)
+            }
+        }
+    }
+
+    private fun resetSearcher() {
+        binding.fromCurrencyChooser.currenciesSearcher.setText("")
     }
 
     private fun onDividerHeightChanged(values: Pair<Float, Int>) {

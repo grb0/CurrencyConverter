@@ -1,4 +1,4 @@
 <ripple
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="@color/ripple"
-    android:radius="@dimen/action_btn_ripple" />
+    android:radius="@dimen/reset_searcher_ripple" />

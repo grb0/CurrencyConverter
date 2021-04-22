@@ -9,6 +9,7 @@ import ba.grbo.currencyconverter.data.models.preferences.FilterBy
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.UNFOCUSED
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.UNFOCUSING
+import ba.grbo.currencyconverter.util.SingleSharedFlow
 import ba.grbo.currencyconverter.util.toSearcherState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -45,6 +46,14 @@ class ConverterViewModel @Inject constructor(
     val modifyDivider: StateFlow<Pair<Float, Int>>
         get() = _modifyDivider
 
+    private val _showResetButton = MutableStateFlow(false)
+    val showResetButton: StateFlow<Boolean>
+        get() = _showResetButton
+
+    private val _resetSearcher = SingleSharedFlow<Unit>()
+    val resetSearcher: SharedFlow<Unit>
+        get() = _resetSearcher
+
     private val onTextChanged = MutableStateFlow("")
 
     private val filter: (Currency, String) -> Boolean
@@ -66,7 +75,7 @@ class ConverterViewModel @Inject constructor(
     init {
         filter = initializeFilter(filterBy)
         onTextChanged
-            .debounce(500)
+            .debounce(250)
             .onEach { filterCountries(it) }
             .flowOn(Dispatchers.Default)
             .launchIn(viewModelScope)
@@ -90,6 +99,10 @@ class ConverterViewModel @Inject constructor(
 
     fun onTitleClicked() {
         mutateDropdown()
+    }
+
+    fun onResetSearcherClicked() {
+        _resetSearcher.tryEmit(Unit)
     }
 
     fun onCurrencyClicked(country: Country) {
@@ -139,7 +152,13 @@ class ConverterViewModel @Inject constructor(
     }
 
     fun onTextChanged(query: String) {
-        onTextChanged.value = query
+        if (query.isEmpty()) {
+            _countries.value = plainCountries
+            setResetButton(false)
+        } else {
+            setResetButton(true)
+            onTextChanged.value = query
+        }
     }
 
     fun onCountriesScrolled(topReached: Boolean) {
@@ -147,9 +166,12 @@ class ConverterViewModel @Inject constructor(
         else _modifyDivider.value = DIVIDER_MODIFIED_HEIGHT to R.drawable.divider_shadow
     }
 
+    private fun setResetButton(hasText: Boolean) {
+        _showResetButton.value = hasText
+    }
+
     private fun filterCountries(query: String) {
-        _countries.value = if (query.isEmpty()) plainCountries
-        else plainCountries.filter { filter(it.currency, query) }
+        _countries.value = plainCountries.filter { filter(it.currency, query) }
     }
 
     private fun mutateDropdown() {

@@ -119,24 +119,43 @@
                 android:orientation="vertical"
                 tools:listitem="@layout/dropdown_item">
 
-                <EditText
-                    android:id="@+id/currencies_searcher"
+                <RelativeLayout
+                    android:id="@+id/currencies_searcher_layout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/border_edit_text"
-                    android:ems="10"
-                    android:fontFamily="@font/roboto"
-                    android:hint="@string/search_hint"
-                    android:importantForAutofill="no"
-                    android:inputType="text|textNoSuggestions"
-                    android:paddingStart="8dp"
-                    android:paddingTop="12dp"
-                    android:paddingEnd="8dp"
-                    android:paddingBottom="12dp"
-                    android:textColor="@color/black"
-                    android:textCursorDrawable="@drawable/cursor_edit_text"
-                    android:textSize="16sp" />
+                    android:layout_height="wrap_content">
+
+                    <EditText
+                        android:id="@+id/currencies_searcher"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:background="@drawable/border_edit_text"
+                        android:ems="10"
+                        android:fontFamily="@font/roboto"
+                        android:hint="@string/search_hint"
+                        android:importantForAutofill="no"
+                        android:inputType="text|textNoSuggestions"
+                        android:paddingStart="8dp"
+                        android:paddingTop="12dp"
+                        android:paddingEnd="44dp"
+                        android:paddingBottom="12dp"
+                        android:textColor="@color/black"
+                        android:textCursorDrawable="@drawable/cursor_edit_text"
+                        android:textSize="16sp" />
+
+                    <ImageButton
+                        android:id="@+id/reset_searcher"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignTop="@id/currencies_searcher"
+                        android:layout_alignEnd="@id/currencies_searcher"
+                        android:layout_alignBottom="@id/currencies_searcher"
+                        android:background="@drawable/ripple_reset_searcher_btn"
+                        android:contentDescription="@string/close"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:src="@drawable/ic_close" />
+                </RelativeLayout>
 
                 <View
                     android:id="@+id/divider"
