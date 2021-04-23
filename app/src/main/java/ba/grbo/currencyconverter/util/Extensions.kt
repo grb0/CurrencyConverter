@@ -1,25 +1,42 @@
 package ba.grbo.currencyconverter.util
 
+import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.res.ColorStateList
 import android.content.res.Resources
+import android.graphics.Typeface
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
+import android.util.Property
 import android.util.TypedValue
+import android.view.View
 import android.view.animation.LinearInterpolator
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.annotation.AttrRes
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import ba.grbo.currencyconverter.R
-import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.FOCUSING
-import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.UNFOCUSING
+import ba.grbo.currencyconverter.ui.fragments.ConverterFragment
+import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown
+import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState
+import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Focusing
+import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocusing
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import java.util.*
+import kotlin.math.roundToInt
 
 fun Context.getColorFromAttribute(@AttrRes id: Int): Int {
     val typedValue = TypedValue()
@@ -33,7 +50,9 @@ fun Float.toPixels(resources: Resources) = TypedValue.applyDimension(
     resources.displayMetrics
 )
 
-fun Boolean.toSearcherState() = if (this) FOCUSING else UNFOCUSING
+fun Boolean.toSearcherState(dropdown: Dropdown): SearcherState {
+    return if (this) Focusing(dropdown) else Unfocusing(dropdown)
+}
 
 private fun <T> Flow<T>.collect(
     lifecycle: Lifecycle,
@@ -98,3 +117,192 @@ fun <T> SingleSharedFlow() = MutableSharedFlow<T>(
     onBufferOverflow = BufferOverflow.DROP_OLDEST,
     extraBufferCapacity = 1
 )
+
+fun TextView.getBackgroundAnimator() = ObjectAnimator.ofArgb(
+    this,
+    "backgroundColor",
+    ConverterFragment.Colors.WHITE,
+    ConverterFragment.Colors.LIGHT_GRAY
+).setUp(resources)
+
+fun TextView.getAnimator(): ObjectAnimator {
+    val backgroundColorProperty = PropertyValuesHolder.ofObject(
+        "backgroundColor",
+        { fraction, startValue, endValue ->
+            ArgbEvaluator().evaluate(fraction, startValue, endValue) as Int
+        },
+        ConverterFragment.Colors.WHITE,
+        ConverterFragment.Colors.LIGHT_GRAY
+    )
+
+    val textColorProperty = PropertyValuesHolder.ofObject(
+        "textColor",
+        { fraction, startValue, endValue ->
+            ArgbEvaluator().evaluate(fraction, startValue, endValue) as Int
+        },
+        ConverterFragment.Colors.BORDER,
+        ConverterFragment.Colors.PRIMARY_VARIANT
+    )
+
+    val typeFaceProperty = PropertyValuesHolder.ofObject(
+        Property.of(TextView::class.java, Typeface::class.java, "typeface"),
+        { fraction, startValue, endValue ->
+            if (fraction < 0.33) startValue
+            else if (fraction > 0.33 && fraction < 0.66) ResourcesCompat.getFont(
+                context, R.font.roboto_medium
+            ) else endValue
+        },
+        ResourcesCompat.getFont(context, R.font.roboto),
+        ResourcesCompat.getFont(context, R.font.roboto_bold)
+    )
+
+    return ObjectAnimator.ofPropertyValuesHolder(
+        this,
+        backgroundColorProperty,
+        textColorProperty,
+        typeFaceProperty
+    ).setUp(resources)
+}
+
+fun LinearLayout.getBackgroundAnimator() = ObjectAnimator.ofObject(
+    this,
+    Property.of(LinearLayout::class.java, Drawable::class.java, "background"),
+    { fraction, _, _ ->
+        val colorEvaluator = ArgbEvaluator()
+        val backgroundColor = colorEvaluator.evaluate(
+            fraction,
+            ConverterFragment.Colors.WHITE,
+            ConverterFragment.Colors.LIGHT_GRAY
+        ) as Int
+
+        val drawable = getGradientDrawable(backgroundColor = backgroundColor)
+        drawable
+    },
+    getGradientDrawable(),
+    getGradientDrawable(backgroundColor = ConverterFragment.Colors.LIGHT_GRAY)
+).setUp(resources)
+
+fun LinearLayout.getAnimator() = ObjectAnimator.ofObject(
+    this,
+    Property.of(LinearLayout::class.java, Drawable::class.java, "background"),
+    { fraction, _, _ ->
+        val colorEvaluator = ArgbEvaluator()
+        val strokeColor = colorEvaluator.evaluate(
+            fraction,
+            ConverterFragment.Colors.BORDER,
+            ConverterFragment.Colors.PRIMARY_VARIANT
+        ) as Int
+        val backgroundColor = colorEvaluator.evaluate(
+            fraction,
+            ConverterFragment.Colors.WHITE,
+            ConverterFragment.Colors.LIGHT_GRAY
+        ) as Int
+        val strokeWidth = 1f + (fraction * (2f - 1f))
+        val drawable = getGradientDrawable(
+            strokeWidth,
+            strokeColor,
+            backgroundColor
+        )
+        drawable
+    },
+    getGradientDrawable(),
+    getGradientDrawable(
+        2f,
+        ConverterFragment.Colors.PRIMARY_VARIANT,
+        ConverterFragment.Colors.LIGHT_GRAY
+    )
+).setUp(resources)
+
+fun ConstraintLayout.getAnimator() = ObjectAnimator.ofArgb(
+    this,
+    "backgroundColor",
+    ConverterFragment.Colors.WHITE,
+    ConverterFragment.Colors.LIGHT_GRAY
+).setUp(resources)
+
+fun TextView.getCurrencyAnimator(): ObjectAnimator {
+    val alphaType = PropertyValuesHolder.ofObject(
+        "placeholder",
+        { fraction, startValue, endValue ->
+            val alpha = (255 + (fraction * (128 - 255))).roundToInt()
+            val drawable = compoundDrawables[0]?.mutate()?.constantState?.newDrawable()?.apply {
+                this.alpha = alpha
+            }
+            setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null)
+            alpha
+        },
+        255,
+        128
+    )
+
+    val colorType = PropertyValuesHolder.ofObject(
+        "textColor",
+        { fraction, startValue, endValue ->
+            ArgbEvaluator().evaluate(fraction, startValue, endValue) as Int
+        },
+        ConverterFragment.Colors.BLACK,
+        ConverterFragment.Colors.BORDER
+    )
+
+    return ObjectAnimator.ofPropertyValuesHolder(
+        this,
+        alphaType,
+        colorType
+    ).setUp(resources)
+}
+
+fun ImageButton.getBackgroundColorAnimator(): ObjectAnimator {
+    val imageTintListProperty = PropertyValuesHolder.ofObject(
+        "imageTintList",
+        { fraction, _, _ ->
+            val interpolatedColor = ArgbEvaluator().evaluate(
+                fraction,
+                ConverterFragment.Colors.CONTROL_NORMAL,
+                ConverterFragment.Colors.DIVIDER
+            ) as Int
+            ColorStateList.valueOf(interpolatedColor)
+        },
+        ColorStateList.valueOf(ConverterFragment.Colors.CONTROL_NORMAL),
+        ColorStateList.valueOf(ConverterFragment.Colors.DIVIDER)
+    )
+
+    return ObjectAnimator.ofPropertyValuesHolder(
+        this,
+        imageTintListProperty,
+    ).setUp(resources)
+}
+
+fun ImageButton.getAnimator(): ObjectAnimator {
+    val imageTintListProperty = PropertyValuesHolder.ofObject(
+        "imageTintList",
+        { fraction, _, _ ->
+            val interpolatedColor = ArgbEvaluator().evaluate(
+                fraction,
+                ConverterFragment.Colors.CONTROL_NORMAL,
+                ConverterFragment.Colors.PRIMARY_VARIANT
+            ) as Int
+            ColorStateList.valueOf(interpolatedColor)
+        },
+        ColorStateList.valueOf(ConverterFragment.Colors.CONTROL_NORMAL),
+        ColorStateList.valueOf(ConverterFragment.Colors.PRIMARY_VARIANT)
+    )
+
+    val rotation = PropertyValuesHolder.ofFloat(View.ROTATION, 0f, 180f)
+
+    return ObjectAnimator.ofPropertyValuesHolder(
+        this,
+        imageTintListProperty,
+        rotation
+    ).setUp(resources)
+}
+
+fun LinearLayout.getGradientDrawable(
+    strokeWidth: Float = 1f,
+    strokeColor: Int = ConverterFragment.Colors.BORDER,
+    backgroundColor: Int = ConverterFragment.Colors.WHITE
+) = GradientDrawable().apply {
+    shape = GradientDrawable.RECTANGLE
+    setStroke(strokeWidth.toPixels(resources).roundToInt(), strokeColor)
+    setColor(backgroundColor)
+    cornerRadius = 5f.toPixels(resources)
+}

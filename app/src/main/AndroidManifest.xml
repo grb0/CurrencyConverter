@@ -12,6 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CurrencyConverter">
         <activity
+            android:windowSoftInputMode="adjustPan"
             android:name=".ui.activities.CurrencyConverterActivity"
             android:theme="@style/Theme.SplashScreen">
             <intent-filter>

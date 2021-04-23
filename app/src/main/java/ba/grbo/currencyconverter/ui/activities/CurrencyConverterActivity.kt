@@ -21,7 +21,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class CurrencyConverterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCurrencyConverterBinding
-    var onScreenTouched: ((event: MotionEvent) -> Pair<Boolean, Point>)? = null
+    var onScreenTouched: ((event: MotionEvent) -> Triple<Boolean, Point, Boolean>)? = null
 
     @Inject
     lateinit var language: Locale
@@ -39,8 +39,11 @@ class CurrencyConverterActivity : AppCompatActivity() {
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        if (ev.action == MotionEvent.ACTION_DOWN) onScreenTouched?.invoke(ev)
-        return super.dispatchTouchEvent(ev)
+        return if (ev.action == MotionEvent.ACTION_DOWN) {
+            val shouldConsume = onScreenTouched?.invoke(ev)?.third
+            if (shouldConsume == true) true
+            else super.dispatchTouchEvent(ev)
+        } else super.dispatchTouchEvent(ev)
     }
 
     private fun setUp() {
