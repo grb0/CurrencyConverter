@@ -5,5 +5,6 @@
     <dimen name="action_btn_ripple">24dp</dimen>
     <dimen name="reset_searcher_size">22dp</dimen>
     <dimen name="reset_searcher_ripple">20dp</dimen>
+    <dimen name="divider_height">1.4dp</dimen>
     <dimen name="logo_size">200dp</dimen>
 </resources>

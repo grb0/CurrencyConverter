@@ -462,11 +462,8 @@ class ConverterFragment : Fragment() {
         binding.fromCurrencyChooser.currenciesSearcher.setText("")
     }
 
-    private fun onDividerHeightChanged(values: Pair<Float, Int>) {
-        val (height, drawable) = values
-        val lP = binding.fromCurrencyChooser.divider.layoutParams as LinearLayout.LayoutParams
-        lP.height = height.toPixels(resources).roundToInt()
-        binding.fromCurrencyChooser.divider.layoutParams = lP
+    private fun onDividerHeightChanged(topReached: Boolean) {
+        val drawable = if (topReached) R.drawable.divider_top else R.drawable.divider_bottom
         binding.fromCurrencyChooser.divider.setBackgroundResource(drawable)
     }
 

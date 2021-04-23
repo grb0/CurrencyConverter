@@ -2,7 +2,6 @@ package ba.grbo.currencyconverter.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.data.models.Currency
 import ba.grbo.currencyconverter.data.models.preferences.FilterBy
@@ -42,8 +41,8 @@ class ConverterViewModel @Inject constructor(
     val searcherState: StateFlow<SearcherState>
         get() = _searcherState
 
-    private val _modifyDivider = MutableStateFlow(DIVIDER_START_HEIGHT to R.drawable.divider_shadow)
-    val modifyDivider: StateFlow<Pair<Float, Int>>
+    private val _modifyDivider = MutableStateFlow(true)
+    val modifyDivider: StateFlow<Boolean>
         get() = _modifyDivider
 
     private val _showResetButton = MutableStateFlow(false)
@@ -162,8 +161,7 @@ class ConverterViewModel @Inject constructor(
     }
 
     fun onCountriesScrolled(topReached: Boolean) {
-        if (topReached) _modifyDivider.value = DIVIDER_START_HEIGHT to R.drawable.divider_shadow
-        else _modifyDivider.value = DIVIDER_MODIFIED_HEIGHT to R.drawable.divider_shadow
+        _modifyDivider.value = topReached
     }
 
     private fun setResetButton(hasText: Boolean) {
