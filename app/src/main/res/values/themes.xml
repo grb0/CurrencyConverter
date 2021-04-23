@@ -17,6 +17,7 @@
         <item name="android:colorControlActivated">?colorPrimary
         </item> <!--Settings active switchs-->
         <item name="alertDialogTheme">@style/Theme.CurrencyConverter.AlertDialogStyle</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
 
     <style name="CustomPreferenceCategoryTitleTextStyle">
