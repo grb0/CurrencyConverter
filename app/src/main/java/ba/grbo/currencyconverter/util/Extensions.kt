@@ -1,5 +1,6 @@
 package ba.grbo.currencyconverter.util
 
+import android.animation.Animator
 import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
@@ -14,6 +15,7 @@ import android.os.Build
 import android.util.Property
 import android.util.TypedValue
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -27,6 +29,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.transition.TransitionValues
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.ui.fragments.ConverterFragment
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown
@@ -34,6 +37,7 @@ import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Focusing
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocusing
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.transition.MaterialFadeThrough
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import java.util.*
@@ -400,4 +404,18 @@ fun BottomNavigationView.getAnimator(
         itemIconTintListProperty,
         itemTextColorProperty
     ).setUp(resources)
+}
+
+fun getMaterialFadeThroughAnimator(viewGroup: ViewGroup, enter: Boolean): Animator {
+    return if (enter) MaterialFadeThrough().onAppear(
+        viewGroup,
+        viewGroup,
+        TransitionValues(viewGroup),
+        TransitionValues(viewGroup)
+    ) else MaterialFadeThrough().onDisappear(
+        viewGroup,
+        viewGroup,
+        TransitionValues(viewGroup),
+        TransitionValues(viewGroup)
+    )
 }

@@ -1,6 +1,8 @@
 package ba.grbo.currencyconverter.ui.fragments
 
+import android.animation.Animator
 import android.os.Bundle
+import android.view.ViewGroup
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import ba.grbo.currencyconverter.CurrencyConverterApplication
@@ -9,6 +11,7 @@ import ba.grbo.currencyconverter.data.models.Currency
 import ba.grbo.currencyconverter.data.models.preferences.FilterBy
 import ba.grbo.currencyconverter.data.models.preferences.Language
 import ba.grbo.currencyconverter.data.models.preferences.Theme
+import ba.grbo.currencyconverter.util.getMaterialFadeThroughAnimator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -36,6 +39,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
     override fun onResume() {
         super.onResume()
         initializeValues()
+    }
+
+    override fun onCreateAnimator(transit: Int, enter: Boolean, nextAnim: Int): Animator {
+        return getMaterialFadeThroughAnimator(view as ViewGroup, enter)
     }
 
     private fun observeLanguage() {

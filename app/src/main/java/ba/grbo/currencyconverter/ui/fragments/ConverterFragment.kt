@@ -1,5 +1,6 @@
 package ba.grbo.currencyconverter.ui.fragments
 
+import android.animation.Animator
 import android.animation.LayoutTransition
 import android.animation.LayoutTransition.*
 import android.animation.ObjectAnimator
@@ -119,6 +120,10 @@ class ConverterFragment : Fragment() {
         setListeners()
         collectFlows()
         return binding.root
+    }
+
+    override fun onCreateAnimator(transit: Int, enter: Boolean, nextAnim: Int): Animator {
+        return getMaterialFadeThroughAnimator(binding.converterLayout, enter)
     }
 
     private fun initializeFastScroller(recyclerView: RecyclerView) {
