@@ -14,6 +14,12 @@
             android:title="@string/title_auto_hide_scrollbar"
             app:icon="@drawable/ic_hide" />
 
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/key_extend_chooser_landscape"
+            android:title="@string/title_extend_chooser_landscape"
+            app:icon="@drawable/ic_extend" />
+
         <ListPreference
             android:defaultValue="@string/english_value"
             android:entries="@array/language_names"

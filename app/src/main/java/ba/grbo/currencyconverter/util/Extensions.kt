@@ -419,3 +419,15 @@ fun getMaterialFadeThroughAnimator(viewGroup: ViewGroup, enter: Boolean): Animat
         TransitionValues(viewGroup)
     )
 }
+
+fun View.setMargins(size: Float) {
+    if (layoutParams is ViewGroup.MarginLayoutParams) {
+        val params = layoutParams as ViewGroup.MarginLayoutParams
+        val margin = size.toPixels(resources).roundToInt()
+        params.leftMargin = margin
+        params.topMargin = margin
+        params.rightMargin = margin
+        params.bottomMargin = margin
+        requestLayout()
+    }
+}

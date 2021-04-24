@@ -36,6 +36,8 @@ import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.data.models.Currency
 import ba.grbo.currencyconverter.databinding.FragmentConverterBinding
+import ba.grbo.currencyconverter.di.AutohideScrollbar
+import ba.grbo.currencyconverter.di.ExtendChooserLandscape
 import ba.grbo.currencyconverter.ui.activities.CurrencyConverterActivity
 import ba.grbo.currencyconverter.ui.adapters.CountryAdapter
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel
@@ -60,8 +62,14 @@ class ConverterFragment : Fragment() {
     lateinit var uiName: Currency.UiName
 
     @Inject
+    @AutohideScrollbar
     @JvmField
     var autohideScroller: Boolean = false
+
+    @Inject
+    @ExtendChooserLandscape
+    @JvmField
+    var extendChooserInLandscape: Boolean = false
 
     private lateinit var fromDropdownActionAnimator: ObjectAnimator
     private lateinit var fromDropdownTitleAnimator: ObjectAnimator
@@ -613,31 +621,61 @@ class ConverterFragment : Fragment() {
     private fun modifyCurrenciesCardPosition(viewId: Int) {
         ConstraintSet().apply {
             clone(binding.converterLayout)
-            connect(
-                binding.currenciesCard.id,
-                ConstraintSet.TOP,
-                viewId,
-                ConstraintSet.BOTTOM
-            )
-            connect(
-                binding.currenciesCard.id,
-                ConstraintSet.BOTTOM,
-                binding.converterLayout.id,
-                ConstraintSet.BOTTOM
-            )
-            connect(
-                binding.currenciesCard.id,
-                ConstraintSet.START,
-                viewId,
-                ConstraintSet.START
-            )
-            connect(
-                binding.currenciesCard.id,
-                ConstraintSet.END,
-                viewId,
-                ConstraintSet.END
-            )
-            applyTo(binding.converterLayout)
+
+            if (extendChooserInLandscape && orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                connect(
+                    binding.currenciesCard.id,
+                    ConstraintSet.TOP,
+                    binding.converterLayout.id,
+                    ConstraintSet.TOP
+                )
+                connect(
+                    binding.currenciesCard.id,
+                    ConstraintSet.BOTTOM,
+                    binding.converterLayout.id,
+                    ConstraintSet.BOTTOM
+                )
+                connect(
+                    binding.currenciesCard.id,
+                    ConstraintSet.START,
+                    binding.converterLayout.id,
+                    ConstraintSet.START
+                )
+                connect(
+                    binding.currenciesCard.id,
+                    ConstraintSet.END,
+                    binding.converterLayout.id,
+                    ConstraintSet.END
+                )
+                applyTo(binding.converterLayout)
+                binding.currenciesCard.setMargins(8f)
+            } else {
+                connect(
+                    binding.currenciesCard.id,
+                    ConstraintSet.TOP,
+                    viewId,
+                    ConstraintSet.BOTTOM
+                )
+                connect(
+                    binding.currenciesCard.id,
+                    ConstraintSet.BOTTOM,
+                    binding.converterLayout.id,
+                    ConstraintSet.BOTTOM
+                )
+                connect(
+                    binding.currenciesCard.id,
+                    ConstraintSet.START,
+                    viewId,
+                    ConstraintSet.START
+                )
+                connect(
+                    binding.currenciesCard.id,
+                    ConstraintSet.END,
+                    viewId,
+                    ConstraintSet.END
+                )
+                applyTo(binding.converterLayout)
+            }
         }
     }
 

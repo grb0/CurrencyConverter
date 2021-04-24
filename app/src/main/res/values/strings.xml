@@ -11,6 +11,8 @@
     <string name="key_miscellaneous" translatable="false">miscellaneous</string>
     <string name="key_auto_hide_scrollbar" translatable="false">autohide_scrollbar</string>
     <string name="title_auto_hide_scrollbar">Auto-hide scrollbar</string>
+    <string name="key_extend_chooser_landscape" translatable="false">extend_chooser_landscape</string>
+    <string name="title_extend_chooser_landscape">Extend chooser in landscape mode</string>
     <string name="key_theme" translatable="false">theme</string>
     <string name="title_theme">Theme</string>
     <string name="key_language" translatable="false">language</string>
