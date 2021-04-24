@@ -9,11 +9,13 @@ import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocused
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocusing
+import ba.grbo.currencyconverter.util.SharedStateLikeFlow
 import ba.grbo.currencyconverter.util.SingleSharedFlow
 import ba.grbo.currencyconverter.util.toSearcherState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,8 +47,8 @@ class ConverterViewModel @Inject constructor(
     val modifyDivider: StateFlow<Boolean>
         get() = _modifyDivider
 
-    private val _showResetButton = MutableStateFlow(false)
-    val showResetButton: StateFlow<Boolean>
+    private val _showResetButton = SharedStateLikeFlow<Boolean>()
+    val showResetButton: SharedFlow<Boolean>
         get() = _showResetButton
 
     private val _resetSearcher = SingleSharedFlow<Unit>()
@@ -120,6 +122,15 @@ class ConverterViewModel @Inject constructor(
         mutateDropdown(TO)
     }
 
+    fun onSwapClicked() {
+        val fromCountry = _fromSelectedCurrency.value
+        val toCountry = _toSelectedCurrency.value
+        viewModelScope.launch {
+            launch { _fromSelectedCurrency.value = toCountry }
+            launch { _toSelectedCurrency.value = fromCountry }
+        }
+    }
+
     fun onResetSearcherClicked() {
         _resetSearcher.tryEmit(Unit)
     }
@@ -183,7 +194,7 @@ class ConverterViewModel @Inject constructor(
     }
 
     private fun setResetButton(hasText: Boolean) {
-        _showResetButton.value = hasText
+        _showResetButton.tryEmit(hasText)
     }
 
     private fun filterCountries(query: String) {

@@ -90,12 +90,17 @@ class ConverterFragment : Fragment() {
     private lateinit var toDropdownActionAnimator: ObjectAnimator
     private lateinit var toDropdownTitleAnimator: ObjectAnimator
     private lateinit var toCurrencyLayoutAnimator: ObjectAnimator
+    private lateinit var swapAnimator: ObjectAnimator
 
     private lateinit var converterLayoutAnimator: ObjectAnimator
     private lateinit var bottomNavigationAnimator: ObjectAnimator
 
-    private lateinit var fadeIn: AlphaAnimation
-    private lateinit var fadeOut: AlphaAnimation
+    private lateinit var fromFadeIn: AlphaAnimation
+    private lateinit var fromFadeOut: AlphaAnimation
+
+    private lateinit var toFadeIn: AlphaAnimation
+    private lateinit var toFadeOut: AlphaAnimation
+
     private var orientation = Int.MIN_VALUE
     private var recyclerViewHeight = Int.MIN_VALUE
 
@@ -156,15 +161,11 @@ class ConverterFragment : Fragment() {
     }
 
     private fun initializeAnimations() {
-        fadeIn = AlphaAnimation(0f, 1f).apply {
-            interpolator = LinearInterpolator()
-            duration = resources.getInteger(R.integer.anim_time).toLong()
-        }
+        fromFadeIn = AlphaAnimation(0f, 1f).setUp(resources)
+        fromFadeOut = AlphaAnimation(1f, 0f).setUp(resources)
 
-        fadeOut = AlphaAnimation(1f, 0f).apply {
-            interpolator = LinearInterpolator()
-            duration = resources.getInteger(R.integer.anim_time).toLong()
-        }
+        toFadeIn = AlphaAnimation(0f, 1f).setUp(resources)
+        toFadeOut = AlphaAnimation(1f, 0f).setUp(resources)
     }
 
     private fun initializeAnimators() {
@@ -174,6 +175,7 @@ class ConverterFragment : Fragment() {
         initializeCurrencyAnimators()
         initializeConverterLayoutAnimator()
         initializeBottomNavigationAnimator()
+        initializeSwapAnimator()
     }
 
     private fun setUpConverterLayoutTransition() {
@@ -244,6 +246,10 @@ class ConverterFragment : Fragment() {
             (requireActivity() as CurrencyConverterActivity).getBottomNavigationAnimator()
     }
 
+    private fun initializeSwapAnimator() {
+        swapAnimator = binding.swap.getBackgroundColorAnimator()
+    }
+
     private fun initializeColors() {
         Colors.WHITE = getColorFromResource(R.color.white)
         Colors.BLACK = getColorFromResource(R.color.black)
@@ -279,6 +285,7 @@ class ConverterFragment : Fragment() {
         }
 
         binding.run {
+            swap.setOnClickListener { viewModel.onSwapClicked() }
             resetSearcher.setOnClickListener { viewModel.onResetSearcherClicked() }
             currenciesSearcher.run {
                 setOnFocusChangeListener { _, hasFocus ->
@@ -361,41 +368,49 @@ class ConverterFragment : Fragment() {
         if (from) onSelectedCurrencyChanged(
             country,
             binding.fromCurrencyChooser.currencyMain,
-            binding.fromCurrencyChooser.currencySecondary
+            binding.fromCurrencyChooser.currencySecondary,
+            fromFadeIn,
+            fromFadeOut
         ) else onSelectedCurrencyChanged(
             country,
             binding.toCurrencyChooser.currencyMain,
-            binding.toCurrencyChooser.currencySecondary
+            binding.toCurrencyChooser.currencySecondary,
+            toFadeIn,
+            toFadeOut
         )
     }
 
     private fun onSelectedCurrencyChanged(
         country: Country,
         main: TextView,
-        secondary: TextView
+        secondary: TextView,
+        fadeIn: AlphaAnimation,
+        fadeOut: AlphaAnimation
     ) {
         when {
             main.text.isEmpty() -> {
                 main.text = country.currency.getUiName(uiName)
                 main.setCompoundDrawablesWithIntrinsicBounds(country.flag, null, null, null)
             }
-            secondary.isVisible -> changeCurrencyState(main, secondary, country)
-            main.isVisible -> changeCurrencyState(secondary, main, country)
+            secondary.isVisible -> changeCurrencyState(country, main, secondary, fadeIn, fadeOut)
+            main.isVisible -> changeCurrencyState(country, secondary, main, fadeIn, fadeOut)
         }
     }
 
     private fun changeCurrencyState(
+        country: Country,
         fadedIn: TextView,
         fadedOut: TextView,
-        country: Country
+        fadeIn: AlphaAnimation,
+        fadeOut: AlphaAnimation
     ) {
         fadedIn.run {
             text = country.currency.getUiName(uiName)
             setCompoundDrawablesWithIntrinsicBounds(country.flag, null, null, null)
         }
 
-        fadeIn.setAnimationListener(getAnimationListener(fadedIn, true))
-        fadeOut.setAnimationListener(getAnimationListener(fadedOut, false))
+        fadeIn.setAnimationListener(getAnimationListener(fadedIn, true, fadeIn, fadeOut))
+        fadeOut.setAnimationListener(getAnimationListener(fadedOut, false, fadeIn, fadeOut))
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             launch { fadedIn.startAnimation(fadeIn) }
@@ -405,7 +420,9 @@ class ConverterFragment : Fragment() {
 
     private fun getAnimationListener(
         view: View,
-        fadinIn: Boolean
+        fadinIn: Boolean,
+        fadeIn: AlphaAnimation,
+        fadeOut: AlphaAnimation
     ) = object : Animation.AnimationListener {
         override fun onAnimationStart(animation: Animation?) {
             if (!fadinIn && view is ImageButton) view.isEnabled = false
@@ -440,15 +457,23 @@ class ConverterFragment : Fragment() {
     }
 
     private fun showResetButton(showButton: Boolean) {
-        binding.resetSearcher.run {
-            if (showButton) {
-                fadeIn.setAnimationListener(getAnimationListener(this, true))
-                startAnimation(fadeIn)
-            } else {
-                fadeOut.setAnimationListener(getAnimationListener(this, false))
-                startAnimation(fadeOut)
-            }
-        }
+        if (showButton) setAnimationListenerAndStartAnimation(fromFadeIn, true)
+        else setAnimationListenerAndStartAnimation(fromFadeOut, false)
+    }
+
+    private fun setAnimationListenerAndStartAnimation(
+        animation: AlphaAnimation,
+        fadinIn: Boolean
+    ) {
+        animation.setAnimationListener(
+            getAnimationListener(
+                binding.resetSearcher,
+                fadinIn,
+                fromFadeIn,
+                fromFadeOut
+            )
+        )
+        binding.resetSearcher.startAnimation(animation)
     }
 
     private fun resetSearcher() {
@@ -549,6 +574,7 @@ class ConverterFragment : Fragment() {
             launch { startObjectAnimator(fromToCurrencyAnimatorSecondary) }
             launch { startObjectAnimator(fromToDropdownActionAnimator) }
             launch { startObjectAnimator(bottomNavigationAnimator) }
+            launch { startObjectAnimator(swapAnimator) }
         }
     }
 
@@ -564,6 +590,7 @@ class ConverterFragment : Fragment() {
             launch { startObjectAnimator(toFromCurrencyAnimatorSecondary) }
             launch { startObjectAnimator(toFromDropdownActionAnimator) }
             launch { startObjectAnimator(bottomNavigationAnimator) }
+            launch { startObjectAnimator(swapAnimator) }
         }
     }
 
@@ -584,6 +611,7 @@ class ConverterFragment : Fragment() {
             launch { reverseObjectAnimator(fromToCurrencyAnimatorSecondary) }
             launch { reverseObjectAnimator(fromToDropdownActionAnimator) }
             launch { reverseObjectAnimator(bottomNavigationAnimator) }
+            launch { reverseObjectAnimator(swapAnimator) }
         }
     }
 
@@ -599,6 +627,7 @@ class ConverterFragment : Fragment() {
             launch { reverseObjectAnimator(toFromCurrencyAnimatorSecondary) }
             launch { reverseObjectAnimator(toFromDropdownActionAnimator) }
             launch { reverseObjectAnimator(bottomNavigationAnimator) }
+            launch { reverseObjectAnimator(swapAnimator) }
         }
     }
 

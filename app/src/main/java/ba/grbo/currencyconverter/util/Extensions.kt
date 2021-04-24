@@ -16,6 +16,7 @@ import android.util.Property
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
 import android.view.animation.LinearInterpolator
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -104,6 +105,12 @@ fun ObjectAnimator.setUp(resources: Resources): ObjectAnimator {
     return this
 }
 
+fun AlphaAnimation.setUp(resources: Resources): AlphaAnimation {
+    interpolator = LinearInterpolator()
+    duration = resources.getInteger(R.integer.anim_time).toLong()
+    return this
+}
+
 fun Context.updateLocale(language: Locale): ContextWrapper {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
         resources.configuration.setLocale(language)
@@ -121,6 +128,16 @@ fun Context.updateLocale(language: Locale): ContextWrapper {
 fun <T> SingleSharedFlow() = MutableSharedFlow<T>(
     onBufferOverflow = BufferOverflow.DROP_OLDEST,
     extraBufferCapacity = 1
+)
+
+val <T> SharedFlow<T>.value
+    get() = if (replayCache.isNotEmpty()) replayCache[0] else null
+
+// StateFlow imitation without an initial value, so we avoid null as an initial value
+@Suppress("FunctionName", "UNCHECKED_CAST")
+fun <T> SharedStateLikeFlow() = MutableSharedFlow<T>(
+    replay = 1,
+    onBufferOverflow = BufferOverflow.DROP_OLDEST
 )
 
 fun TextView.getBackgroundAnimator() = ObjectAnimator.ofArgb(
@@ -228,7 +245,7 @@ fun ConstraintLayout.getAnimator() = ObjectAnimator.ofArgb(
 fun TextView.getCurrencyAnimator(): ObjectAnimator {
     val alphaType = PropertyValuesHolder.ofObject(
         "placeholder",
-        { fraction, startValue, endValue ->
+        { fraction, _, _ ->
             val alpha = (255 + (fraction * (128 - 255))).roundToInt()
             val drawable = compoundDrawables[0]?.mutate()?.constantState?.newDrawable()?.apply {
                 this.alpha = alpha

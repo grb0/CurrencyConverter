@@ -22,12 +22,10 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0"
             app:title="@{`From`}" />
 
         <include
@@ -35,10 +33,9 @@
             layout="@layout/dropdown_currency_chooser"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="@+id/from_currency_chooser"
             app:layout_constraintStart_toStartOf="@+id/from_currency_chooser"
-            app:layout_constraintTop_toBottomOf="@id/from_currency_chooser"
+            app:layout_constraintTop_toBottomOf="@+id/swap"
             app:title="@{`To`}"
             tools:visibility="invisible" />
 
@@ -55,7 +52,7 @@
             app:layout_constraintStart_toStartOf="@+id/from_currency_chooser"
             app:layout_constraintTop_toBottomOf="@+id/from_currency_chooser"
             app:layout_constraintVertical_bias="0.0"
-            tools:visibility="visible">
+            tools:visibility="gone">
 
 
             <LinearLayout
@@ -92,6 +89,7 @@
 
                     <ImageButton
                         android:id="@+id/reset_searcher"
+                        android:visibility="invisible"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignTop="@id/currencies_searcher"
@@ -119,6 +117,19 @@
                     tools:listitem="@layout/dropdown_item" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
+
+        <ImageButton
+            android:id="@+id/swap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/ripple_action_btn"
+            android:contentDescription="@string/swap_arrows"
+            android:padding="10dp"
+            android:src="@drawable/ic_swap_vertical"
+            app:layout_constraintEnd_toEndOf="@+id/from_currency_chooser"
+            app:layout_constraintStart_toStartOf="@+id/from_currency_chooser"
+            app:layout_constraintTop_toBottomOf="@+id/from_currency_chooser" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
