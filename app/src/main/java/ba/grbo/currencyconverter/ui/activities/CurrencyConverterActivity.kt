@@ -1,6 +1,7 @@
 package ba.grbo.currencyconverter.ui.activities
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Point
 import android.os.Bundle
 import android.view.MotionEvent
@@ -13,6 +14,7 @@ import androidx.navigation.ui.setupWithNavController
 import ba.grbo.currencyconverter.CurrencyConverterApplication
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.databinding.ActivityCurrencyConverterBinding
+import ba.grbo.currencyconverter.util.getAnimator
 import ba.grbo.currencyconverter.util.updateLocale
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
@@ -22,6 +24,8 @@ import javax.inject.Inject
 class CurrencyConverterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCurrencyConverterBinding
     var onScreenTouched: ((event: MotionEvent) -> Triple<Boolean, Point, Boolean>)? = null
+    private lateinit var iconColorStateList: ColorStateList
+    private lateinit var textColorStateList: ColorStateList
 
     @Inject
     lateinit var language: Locale
@@ -46,7 +50,14 @@ class CurrencyConverterActivity : AppCompatActivity() {
         } else super.dispatchTouchEvent(ev)
     }
 
+    private fun initColorStates() {
+        iconColorStateList = binding.bottomNavigation.itemIconTintList!!
+        textColorStateList = binding.bottomNavigation.itemTextColor!!
+    }
+
     private fun setUp() {
+        initColorStates()
+
         val fragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
         val navController = (fragment as NavHostFragment).navController
         val appBarConfiguration = AppBarConfiguration(
@@ -62,4 +73,9 @@ class CurrencyConverterActivity : AppCompatActivity() {
         // Setting empty one, to avoid fragment reinstantiating
         binding.bottomNavigation.setOnNavigationItemReselectedListener { }
     }
+
+    fun getBottomNavigationAnimator() = binding.bottomNavigation.getAnimator(
+        iconColorStateList,
+        textColorStateList
+    )
 }

@@ -83,6 +83,7 @@ class ConverterFragment : Fragment() {
     private lateinit var toCurrencyLayoutAnimator: ObjectAnimator
 
     private lateinit var converterLayoutAnimator: ObjectAnimator
+    private lateinit var bottomNavigationAnimator: ObjectAnimator
 
     private lateinit var fadeIn: AlphaAnimation
     private lateinit var fadeOut: AlphaAnimation
@@ -157,8 +158,9 @@ class ConverterFragment : Fragment() {
         initializeCurrencyLayoutAnimators()
         initializeDropdownTitleAnimators()
         initializeDropdownActionAnimators()
-        initializeConverterLayoutAnimator()
         initializeCurrencyAnimators()
+        initializeConverterLayoutAnimator()
+        initializeBottomNavigationAnimator()
     }
 
     private fun setUpConverterLayoutTransition() {
@@ -222,6 +224,11 @@ class ConverterFragment : Fragment() {
 
     private fun initializeConverterLayoutAnimator() {
         converterLayoutAnimator = binding.converterLayout.getAnimator()
+    }
+
+    private fun initializeBottomNavigationAnimator() {
+        bottomNavigationAnimator =
+            (requireActivity() as CurrencyConverterActivity).getBottomNavigationAnimator()
     }
 
     private fun initializeColors() {
@@ -528,6 +535,7 @@ class ConverterFragment : Fragment() {
             launch { startObjectAnimator(fromToCurrencyAnimatorMain) }
             launch { startObjectAnimator(fromToCurrencyAnimatorSecondary) }
             launch { startObjectAnimator(fromToDropdownActionAnimator) }
+            launch { startObjectAnimator(bottomNavigationAnimator) }
         }
     }
 
@@ -542,6 +550,7 @@ class ConverterFragment : Fragment() {
             launch { startObjectAnimator(toFromCurrencyAnimatorMain) }
             launch { startObjectAnimator(toFromCurrencyAnimatorSecondary) }
             launch { startObjectAnimator(toFromDropdownActionAnimator) }
+            launch { startObjectAnimator(bottomNavigationAnimator) }
         }
     }
 
@@ -561,6 +570,7 @@ class ConverterFragment : Fragment() {
             launch { reverseObjectAnimator(fromToCurrencyAnimatorMain) }
             launch { reverseObjectAnimator(fromToCurrencyAnimatorSecondary) }
             launch { reverseObjectAnimator(fromToDropdownActionAnimator) }
+            launch { reverseObjectAnimator(bottomNavigationAnimator) }
         }
     }
 
@@ -575,13 +585,11 @@ class ConverterFragment : Fragment() {
             launch { reverseObjectAnimator(toFromCurrencyAnimatorMain) }
             launch { reverseObjectAnimator(toFromCurrencyAnimatorSecondary) }
             launch { reverseObjectAnimator(toFromDropdownActionAnimator) }
+            launch { reverseObjectAnimator(bottomNavigationAnimator) }
         }
     }
 
     private fun expandDropdown(dropdown: Dropdown) {
-//        val drawable = binding.fromCurrencyChooser.currencyMain.compoundDrawables[0].mutate()
-//        drawable.alpha = 128
-//        binding.fromCurrencyChooser.currencyMain.compoundDrawables[0] = drawable
         startObjectAnimators(dropdown)
         showCurrenciesCard(dropdown)
     }
@@ -696,9 +704,6 @@ class ConverterFragment : Fragment() {
     }
 
     private fun collapseDropdown(dropdown: Dropdown) {
-//        val drawable = binding.fromCurrencyChooser.currencyMain.compoundDrawables[0].mutate()
-//        drawable.alpha = 255
-//        binding.fromCurrencyChooser.currencyMain.compoundDrawables[0] = drawable
         reverseObjectAnimators(dropdown)
         hideCurrenciesCard()
         viewModel.onDropdownCollapsed()

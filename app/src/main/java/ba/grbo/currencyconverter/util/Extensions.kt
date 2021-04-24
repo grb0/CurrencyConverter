@@ -33,6 +33,7 @@ import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Focusing
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocusing
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import java.util.*
@@ -305,4 +306,98 @@ fun LinearLayout.getGradientDrawable(
     setStroke(strokeWidth.toPixels(resources).roundToInt(), strokeColor)
     setColor(backgroundColor)
     cornerRadius = 5f.toPixels(resources)
+}
+
+fun BottomNavigationView.getAnimator(
+    startStateIcon: ColorStateList,
+    startStateText: ColorStateList
+): ObjectAnimator {
+    val cSL = ColorStateList(
+        arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf(-android.R.attr.checked)),
+        intArrayOf(ConverterFragment.Colors.BORDER, ConverterFragment.Colors.DIVIDER)
+    )
+
+    val backgroundColorProperty = PropertyValuesHolder.ofObject(
+        "backgroundColor",
+        { fraction, startValue, endValue ->
+            ArgbEvaluator().evaluate(fraction, startValue, endValue) as Int
+        },
+        ConverterFragment.Colors.PRIMARY,
+        ConverterFragment.Colors.DIVIDER
+    )
+
+    val itemIconTintListProperty = PropertyValuesHolder.ofObject(
+        "itemIconTintList",
+        { fraction, _, _ ->
+            val evaluator = ArgbEvaluator()
+            val checkedColor = evaluator.evaluate(
+                fraction,
+                startStateIcon.getColorForState(
+                    intArrayOf(android.R.attr.state_checked),
+                    ConverterFragment.Colors.PRIMARY_VARIANT
+                ),
+                ConverterFragment.Colors.BORDER,
+            ) as Int
+
+            val uncheckedColor = evaluator.evaluate(
+                fraction,
+                startStateIcon.getColorForState(
+                    intArrayOf(-android.R.attr.state_checked),
+                    ConverterFragment.Colors.PRIMARY_VARIANT
+                ),
+                ConverterFragment.Colors.DIVIDER
+            ) as Int
+
+            ColorStateList(
+                arrayOf(
+                    intArrayOf(android.R.attr.state_checked),
+                    intArrayOf(-android.R.attr.state_checked)
+                ),
+                intArrayOf(checkedColor, uncheckedColor)
+            )
+        },
+        startStateIcon,
+        cSL
+    )
+
+    val itemTextColorProperty = PropertyValuesHolder.ofObject(
+        "itemTextColor",
+        { fraction, _, _ ->
+            val evaluator = ArgbEvaluator()
+            val checkedColor = evaluator.evaluate(
+                fraction,
+                startStateText.getColorForState(
+                    intArrayOf(android.R.attr.state_checked),
+                    ConverterFragment.Colors.PRIMARY_VARIANT
+                ),
+                ConverterFragment.Colors.BORDER
+            ) as Int
+
+            val uncheckedColor = evaluator.evaluate(
+                fraction,
+                startStateText.getColorForState(
+                    intArrayOf(-android.R.attr.state_checked),
+                    ConverterFragment.Colors.PRIMARY_VARIANT
+                ),
+                ConverterFragment.Colors.DIVIDER,
+            ) as Int
+
+            ColorStateList(
+                arrayOf(
+                    intArrayOf(android.R.attr.state_checked),
+                    intArrayOf(-android.R.attr.state_checked)
+                ),
+                intArrayOf(checkedColor, uncheckedColor)
+            )
+        },
+        startStateText,
+        cSL
+    )
+
+    return ObjectAnimator.ofPropertyValuesHolder(
+        this,
+        backgroundColorProperty,
+        itemIconTintListProperty,
+        itemTextColorProperty
+    ).setUp(resources)
 }
