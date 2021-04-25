@@ -1,25 +1,59 @@
 package ba.grbo.currencyconverter.ui.viewmodels
 
 import androidx.annotation.IdRes
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import ba.grbo.currencyconverter.R
+import ba.grbo.currencyconverter.util.SharedStateLikeFlow
+import ba.grbo.currencyconverter.util.SingleSharedFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class CurrencyConverterViewModel @Inject constructor() : ViewModel() {
-    private val _actionBarTitleId = MutableStateFlow<@StringRes Int>(R.string.title_converter)
-    val actionBarTitleId: StateFlow<Int>
-        get() = _actionBarTitleId
+    private val _destinationId = SingleSharedFlow<@IdRes Int>()
+    val destinationId: SharedFlow<Int>
+        get() = _destinationId
 
-    fun onDestinationChanged(@IdRes destinationId: Int) {
-        when (destinationId) {
-            R.id.navigation_converter -> _actionBarTitleId.tryEmit(R.string.title_converter)
-            R.id.navigation_history -> _actionBarTitleId.tryEmit(R.string.title_history)
-            R.id.navigation_settings -> _actionBarTitleId.tryEmit(R.string.title_settings)
-        }
+    private val _selectedItemId = SharedStateLikeFlow<@IdRes Int>()
+    val selectedItemId: SharedFlow<Int>
+        get() = _selectedItemId
+
+    private val _actionBarTitle = SharedStateLikeFlow<String>()
+    val actionBarTitle: SharedFlow<String>
+        get() = _actionBarTitle
+
+    private val _exitApp = SingleSharedFlow<Unit>()
+    val exitApp: SharedFlow<Unit>
+        get() = _exitApp
+
+    private var currentDestinationId: Int = Int.MIN_VALUE
+
+    fun onNavigationItemSelected(@IdRes itemId: Int): Boolean {
+        _destinationId.tryEmit(
+            when (itemId) {
+                R.id.converterNavigation -> R.id.converterFragment
+                R.id.historyNavigation -> R.id.historyFragment
+                R.id.settingsNavigation -> R.id.settingsFragment
+                else -> throw IllegalArgumentException("Unknown itemId: $itemId")
+            }
+        )
+        return true
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onNavigationItemReselected(@IdRes itemId: Int) {
+        // Do nothing
+    }
+
+    fun onBackPressed() {
+        if (currentDestinationId != R.id.converterFragment) {
+            _selectedItemId.tryEmit(R.id.converterNavigation)
+        } else _exitApp.tryEmit(Unit)
+    }
+
+    fun onDestinationChanged(destinationId: Int, actionBarTitle: String) {
+        currentDestinationId = destinationId
+        _actionBarTitle.tryEmit(actionBarTitle)
     }
 }

@@ -304,7 +304,6 @@ class ConverterFragment : Fragment() {
         return ContextCompat.getColor(requireContext(), id)
     }
 
-    @Suppress("SameParameterValue")
     private fun getColorFromAttribute(@AttrRes id: Int): Int {
         return requireContext().getColorFromAttribute(id)
     }

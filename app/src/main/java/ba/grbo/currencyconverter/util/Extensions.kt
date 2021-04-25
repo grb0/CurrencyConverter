@@ -448,3 +448,15 @@ fun View.setMargins(size: Float) {
         requestLayout()
     }
 }
+
+fun getPropertyValueHolderForBackgroundColor(
+    startColor: Int,
+    endColor: Int
+): PropertyValuesHolder = PropertyValuesHolder.ofObject(
+    "backgroundColor",
+    { fraction, startValue, endValue ->
+        ArgbEvaluator().evaluate(fraction, startValue, endValue) as Int
+    },
+    startColor,
+    endColor
+)
