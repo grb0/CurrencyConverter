@@ -33,11 +33,12 @@
             layout="@layout/dropdown_currency_chooser"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="-4dp"
             app:layout_constraintEnd_toEndOf="@+id/from_currency_chooser"
             app:layout_constraintStart_toStartOf="@+id/from_currency_chooser"
-            app:layout_constraintTop_toBottomOf="@+id/swap"
+            app:layout_constraintTop_toBottomOf="@+id/dropdown_swapper"
             app:title="@{`To`}"
-            tools:visibility="invisible" />
+            tools:visibility="visible" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/currencies_card"
@@ -119,10 +120,10 @@
         </com.google.android.material.card.MaterialCardView>
 
         <ImageButton
-            android:id="@+id/swap"
+            android:id="@+id/dropdown_swapper"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:background="@drawable/ripple_action_btn"
             android:contentDescription="@string/swap_arrows"
             android:padding="10dp"

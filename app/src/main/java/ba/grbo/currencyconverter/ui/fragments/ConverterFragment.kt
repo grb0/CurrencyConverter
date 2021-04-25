@@ -247,7 +247,7 @@ class ConverterFragment : Fragment() {
     }
 
     private fun initializeSwapAnimator() {
-        swapAnimator = binding.swap.getBackgroundColorAnimator()
+        swapAnimator = binding.dropdownSwapper.getBackgroundColorAnimator()
     }
 
     private fun initializeColors() {
@@ -285,7 +285,7 @@ class ConverterFragment : Fragment() {
         }
 
         binding.run {
-            swap.setOnClickListener { viewModel.onSwapClicked() }
+            dropdownSwapper.setOnClickListener { viewModel.onDropdownSwapperClicked() }
             resetSearcher.setOnClickListener { viewModel.onResetSearcherClicked() }
             currenciesSearcher.run {
                 setOnFocusChangeListener { _, hasFocus ->
@@ -357,6 +357,7 @@ class ConverterFragment : Fragment() {
             collectWhenStarted(modifyDivider, ::onDividerHeightChanged)
             collectWhenStarted(countries, ::onCountriesUpdated)
             collectWhenStarted(searcherState, ::onSearcherStateChanged)
+            collectWhenStarted(animateCurrencySwapping, { animateCurrencySwapping() }, false)
         }
     }
 
@@ -546,6 +547,15 @@ class ConverterFragment : Fragment() {
 
     private fun restoreOriginalOnScreenTouched(dropdown: Dropdown) {
         setOnScreenTouched(dropdown, true)
+    }
+
+    private fun animateCurrencySwapping() {
+        ObjectAnimator.ofFloat(
+            binding.dropdownSwapper,
+            View.ROTATION,
+            binding.dropdownSwapper.rotation - 180f,
+            binding.dropdownSwapper.rotation
+        ).setUp(resources).start()
     }
 
     private fun startObjectAnimator(objectAnimator: ObjectAnimator) {

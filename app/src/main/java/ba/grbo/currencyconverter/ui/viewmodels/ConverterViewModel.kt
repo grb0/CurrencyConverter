@@ -55,6 +55,10 @@ class ConverterViewModel @Inject constructor(
     val resetSearcher: SharedFlow<Unit>
         get() = _resetSearcher
 
+    private val _animateCurrencySwapping = SingleSharedFlow<Unit>()
+    val animateCurrencySwapping: SharedFlow<Unit>
+        get() = _animateCurrencySwapping
+
     private val onTextChanged = MutableStateFlow("")
 
     private val filter: (Currency, String) -> Boolean
@@ -122,7 +126,16 @@ class ConverterViewModel @Inject constructor(
         mutateDropdown(TO)
     }
 
-    fun onSwapClicked() {
+    fun onDropdownSwapperClicked() {
+        animateCurrencySwapping()
+        swapSelectedCurrencies()
+    }
+
+    private fun animateCurrencySwapping() {
+        _animateCurrencySwapping.tryEmit(Unit)
+    }
+
+    private fun swapSelectedCurrencies() {
         val fromCountry = _fromSelectedCurrency.value
         val toCountry = _toSelectedCurrency.value
         viewModelScope.launch {
