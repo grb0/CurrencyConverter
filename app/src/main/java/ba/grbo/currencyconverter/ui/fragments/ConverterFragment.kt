@@ -3,10 +3,8 @@ package ba.grbo.currencyconverter.ui.fragments
 import android.animation.Animator
 import android.animation.LayoutTransition
 import android.animation.LayoutTransition.*
-import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.res.ColorStateList
-import android.content.res.Configuration
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.Bundle
@@ -38,6 +36,8 @@ import ba.grbo.currencyconverter.di.AutohideScrollbar
 import ba.grbo.currencyconverter.di.ExtendChooserLandscape
 import ba.grbo.currencyconverter.ui.activities.CurrencyConverterActivity
 import ba.grbo.currencyconverter.ui.adapters.CountryAdapter
+import ba.grbo.currencyconverter.ui.miscs.Animations
+import ba.grbo.currencyconverter.ui.miscs.ObjectAnimators
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown.FROM
@@ -46,12 +46,12 @@ import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocusing
 import ba.grbo.currencyconverter.util.*
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
+@Suppress("PrivatePropertyName")
 @AndroidEntryPoint
 class ConverterFragment : Fragment() {
     private val viewModel: ConverterViewModel by viewModels()
@@ -74,280 +74,53 @@ class ConverterFragment : Fragment() {
     @JvmField
     var extendChooserInLandscape: Boolean = false
 
-    private lateinit var fromFadeIn: AlphaAnimation
-    private lateinit var fromFadeOut: AlphaAnimation
-
-    private lateinit var toFadeIn: AlphaAnimation
-    private lateinit var toFadeOut: AlphaAnimation
-
     private var orientation = Int.MIN_VALUE
     private var recyclerViewHeight = Int.MIN_VALUE
 
-    @Suppress("PropertyName")
-    lateinit var Animators: ObjectAnimators
+    private lateinit var Animators: ObjectAnimators
+    private lateinit var Animations: Animations
 
-    @Suppress("PrivatePropertyName", "PropertyName")
-    class ObjectAnimators(
-        binding: FragmentConverterBinding,
-        bottomNavigationAnimator: ObjectAnimator,
-        Colors: Colors
-    ) {
-        private val CONVERTER_LAYOUT = binding.converterLayout.getAnimator(
-            Colors.WHITE,
-            Colors.LIGHT_GRAY
-        )
-        private val DROPDOWN_SWAPPER = binding.dropdownSwapper.getBackgroundColorAnimator(
-            Colors.CONTROL_NORMAL,
-            Colors.DIVIDER
-        )
-        private val BOTTOM_NAVIGATION = bottomNavigationAnimator
-        private val CURRENCY_SWAPPING = binding.dropdownSwapper.getRotationAnimatior()
-
-        private val From = object : Base {
-            override val DROPDOWN_ACTION: ObjectAnimator
-            override val DROPDOWN_TITLE: ObjectAnimator
-            override val CURRENCY_LAYOUT: ObjectAnimator
-            override val CURRENCY_DOUBLE: ObjectAnimator
-
-            init {
-                binding.fromCurrencyChooser.run {
-                    DROPDOWN_ACTION = dropdownAction.getAnimator(
-                        Colors.CONTROL_NORMAL,
-                        Colors.PRIMARY_VARIANT
-                    )
-                    DROPDOWN_TITLE = dropdownTitle.getAnimator(
-                        Colors.WHITE,
-                        Colors.LIGHT_GRAY,
-                        Colors.BORDER,
-                        Colors.PRIMARY_VARIANT
-                    )
-                    CURRENCY_LAYOUT = currencyLayout.getAnimator(
-                        Colors.BORDER,
-                        Colors.PRIMARY_VARIANT,
-                        Colors.WHITE,
-                        Colors.LIGHT_GRAY
-                    )
-                    CURRENCY_DOUBLE = binding.fromCurrencyDouble.getDoubleAnimator(true)
-                }
-            }
-        }
-
-        private val To = object : Base {
-            override val DROPDOWN_ACTION: ObjectAnimator
-            override val DROPDOWN_TITLE: ObjectAnimator
-            override val CURRENCY_LAYOUT: ObjectAnimator
-            override val CURRENCY_DOUBLE: ObjectAnimator
-
-            init {
-                binding.toCurrencyChooser.run {
-                    DROPDOWN_ACTION = dropdownAction.getAnimator(
-                        Colors.CONTROL_NORMAL,
-                        Colors.PRIMARY_VARIANT
-                    )
-                    DROPDOWN_TITLE = dropdownTitle.getAnimator(
-                        Colors.WHITE,
-                        Colors.LIGHT_GRAY,
-                        Colors.BORDER,
-                        Colors.PRIMARY_VARIANT
-                    )
-                    CURRENCY_LAYOUT = currencyLayout.getAnimator(
-                        Colors.BORDER,
-                        Colors.PRIMARY_VARIANT,
-                        Colors.WHITE,
-                        Colors.LIGHT_GRAY
-                    )
-                    CURRENCY_DOUBLE = binding.toCurrencyDouble.getDoubleAnimator()
-                }
-            }
-        }
-
-        private val FromTo = object : Extended {
-            override val DROPDOWN_ACTION: ObjectAnimator
-            override val DROPDOWN_TITLE: ObjectAnimator
-            override val CURRENCY_LAYOUT: ObjectAnimator
-            override val CURRENCY: ObjectAnimator
-            override val CURRENCY_DOUBLE: ObjectAnimator
-
-            init {
-                binding.toCurrencyChooser.run {
-                    DROPDOWN_ACTION = dropdownAction.getBackgroundColorAnimator(
-                        Colors.CONTROL_NORMAL,
-                        Colors.DIVIDER
-                    )
-                    DROPDOWN_TITLE = dropdownTitle.getBackgroundAnimator(
-                        Colors.WHITE,
-                        Colors.LIGHT_GRAY
-                    )
-                    CURRENCY_LAYOUT = currencyLayout.getBackgroundAnimator(
-                        Colors.BORDER,
-                        Colors.WHITE,
-                        Colors.LIGHT_GRAY
-                    )
-                    CURRENCY = currency.getCurrencyAnimator(Colors.BLACK, Colors.BORDER)
-                    CURRENCY_DOUBLE = currencyDouble.getCurrencyAnimator(
-                        Colors.BLACK,
-                        Colors.BORDER
-                    )
-                }
-            }
-        }
-
-        private val ToFrom = object : Extended {
-            override val DROPDOWN_ACTION: ObjectAnimator
-            override val DROPDOWN_TITLE: ObjectAnimator
-            override val CURRENCY_LAYOUT: ObjectAnimator
-            override val CURRENCY: ObjectAnimator
-            override val CURRENCY_DOUBLE: ObjectAnimator
-
-            init {
-                binding.fromCurrencyChooser.run {
-                    DROPDOWN_ACTION = dropdownAction.getBackgroundColorAnimator(
-                        Colors.CONTROL_NORMAL,
-                        Colors.DIVIDER
-                    )
-                    DROPDOWN_TITLE = dropdownTitle.getBackgroundAnimator(
-                        Colors.WHITE,
-                        Colors.LIGHT_GRAY
-                    )
-                    CURRENCY_LAYOUT = currencyLayout.getBackgroundAnimator(
-                        Colors.BORDER,
-                        Colors.WHITE,
-                        Colors.LIGHT_GRAY
-                    )
-                    CURRENCY = currency.getCurrencyAnimator(Colors.BLACK, Colors.BORDER)
-                    CURRENCY_DOUBLE = currencyDouble.getCurrencyAnimator(
-                        Colors.BLACK,
-                        Colors.BORDER
-                    )
-                }
-            }
-        }
-
-        interface Base {
-            val DROPDOWN_ACTION: ObjectAnimator
-            val DROPDOWN_TITLE: ObjectAnimator
-            val CURRENCY_LAYOUT: ObjectAnimator
-            val CURRENCY_DOUBLE: ObjectAnimator
-        }
-
-        interface Extended : Base {
-            val CURRENCY: ObjectAnimator
-        }
-
-        private fun ObjectAnimator.begin() {
-            if (isRunning) reverse()
-            else start()
-        }
-
-        private fun startFromObjectAnimators(scope: CoroutineScope) {
-            scope.launch {
-                launch { From.CURRENCY_LAYOUT.begin() }
-                launch { From.DROPDOWN_ACTION.begin() }
-                launch { From.DROPDOWN_TITLE.begin() }
-                launch { CONVERTER_LAYOUT.begin() }
-                launch { FromTo.CURRENCY_LAYOUT.begin() }
-                launch { FromTo.DROPDOWN_TITLE.begin() }
-                launch { FromTo.CURRENCY.begin() }
-                launch { FromTo.CURRENCY_DOUBLE.begin() }
-                launch { FromTo.DROPDOWN_ACTION.begin() }
-                launch { BOTTOM_NAVIGATION.begin() }
-                launch { DROPDOWN_SWAPPER.begin() }
-            }
-        }
-
-        private fun startToObjectAnimators(scope: CoroutineScope) {
-            scope.launch {
-                launch { To.CURRENCY_LAYOUT.begin() }
-                launch { To.DROPDOWN_ACTION.begin() }
-                launch { To.DROPDOWN_TITLE.begin() }
-                launch { CONVERTER_LAYOUT.begin() }
-                launch { ToFrom.CURRENCY_LAYOUT.begin() }
-                launch { ToFrom.DROPDOWN_TITLE.begin() }
-                launch { ToFrom.CURRENCY.begin() }
-                launch { ToFrom.CURRENCY_DOUBLE.begin() }
-                launch { ToFrom.DROPDOWN_ACTION.begin() }
-                launch { BOTTOM_NAVIGATION.begin() }
-                launch { DROPDOWN_SWAPPER.begin() }
-            }
-        }
-
-        private fun reverseFromObjectAnimators(scope: CoroutineScope) {
-            scope.launch {
-                launch { From.CURRENCY_LAYOUT.reverse() }
-                launch { From.DROPDOWN_ACTION.reverse() }
-                launch { From.DROPDOWN_TITLE.reverse() }
-                launch { CONVERTER_LAYOUT.reverse() }
-                launch { FromTo.CURRENCY_LAYOUT.reverse() }
-                launch { FromTo.DROPDOWN_TITLE.reverse() }
-                launch { FromTo.CURRENCY.reverse() }
-                launch { FromTo.CURRENCY_DOUBLE.reverse() }
-                launch { FromTo.DROPDOWN_ACTION.reverse() }
-                launch { BOTTOM_NAVIGATION.reverse() }
-                launch { DROPDOWN_SWAPPER.reverse() }
-            }
-        }
-
-        private fun reverseToObjectAnimators(scope: CoroutineScope) {
-            scope.launch {
-                launch { To.CURRENCY_LAYOUT.reverse() }
-                launch { To.DROPDOWN_ACTION.reverse() }
-                launch { To.DROPDOWN_TITLE.reverse() }
-                launch { CONVERTER_LAYOUT.reverse() }
-                launch { ToFrom.CURRENCY_LAYOUT.reverse() }
-                launch { ToFrom.DROPDOWN_TITLE.reverse() }
-                launch { ToFrom.CURRENCY.reverse() }
-                launch { ToFrom.CURRENCY_DOUBLE.reverse() }
-                launch { ToFrom.DROPDOWN_ACTION.reverse() }
-                launch { BOTTOM_NAVIGATION.reverse() }
-                launch { DROPDOWN_SWAPPER.reverse() }
-            }
-        }
-
-        fun animateCurrencySwapping(scope: CoroutineScope) {
-            scope.launch {
-                launch { CURRENCY_SWAPPING.begin() }
-                launch { From.CURRENCY_DOUBLE.begin() }
-                launch { To.CURRENCY_DOUBLE }
-            }
-        }
-
-        fun startObjectAnimators(dropdown: Dropdown, scope: CoroutineScope) {
-            if (dropdown == FROM) startFromObjectAnimators(scope)
-            else startToObjectAnimators(scope)
-        }
-
-        fun reverseObjectAnimators(dropdown: Dropdown, scope: CoroutineScope) {
-            if (dropdown == FROM) reverseFromObjectAnimators(scope)
-            else reverseToObjectAnimators(scope)
-        }
-    }
+    private lateinit var activity: CurrencyConverterActivity
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        orientation = resources.configuration.orientation
-        binding = FragmentConverterBinding.inflate(inflater, container, false).apply {
-            lifecycleOwner = viewLifecycleOwner
-        }
-        setDropdownsBackground()
-        initializeAnimations()
-        Animators = ObjectAnimators(
-            binding,
-            (requireActivity() as CurrencyConverterActivity).getBottomNavigationAnimator(),
-            Colors
-        )
-        setUpConverterLayoutTransition()
-        setUpRecyclerView()
-        setListeners()
-        collectFlows()
-        return binding.root
+        return setup(inflater, container)
     }
 
     override fun onCreateAnimator(transit: Int, enter: Boolean, nextAnim: Int): Animator {
         return getMaterialFadeThroughAnimator(binding.converterLayout, enter)
     }
+
+    private fun setup(inflater: LayoutInflater, container: ViewGroup?): View {
+        initActivity()
+        initOrientation()
+        val root = initBinding(inflater, container)
+        setDropdownsBackground()
+        initMotions()
+        setUpRecyclerView()
+        setListeners()
+        collectFlows()
+        return root
+    }
+
+    private fun initActivity() {
+        activity = requireActivity() as CurrencyConverterActivity
+    }
+
+    private fun initOrientation() {
+        orientation = resources.configuration.orientation
+    }
+
+    private fun initBinding(
+        inflater: LayoutInflater,
+        container: ViewGroup?
+    ) = FragmentConverterBinding.inflate(inflater, container, false).also {
+        it.lifecycleOwner = viewLifecycleOwner
+        binding = it
+    }.root
 
     private fun initializeFastScroller(recyclerView: RecyclerView) {
         val thumb = ContextCompat.getDrawable(
@@ -367,18 +140,25 @@ class ConverterFragment : Fragment() {
     }
 
     private fun setDropdownBackground(dropdown: LinearLayout) {
-        dropdown.background = dropdown.getGradientDrawable(
-            strokeColor = Colors.BORDER,
-            backgroundColor = Colors.WHITE
-        )
+        dropdown.background = dropdown.getGradientDrawable(Colors.WHITE, Colors.BORDER)
     }
 
-    private fun initializeAnimations() {
-        fromFadeIn = AlphaAnimation(0f, 1f).setUp(resources)
-        fromFadeOut = AlphaAnimation(1f, 0f).setUp(resources)
+    private fun initMotions() {
+        initAnimations()
+        initAnimators()
+        setUpConverterLayoutTransition()
+    }
 
-        toFadeIn = AlphaAnimation(0f, 1f).setUp(resources)
-        toFadeOut = AlphaAnimation(1f, 0f).setUp(resources)
+    private fun initAnimations() {
+        Animations = Animations(resources)
+    }
+
+    private fun initAnimators() {
+        Animators = ObjectAnimators(
+            binding,
+            activity.getBottomNavigationAnimator(),
+            Colors
+        )
     }
 
     private fun setUpConverterLayoutTransition() {
@@ -392,12 +172,47 @@ class ConverterFragment : Fragment() {
         }
     }
 
+    private fun setUpRecyclerView() {
+        assignAdapter()
+        modifyHeightInPortraitMode(addVerticalDivider())
+        initializeFastScroller(binding.currencies)
+    }
+
+    private fun assignAdapter() {
+        binding.currencies.adapter = CountryAdapter(viewLifecycleOwner, uiName) {
+            viewModel.onCurrencyClicked(it)
+        }
+    }
+
+    private fun addVerticalDivider(): DividerItemDecoration {
+        return DividerItemDecoration(
+            requireContext(),
+            DividerItemDecoration.VERTICAL
+        ).also { binding.currencies.addItemDecoration(it) }
+    }
+
+    private fun modifyHeightInPortraitMode(verticalDivider: DividerItemDecoration) {
+        // Only in portrait mode
+        if (!orientation.isLandscape) {
+            val countryHolder = binding.currencies.adapter!!.createViewHolder(
+                binding.currencies,
+                0
+            )
+            val verticalDividersHeight = ((verticalDivider.drawable?.intrinsicHeight ?: 3) * 4)
+            val countryHoldersHeight = countryHolder.itemView.layoutParams.height * 4
+            recyclerViewHeight = verticalDividersHeight + countryHoldersHeight
+            binding.currencies.layoutParams.height = recyclerViewHeight
+
+            // Let it not be in vain :)
+            binding.currencies.recycledViewPool.putRecycledView(countryHolder)
+        }
+    }
+
     private fun setListeners() {
         binding.fromCurrencyChooser.run {
             dropdownAction.setOnClickListener { viewModel.onFromDropdownActionClicked() }
             currencyLayout.setOnClickListener { viewModel.onFromDropdownClicked() }
             dropdownTitle.setOnClickListener { viewModel.onFromTitleClicked() }
-
         }
 
         binding.toCurrencyChooser.run {
@@ -414,47 +229,10 @@ class ConverterFragment : Fragment() {
                     viewModel.onSearcherFocusChanged(hasFocus)
                 }
                 addTextChangedListener {
-                    it?.let { viewModel.onTextChanged(it.toString()) }
+                    it?.let { viewModel.onSearcherTextChanged(it.toString()) }
                 }
             }
             setOnScrollListener(currencies)
-        }
-    }
-
-    private fun setUpRecyclerView() {
-        assignAdapter()
-        modifyHeightInPortraitMode(addVerticalDivider())
-        initializeFastScroller(binding.currencies)
-    }
-
-    private fun assignAdapter() {
-        val adapter = CountryAdapter(viewLifecycleOwner, uiName) {
-            viewModel.onCurrencyClicked(it)
-        }
-        binding.currencies.adapter = adapter
-    }
-
-    private fun addVerticalDivider(): DividerItemDecoration {
-        return DividerItemDecoration(
-            requireContext(),
-            DividerItemDecoration.VERTICAL
-        ).also { binding.currencies.addItemDecoration(it) }
-    }
-
-    private fun modifyHeightInPortraitMode(verticalDivider: DividerItemDecoration) {
-        // Only in portrait mode
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            val countryHolder = binding.currencies.adapter!!.createViewHolder(
-                binding.currencies,
-                0
-            )
-            val verticalDividersHeight = ((verticalDivider.drawable?.intrinsicHeight ?: 3) * 4)
-            val countryHoldersHeight = countryHolder.itemView.layoutParams.height * 4
-            recyclerViewHeight = verticalDividersHeight + countryHoldersHeight
-            binding.currencies.layoutParams.height = recyclerViewHeight
-
-            // Let it not be in vain :)
-            binding.currencies.recycledViewPool.putRecycledView(countryHolder)
         }
     }
 
@@ -476,7 +254,7 @@ class ConverterFragment : Fragment() {
             collectWhenStarted(dropdownState, ::onDropdownStateChanged)
             collectWhenStarted(showResetButton, ::showResetButton)
             collectWhenStarted(resetSearcher, { resetSearcher() }, false)
-            collectWhenStarted(modifyDivider, ::onDividerHeightChanged)
+            collectWhenStarted(modifyDivider, ::modifyDividerDrawable)
             collectWhenStarted(countries, ::onCountriesUpdated)
             collectWhenStarted(searcherState, ::onSearcherStateChanged)
             collectWhenStarted(
@@ -496,14 +274,14 @@ class ConverterFragment : Fragment() {
             country,
             binding.fromCurrencyChooser.currency,
             binding.fromCurrencyChooser.currencyDouble,
-            fromFadeIn,
-            fromFadeOut
+            Animations.From.FADE_IN,
+            Animations.From.FADE_OUT
         ) else onSelectedCurrencyChanged(
             country,
             binding.toCurrencyChooser.currency,
             binding.toCurrencyChooser.currencyDouble,
-            toFadeIn,
-            toFadeOut
+            Animations.To.FADE_IN,
+            Animations.To.FADE_OUT
         )
     }
 
@@ -571,21 +349,15 @@ class ConverterFragment : Fragment() {
     }
 
     private fun onDropdownStateChanged(state: DropdownState) = when (state) {
-        is Expanding -> {
-            expandDropdown(state.dropdown)
-            setOnScreenTouched(state.dropdown, true)
-        }
-        is Collapsing -> {
-            collapseDropdown(state.dropdown)
-            setOnScreenTouched(state.dropdown, false)
-        }
+        is Expanding -> onDropdownExpanding(state.dropdown)
+        is Collapsing -> onDropdownCollapsing(state.dropdown)
         is Collapsed -> {
         } // When collapsed do nothing
     }
 
     private fun showResetButton(showButton: Boolean) {
-        if (showButton) setAnimationListenerAndStartAnimation(fromFadeIn, true)
-        else setAnimationListenerAndStartAnimation(fromFadeOut, false)
+        if (showButton) setAnimationListenerAndStartAnimation(Animations.From.FADE_IN, true)
+        else setAnimationListenerAndStartAnimation(Animations.From.FADE_OUT, false)
     }
 
     private fun setAnimationListenerAndStartAnimation(
@@ -596,8 +368,8 @@ class ConverterFragment : Fragment() {
             getAnimationListener(
                 binding.resetSearcher,
                 fadinIn,
-                fromFadeIn,
-                fromFadeOut
+                Animations.From.FADE_IN,
+                Animations.From.FADE_OUT
             )
         )
         binding.resetSearcher.startAnimation(animation)
@@ -607,7 +379,7 @@ class ConverterFragment : Fragment() {
         binding.currenciesSearcher.setText("")
     }
 
-    private fun onDividerHeightChanged(topReached: Boolean) {
+    private fun modifyDividerDrawable(topReached: Boolean) {
         val drawable = if (topReached) R.drawable.divider_top else R.drawable.divider_bottom
         binding.divider.setBackgroundResource(drawable)
     }
@@ -625,28 +397,47 @@ class ConverterFragment : Fragment() {
     }
 
     private fun modifyOnScreenTouched(dropdown: Dropdown) {
-        val activity = (requireActivity() as CurrencyConverterActivity)
-        val currentOnScreenTouched = activity.onScreenTouched
-        activity.onScreenTouched = {
-            val (isHandled, touchPoint, shouldConsume) = currentOnScreenTouched!!.invoke(it)
-            if (!isHandled) {
-                val currenciesCardTouched = isPointInsideViewBounds(
-                    binding.currenciesCard,
-                    touchPoint
-                )
-                val currenciesSearcherTouched = isPointInsideViewBounds(
-                    binding.currenciesSearcher,
-                    touchPoint
-                )
+        activity.onScreenTouched = { event ->
+            val touchPoint = Point(event.rawX.roundToInt(), event.rawY.roundToInt())
 
-                val handled = viewModel.onScreenTouched(
-                    dropdown,
-                    currenciesCardTouched,
-                    currenciesSearcherTouched
-                )
-                handled to touchPoint
-                Triple(handled, touchPoint, false)
-            } else Triple(isHandled, touchPoint, shouldConsume)
+            val currencyLayout: LinearLayout
+            val dropdownTitle: TextView
+
+            if (dropdown == FROM) {
+                currencyLayout = binding.fromCurrencyChooser.currencyLayout
+                dropdownTitle = binding.fromCurrencyChooser.dropdownTitle
+            } else {
+                currencyLayout = binding.toCurrencyChooser.currencyLayout
+                dropdownTitle = binding.toCurrencyChooser.dropdownTitle
+            }
+
+            val currencyLayoutTouched = isPointInsideViewBounds(
+                currencyLayout,
+                touchPoint
+            )
+
+            val dropdownTitleTouched = isPointInsideViewBounds(
+                dropdownTitle,
+                touchPoint
+            )
+
+            val currenciesCardTouched = isPointInsideViewBounds(
+                binding.currenciesCard,
+                touchPoint
+            )
+
+            val currenciesSearcherTouched = isPointInsideViewBounds(
+                binding.currenciesSearcher,
+                touchPoint
+            )
+
+            viewModel.onScreenTouched(
+                dropdown,
+                currencyLayoutTouched,
+                dropdownTitleTouched,
+                currenciesCardTouched,
+                currenciesSearcherTouched
+            )
         }
     }
 
@@ -664,7 +455,7 @@ class ConverterFragment : Fragment() {
 
     private fun hideKeyboard() {
         val imm = getInputMethodManager()
-        imm.hideSoftInputFromWindow(requireActivity().window.decorView.windowToken, 0)
+        imm.hideSoftInputFromWindow(activity.window.decorView.windowToken, 0)
     }
 
     private fun getInputMethodManager(): InputMethodManager {
@@ -672,12 +463,19 @@ class ConverterFragment : Fragment() {
     }
 
     private fun restoreOriginalOnScreenTouched(dropdown: Dropdown) {
-        setOnScreenTouched(dropdown, true)
+        setOnScreenTouched(dropdown)
+    }
+
+    private fun onDropdownExpanding(dropdown: Dropdown) {
+        expandDropdown(dropdown)
+        setOnScreenTouched(dropdown)
     }
 
     private fun expandDropdown(dropdown: Dropdown) {
-        Animators.startObjectAnimators(dropdown, viewLifecycleOwner.lifecycleScope)
-        showCurrenciesCard(dropdown)
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            launch { Animators.startObjectAnimators(dropdown, viewLifecycleOwner.lifecycleScope) }
+            launch { showCurrenciesCard(dropdown) }
+        }
     }
 
     private fun showCurrenciesCard(dropdown: Dropdown) {
@@ -686,85 +484,66 @@ class ConverterFragment : Fragment() {
     }
 
     private fun modifyCurrenciesCardPosition(dropdown: Dropdown) {
-        val viewId = if (dropdown == FROM) binding.fromCurrencyChooser.dropdownLayout.id
-        else binding.toCurrencyChooser.dropdownLayout.id
-        modifyCurrenciesCardPosition(viewId)
-    }
-
-    private fun modifyCurrenciesCardPosition(viewId: Int) {
-        ConstraintSet().apply {
-            clone(binding.converterLayout)
-
-            if (extendChooserInLandscape && orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                connect(
-                    binding.currenciesCard.id,
-                    ConstraintSet.TOP,
-                    binding.converterLayout.id,
-                    ConstraintSet.TOP
-                )
-                connect(
-                    binding.currenciesCard.id,
-                    ConstraintSet.BOTTOM,
-                    binding.converterLayout.id,
-                    ConstraintSet.BOTTOM
-                )
-                connect(
-                    binding.currenciesCard.id,
-                    ConstraintSet.START,
-                    binding.converterLayout.id,
-                    ConstraintSet.START
-                )
-                connect(
-                    binding.currenciesCard.id,
-                    ConstraintSet.END,
-                    binding.converterLayout.id,
-                    ConstraintSet.END
-                )
-                applyTo(binding.converterLayout)
-                binding.currenciesCard.setMargins(8f)
-            } else {
-                connect(
-                    binding.currenciesCard.id,
-                    ConstraintSet.TOP,
-                    viewId,
-                    ConstraintSet.BOTTOM
-                )
-                connect(
-                    binding.currenciesCard.id,
-                    ConstraintSet.BOTTOM,
-                    binding.converterLayout.id,
-                    ConstraintSet.BOTTOM
-                )
-                connect(
-                    binding.currenciesCard.id,
-                    ConstraintSet.START,
-                    viewId,
-                    ConstraintSet.START
-                )
-                connect(
-                    binding.currenciesCard.id,
-                    ConstraintSet.END,
-                    viewId,
-                    ConstraintSet.END
-                )
-                applyTo(binding.converterLayout)
+        if (extendChooserInLandscape && orientation.isLandscape) {
+            if (viewModel.shouldModifyCurrenciesCardPosition()) {
+                modifyCurrenciesCardPosition(binding.converterLayout.id, true)
+                viewModel.onCurrenciesCardPositionModified()
+            }
+        } else {
+            if (viewModel.shouldModifyCurrenciesCardPosition(dropdown)) {
+                val viewId = if (dropdown == FROM) binding.fromCurrencyChooser.dropdownLayout.id
+                else binding.toCurrencyChooser.dropdownLayout.id
+                modifyCurrenciesCardPosition(viewId)
             }
         }
     }
 
-    private fun setOnScreenTouched(dropdown: Dropdown, shouldSet: Boolean) {
-        (requireActivity() as CurrencyConverterActivity).onScreenTouched = if (!shouldSet) null
-        else { event -> onScreenTouched(dropdown, event) }
+    private fun modifyCurrenciesCardPosition(viewId: Int, extended: Boolean = false) {
+        ConstraintSet().apply {
+            clone(binding.converterLayout)
+            connect(
+                binding.currenciesCard.id,
+                ConstraintSet.TOP,
+                viewId,
+                if (extended) ConstraintSet.TOP else ConstraintSet.BOTTOM
+            )
+            connect(
+                binding.currenciesCard.id,
+                ConstraintSet.BOTTOM,
+                binding.converterLayout.id,
+                ConstraintSet.BOTTOM
+            )
+            connect(
+                binding.currenciesCard.id,
+                ConstraintSet.START,
+                viewId,
+                ConstraintSet.START
+            )
+            connect(
+                binding.currenciesCard.id,
+                ConstraintSet.END,
+                viewId,
+                ConstraintSet.END
+            )
+            applyTo(binding.converterLayout)
+            if (extended) binding.currenciesCard.setMargins(8f)
+        }
+    }
+
+    private fun setOnScreenTouched(dropdown: Dropdown) {
+        activity.onScreenTouched = { event -> onScreenTouched(dropdown, event) }
+    }
+
+    private fun removeOnScreenTouched() {
+        activity.onScreenTouched = null
     }
 
     private fun onScreenTouched(
         dropdown: Dropdown,
         event: MotionEvent
-    )
-            : Triple<Boolean, Point, Boolean> {
+    ): Boolean {
         val touchPoint = Point(event.rawX.roundToInt(), event.rawY.roundToInt())
-        val handled = onScreenTouched(dropdown, touchPoint)
-        return Triple(handled, touchPoint, handled)
+        return onScreenTouched(dropdown, touchPoint)
     }
 
     private fun onScreenTouched(
@@ -819,10 +598,17 @@ class ConverterFragment : Fragment() {
         contains(point.x, point.y)
     }
 
+    private fun onDropdownCollapsing(dropdown: Dropdown) {
+        collapseDropdown(dropdown)
+        removeOnScreenTouched()
+        viewModel.onDropdownCollapsed(dropdown)
+    }
+
     private fun collapseDropdown(dropdown: Dropdown) {
-        Animators.reverseObjectAnimators(dropdown, viewLifecycleOwner.lifecycleScope)
-        hideCurrenciesCard()
-        viewModel.onDropdownCollapsed()
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            launch { Animators.reverseObjectAnimators(dropdown, viewLifecycleOwner.lifecycleScope) }
+            launch { hideCurrenciesCard() }
+        }
     }
 
     private fun hideCurrenciesCard() {

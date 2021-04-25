@@ -59,9 +59,12 @@ class ConverterViewModel @Inject constructor(
     val animateCurrencySwapping: SharedFlow<Unit>
         get() = _animateCurrencySwapping
 
-    private val onTextChanged = MutableStateFlow("")
+    private val onSearcherTextChanged = MutableStateFlow("")
 
     private val filter: (Currency, String) -> Boolean
+
+    private var lastClickedDropdown = NONE
+    private var currenciesCardModifiedForLandscape = false
 
     sealed class DropdownState {
         abstract val dropdown: Dropdown
@@ -87,7 +90,7 @@ class ConverterViewModel @Inject constructor(
 
     init {
         filter = initializeFilter(filterBy)
-        onTextChanged
+        onSearcherTextChanged
             .debounce(250)
             .onEach { filterCountries(it) }
             .flowOn(Dispatchers.Default)
@@ -107,11 +110,11 @@ class ConverterViewModel @Inject constructor(
     }
 
     fun onFromDropdownClicked() {
-        mutateDropdown(FROM)
+        onFromDropdownActionClicked() // Delegate
     }
 
     fun onFromTitleClicked() {
-        mutateDropdown(FROM)
+        onFromDropdownActionClicked() // Delegate
     }
 
     fun onToDropdownActionClicked() {
@@ -166,12 +169,20 @@ class ConverterViewModel @Inject constructor(
 
     fun onScreenTouched(
         dropdown: Dropdown,
+        currencyLayoutTouched: Boolean,
+        dropdownTitleTouched: Boolean,
         currenciesCardTouched: Boolean,
         currenciesSearcherTouched: Boolean
     ): Boolean {
         val shouldUnfocus = currenciesCardTouched && !currenciesSearcherTouched
-        if (shouldUnfocus) _searcherState.value = Unfocusing(dropdown)
-        return shouldUnfocus
+        return if (shouldUnfocus) {
+            _searcherState.value = Unfocusing(dropdown)
+            false
+        } else {
+            val shouldCollapse =
+                !currencyLayoutTouched && !dropdownTitleTouched && !currenciesCardTouched
+            shouldCollapse.also { if (it) _dropdownState.value = Collapsing(dropdown) }
+        }
     }
 
     private fun updateSelectedCurrency(country: Country) {
@@ -180,8 +191,9 @@ class ConverterViewModel @Inject constructor(
 
     }
 
-    fun onDropdownCollapsed() {
+    fun onDropdownCollapsed(dropdown: Dropdown) {
         _dropdownState.value = Collapsed(NONE)
+        lastClickedDropdown = dropdown
     }
 
     fun onSearcherFocusChanged(focused: Boolean) {
@@ -192,18 +204,32 @@ class ConverterViewModel @Inject constructor(
         _searcherState.value = Unfocused(dropdown)
     }
 
-    fun onTextChanged(query: String) {
+    fun onSearcherTextChanged(query: String) {
         if (query.isEmpty()) {
             _countries.value = plainCountries
             setResetButton(false)
         } else {
             setResetButton(true)
-            onTextChanged.value = query
+            onSearcherTextChanged.value = query
         }
     }
 
     fun onCountriesScrolled(topReached: Boolean) {
         _modifyDivider.value = topReached
+    }
+
+    fun shouldModifyCurrenciesCardPosition(dropdown: Dropdown): Boolean {
+        return if (currenciesCardModifiedForLandscape) {
+            currenciesCardModifiedForLandscape = false
+            lastClickedDropdown = NONE
+            true
+        } else lastClickedDropdown != dropdown
+    }
+
+    fun shouldModifyCurrenciesCardPosition() = !currenciesCardModifiedForLandscape
+
+    fun onCurrenciesCardPositionModified() {
+        currenciesCardModifiedForLandscape = true
     }
 
     private fun setResetButton(hasText: Boolean) {

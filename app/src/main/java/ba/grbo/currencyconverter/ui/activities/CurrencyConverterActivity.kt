@@ -5,7 +5,6 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.content.Context
 import android.content.res.ColorStateList
-import android.graphics.Point
 import android.os.Bundle
 import android.view.MotionEvent
 import androidx.activity.viewModels
@@ -43,7 +42,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
     private val viewModel: CurrencyConverterViewModel by viewModels()
     private lateinit var binding: ActivityCurrencyConverterBinding
     private lateinit var navController: NavController
-    var onScreenTouched: ((event: MotionEvent) -> Triple<Boolean, Point, Boolean>)? = null
+    var onScreenTouched: ((event: MotionEvent) -> Boolean)? = null
 
     @Suppress("PropertyName")
     @Inject
@@ -65,7 +64,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         return if (ev.action == MotionEvent.ACTION_DOWN) {
-            val shouldConsume = onScreenTouched?.invoke(ev)?.third
+            val shouldConsume = onScreenTouched?.invoke(ev)
             if (shouldConsume == true) true
             else super.dispatchTouchEvent(ev)
         } else super.dispatchTouchEvent(ev)
@@ -78,7 +77,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
     private fun postSuperOnCreateSetup() {
         initBinding()
         initNavController()
-        addListeners()
+        setListeners()
         collectFlows()
     }
 
@@ -91,7 +90,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
         navController = (fragment as NavHostFragment).navController
     }
 
-    private fun addListeners() {
+    private fun setListeners() {
         addBottomNavigatonListeners()
         addNavControllerListeners()
     }

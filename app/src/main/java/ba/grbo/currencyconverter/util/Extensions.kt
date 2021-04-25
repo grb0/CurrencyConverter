@@ -7,6 +7,7 @@ import android.animation.PropertyValuesHolder
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
@@ -59,6 +60,9 @@ fun Float.toPixels(resources: Resources) = TypedValue.applyDimension(
     this,
     resources.displayMetrics
 )
+
+val Int.isLandscape
+    get() = this == Configuration.ORIENTATION_LANDSCAPE
 
 fun Boolean.toSearcherState(dropdown: Dropdown): SearcherState {
     return if (this) Focusing(dropdown) else Unfocusing(dropdown)
@@ -206,13 +210,13 @@ fun LinearLayout.getBackgroundAnimator(
         ) as Int
 
         val drawable = getGradientDrawable(
-            strokeColor = strokeColor,
-            backgroundColor = backgroundColor
+            backgroundColor,
+            strokeColor
         )
         drawable
     },
-    getGradientDrawable(strokeColor = strokeColor, backgroundColor = backgroundStartColor),
-    getGradientDrawable(strokeColor = strokeColor, backgroundColor = backgroundEndColor)
+    getGradientDrawable(backgroundStartColor, strokeColor),
+    getGradientDrawable(backgroundEndColor, strokeColor)
 ).setUp(resources)
 
 fun LinearLayout.getAnimator(
@@ -241,19 +245,15 @@ fun LinearLayout.getAnimator(
         val strokeWidth = 1f + (fraction * (2f - 1f))
 
         val drawable = getGradientDrawable(
-            strokeWidth,
+            backgroundColor,
             strokeColor,
-            backgroundColor
+            strokeWidth
         )
 
         drawable
     },
-    getGradientDrawable(strokeColor = strokeStartColor, backgroundColor = backgroundEndColor),
-    getGradientDrawable(
-        2f,
-        strokeEndColor,
-        backgroundEndColor
-    )
+    getGradientDrawable(backgroundStartColor, strokeStartColor),
+    getGradientDrawable(backgroundEndColor, strokeEndColor, 2f)
 ).setUp(resources)
 
 fun ConstraintLayout.getAnimator(startColor: Int, endColor: Int) = ObjectAnimator.ofArgb(
@@ -325,9 +325,9 @@ fun ImageButton.getAnimator(
 }
 
 fun LinearLayout.getGradientDrawable(
-    strokeWidth: Float = 1f,
+    backgroundColor: Int,
     strokeColor: Int,
-    backgroundColor: Int
+    strokeWidth: Float = 1f
 ) = GradientDrawable().apply {
     shape = GradientDrawable.RECTANGLE
     setStroke(strokeWidth.toPixels(resources).roundToInt(), strokeColor)
