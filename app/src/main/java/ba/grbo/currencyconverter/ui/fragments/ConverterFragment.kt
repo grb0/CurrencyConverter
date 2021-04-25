@@ -90,10 +90,13 @@ class ConverterFragment : Fragment() {
     private lateinit var toDropdownActionAnimator: ObjectAnimator
     private lateinit var toDropdownTitleAnimator: ObjectAnimator
     private lateinit var toCurrencyLayoutAnimator: ObjectAnimator
-    private lateinit var swapAnimator: ObjectAnimator
 
     private lateinit var converterLayoutAnimator: ObjectAnimator
     private lateinit var bottomNavigationAnimator: ObjectAnimator
+    private lateinit var dropdownSwapperAnimator: ObjectAnimator
+    private lateinit var currencySwappingAnimator: ObjectAnimator
+    private lateinit var fromCurrencyDoubleAnimator: ObjectAnimator
+    private lateinit var toCurrencyDoubleAnimator: ObjectAnimator
 
     private lateinit var fromFadeIn: AlphaAnimation
     private lateinit var fromFadeOut: AlphaAnimation
@@ -176,6 +179,8 @@ class ConverterFragment : Fragment() {
         initializeConverterLayoutAnimator()
         initializeBottomNavigationAnimator()
         initializeSwapAnimator()
+        initializeCurrencySwappingAnimator()
+        initializeCurrencyDoubleAnimators()
     }
 
     private fun setUpConverterLayoutTransition() {
@@ -247,7 +252,41 @@ class ConverterFragment : Fragment() {
     }
 
     private fun initializeSwapAnimator() {
-        swapAnimator = binding.dropdownSwapper.getBackgroundColorAnimator()
+        dropdownSwapperAnimator = binding.dropdownSwapper.getBackgroundColorAnimator()
+    }
+
+    private fun initializeCurrencySwappingAnimator() {
+        currencySwappingAnimator = ObjectAnimator.ofFloat(
+            binding.dropdownSwapper,
+            View.ROTATION,
+            binding.dropdownSwapper.rotation - 180f,
+            binding.dropdownSwapper.rotation
+        ).apply {
+            duration = 3000
+            interpolator = LinearInterpolator()
+        }
+    }
+
+    private fun initializeCurrencyDoubleAnimators() {
+        fromCurrencyDoubleAnimator = ObjectAnimator.ofFloat(
+            binding.fromCurrencyDouble,
+            View.TRANSLATION_Y,
+            binding.fromCurrencyDouble.translationY,
+            112f.toPixels(resources)
+        ).apply {
+            duration = 3000
+            interpolator = LinearInterpolator()
+        }
+
+        toCurrencyDoubleAnimator = ObjectAnimator.ofFloat(
+            binding.toCurrencyDouble,
+            View.TRANSLATION_Y,
+            binding.toCurrencyDouble.translationY,
+            -(112f.toPixels(resources))
+        ).apply {
+            duration = 3000
+            interpolator = LinearInterpolator()
+        }
     }
 
     private fun initializeColors() {
@@ -550,12 +589,9 @@ class ConverterFragment : Fragment() {
     }
 
     private fun animateCurrencySwapping() {
-        ObjectAnimator.ofFloat(
-            binding.dropdownSwapper,
-            View.ROTATION,
-            binding.dropdownSwapper.rotation - 180f,
-            binding.dropdownSwapper.rotation
-        ).setUp(resources).start()
+        startObjectAnimator(currencySwappingAnimator)
+        startObjectAnimator(fromCurrencyDoubleAnimator)
+        startObjectAnimator(toCurrencyDoubleAnimator)
     }
 
     private fun startObjectAnimator(objectAnimator: ObjectAnimator) {
@@ -584,7 +620,7 @@ class ConverterFragment : Fragment() {
             launch { startObjectAnimator(fromToCurrencyAnimatorSecondary) }
             launch { startObjectAnimator(fromToDropdownActionAnimator) }
             launch { startObjectAnimator(bottomNavigationAnimator) }
-            launch { startObjectAnimator(swapAnimator) }
+            launch { startObjectAnimator(dropdownSwapperAnimator) }
         }
     }
 
@@ -600,7 +636,7 @@ class ConverterFragment : Fragment() {
             launch { startObjectAnimator(toFromCurrencyAnimatorSecondary) }
             launch { startObjectAnimator(toFromDropdownActionAnimator) }
             launch { startObjectAnimator(bottomNavigationAnimator) }
-            launch { startObjectAnimator(swapAnimator) }
+            launch { startObjectAnimator(dropdownSwapperAnimator) }
         }
     }
 
@@ -621,7 +657,7 @@ class ConverterFragment : Fragment() {
             launch { reverseObjectAnimator(fromToCurrencyAnimatorSecondary) }
             launch { reverseObjectAnimator(fromToDropdownActionAnimator) }
             launch { reverseObjectAnimator(bottomNavigationAnimator) }
-            launch { reverseObjectAnimator(swapAnimator) }
+            launch { reverseObjectAnimator(dropdownSwapperAnimator) }
         }
     }
 
@@ -637,7 +673,7 @@ class ConverterFragment : Fragment() {
             launch { reverseObjectAnimator(toFromCurrencyAnimatorSecondary) }
             launch { reverseObjectAnimator(toFromDropdownActionAnimator) }
             launch { reverseObjectAnimator(bottomNavigationAnimator) }
-            launch { reverseObjectAnimator(swapAnimator) }
+            launch { reverseObjectAnimator(dropdownSwapperAnimator) }
         }
     }
 
