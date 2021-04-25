@@ -2,8 +2,8 @@ package ba.grbo.currencyconverter
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
-import ba.grbo.currencyconverter.data.models.preferences.Language
-import ba.grbo.currencyconverter.data.models.preferences.Theme
+import ba.grbo.currencyconverter.util.Language
+import ba.grbo.currencyconverter.util.Theme
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 import java.util.*

@@ -20,10 +20,13 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import ba.grbo.currencyconverter.CurrencyConverterApplication
 import ba.grbo.currencyconverter.R
-import ba.grbo.currencyconverter.data.models.managers.Colors
 import ba.grbo.currencyconverter.databinding.ActivityCurrencyConverterBinding
 import ba.grbo.currencyconverter.ui.viewmodels.CurrencyConverterViewModel
-import ba.grbo.currencyconverter.util.getPropertyValueHolderForBackgroundColor
+import ba.grbo.currencyconverter.util.Colors
+import ba.grbo.currencyconverter.util.Constants.BACKGROUND_COLOR
+import ba.grbo.currencyconverter.util.Constants.ITEM_ICON_TINT_LIST
+import ba.grbo.currencyconverter.util.Constants.ITEM_TEXT_COLOR
+import ba.grbo.currencyconverter.util.getArgbPropertyValueHolderForProperty
 import ba.grbo.currencyconverter.util.setUp
 import ba.grbo.currencyconverter.util.updateLocale
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -48,11 +51,6 @@ class CurrencyConverterActivity : AppCompatActivity() {
 
     @Inject
     lateinit var language: Locale
-
-    companion object {
-        const val ITEM_ICON_TINT_LIST = "itemIconTintList"
-        const val ITEM_TEXT_COLOR = "itemTextColor"
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         preSuperOnCreateSetup()
@@ -164,7 +162,8 @@ class CurrencyConverterActivity : AppCompatActivity() {
         val startColorUnchecked = ColorUtils.setAlphaComponent(Colors.ON_PRIMARY, alphaSixty)
         val endColorChecked = ColorUtils.setAlphaComponent(Colors.BLACK, alphaSixty)
         val endColorUnchecked = ColorUtils.setAlphaComponent(Colors.BLACK, alphaTwenty)
-        val backgroundColorProperty = getPropertyValueHolderForBackgroundColor(
+        val backgroundColorProperty = getArgbPropertyValueHolderForProperty(
+            BACKGROUND_COLOR,
             Colors.PRIMARY,
             Colors.DIVIDER
         )

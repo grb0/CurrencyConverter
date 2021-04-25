@@ -4,11 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.data.models.Currency
-import ba.grbo.currencyconverter.data.models.preferences.FilterBy
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocused
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocusing
+import ba.grbo.currencyconverter.util.FilterBy
 import ba.grbo.currencyconverter.util.SharedStateLikeFlow
 import ba.grbo.currencyconverter.util.SingleSharedFlow
 import ba.grbo.currencyconverter.util.toSearcherState

@@ -21,8 +21,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.annotation.AttrRes
-import androidx.annotation.ColorRes
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -48,6 +46,7 @@ import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocusing
 import ba.grbo.currencyconverter.util.*
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import javax.inject.Inject
@@ -61,6 +60,10 @@ class ConverterFragment : Fragment() {
     @Inject
     lateinit var uiName: Currency.UiName
 
+    @Suppress("PropertyName")
+    @Inject
+    lateinit var Colors: Colors
+
     @Inject
     @AutohideScrollbar
     @JvmField
@@ -71,33 +74,6 @@ class ConverterFragment : Fragment() {
     @JvmField
     var extendChooserInLandscape: Boolean = false
 
-    private lateinit var fromDropdownActionAnimator: ObjectAnimator
-    private lateinit var fromDropdownTitleAnimator: ObjectAnimator
-    private lateinit var fromCurrencyLayoutAnimator: ObjectAnimator
-
-    private lateinit var toFromDropdownTitleAnimator: ObjectAnimator
-    private lateinit var toFromCurrencyLayoutAnimator: ObjectAnimator
-    private lateinit var toFromCurrencyAnimatorMain: ObjectAnimator
-    private lateinit var toFromCurrencyAnimatorSecondary: ObjectAnimator
-    private lateinit var toFromDropdownActionAnimator: ObjectAnimator
-
-    private lateinit var fromToDropdownTitleAnimator: ObjectAnimator
-    private lateinit var fromToCurrencyLayoutAnimator: ObjectAnimator
-    private lateinit var fromToCurrencyAnimatorMain: ObjectAnimator
-    private lateinit var fromToCurrencyAnimatorSecondary: ObjectAnimator
-    private lateinit var fromToDropdownActionAnimator: ObjectAnimator
-
-    private lateinit var toDropdownActionAnimator: ObjectAnimator
-    private lateinit var toDropdownTitleAnimator: ObjectAnimator
-    private lateinit var toCurrencyLayoutAnimator: ObjectAnimator
-
-    private lateinit var converterLayoutAnimator: ObjectAnimator
-    private lateinit var bottomNavigationAnimator: ObjectAnimator
-    private lateinit var dropdownSwapperAnimator: ObjectAnimator
-    private lateinit var currencySwappingAnimator: ObjectAnimator
-    private lateinit var fromCurrencyDoubleAnimator: ObjectAnimator
-    private lateinit var toCurrencyDoubleAnimator: ObjectAnimator
-
     private lateinit var fromFadeIn: AlphaAnimation
     private lateinit var fromFadeOut: AlphaAnimation
 
@@ -107,15 +83,243 @@ class ConverterFragment : Fragment() {
     private var orientation = Int.MIN_VALUE
     private var recyclerViewHeight = Int.MIN_VALUE
 
-    object Colors {
-        var WHITE = 0
-        var BLACK = 0
-        var LIGHT_GRAY = 0
-        var PRIMARY = 0
-        var PRIMARY_VARIANT = 0
-        var BORDER = 0
-        var DIVIDER = 0
-        var CONTROL_NORMAL = 0
+    @Suppress("PropertyName")
+    lateinit var Animators: ObjectAnimators
+
+    @Suppress("PrivatePropertyName", "PropertyName")
+    class ObjectAnimators(
+        binding: FragmentConverterBinding,
+        bottomNavigationAnimator: ObjectAnimator,
+        Colors: Colors
+    ) {
+        private val CONVERTER_LAYOUT = binding.converterLayout.getAnimator(
+            Colors.WHITE,
+            Colors.LIGHT_GRAY
+        )
+        private val DROPDOWN_SWAPPER = binding.dropdownSwapper.getBackgroundColorAnimator(
+            Colors.CONTROL_NORMAL,
+            Colors.DIVIDER
+        )
+        private val BOTTOM_NAVIGATION = bottomNavigationAnimator
+        private val CURRENCY_SWAPPING = binding.dropdownSwapper.getRotationAnimatior()
+
+        private val From = object : Base {
+            override val DROPDOWN_ACTION: ObjectAnimator
+            override val DROPDOWN_TITLE: ObjectAnimator
+            override val CURRENCY_LAYOUT: ObjectAnimator
+            override val CURRENCY_DOUBLE: ObjectAnimator
+
+            init {
+                binding.fromCurrencyChooser.run {
+                    DROPDOWN_ACTION = dropdownAction.getAnimator(
+                        Colors.CONTROL_NORMAL,
+                        Colors.PRIMARY_VARIANT
+                    )
+                    DROPDOWN_TITLE = dropdownTitle.getAnimator(
+                        Colors.WHITE,
+                        Colors.LIGHT_GRAY,
+                        Colors.BORDER,
+                        Colors.PRIMARY_VARIANT
+                    )
+                    CURRENCY_LAYOUT = currencyLayout.getAnimator(
+                        Colors.BORDER,
+                        Colors.PRIMARY_VARIANT,
+                        Colors.WHITE,
+                        Colors.LIGHT_GRAY
+                    )
+                    CURRENCY_DOUBLE = binding.fromCurrencyDouble.getDoubleAnimator(true)
+                }
+            }
+        }
+
+        private val To = object : Base {
+            override val DROPDOWN_ACTION: ObjectAnimator
+            override val DROPDOWN_TITLE: ObjectAnimator
+            override val CURRENCY_LAYOUT: ObjectAnimator
+            override val CURRENCY_DOUBLE: ObjectAnimator
+
+            init {
+                binding.toCurrencyChooser.run {
+                    DROPDOWN_ACTION = dropdownAction.getAnimator(
+                        Colors.CONTROL_NORMAL,
+                        Colors.PRIMARY_VARIANT
+                    )
+                    DROPDOWN_TITLE = dropdownTitle.getAnimator(
+                        Colors.WHITE,
+                        Colors.LIGHT_GRAY,
+                        Colors.BORDER,
+                        Colors.PRIMARY_VARIANT
+                    )
+                    CURRENCY_LAYOUT = currencyLayout.getAnimator(
+                        Colors.BORDER,
+                        Colors.PRIMARY_VARIANT,
+                        Colors.WHITE,
+                        Colors.LIGHT_GRAY
+                    )
+                    CURRENCY_DOUBLE = binding.toCurrencyDouble.getDoubleAnimator()
+                }
+            }
+        }
+
+        private val FromTo = object : Extended {
+            override val DROPDOWN_ACTION: ObjectAnimator
+            override val DROPDOWN_TITLE: ObjectAnimator
+            override val CURRENCY_LAYOUT: ObjectAnimator
+            override val CURRENCY: ObjectAnimator
+            override val CURRENCY_DOUBLE: ObjectAnimator
+
+            init {
+                binding.toCurrencyChooser.run {
+                    DROPDOWN_ACTION = dropdownAction.getBackgroundColorAnimator(
+                        Colors.CONTROL_NORMAL,
+                        Colors.DIVIDER
+                    )
+                    DROPDOWN_TITLE = dropdownTitle.getBackgroundAnimator(
+                        Colors.WHITE,
+                        Colors.LIGHT_GRAY
+                    )
+                    CURRENCY_LAYOUT = currencyLayout.getBackgroundAnimator(
+                        Colors.BORDER,
+                        Colors.WHITE,
+                        Colors.LIGHT_GRAY
+                    )
+                    CURRENCY = currency.getCurrencyAnimator(Colors.BLACK, Colors.BORDER)
+                    CURRENCY_DOUBLE = currencyDouble.getCurrencyAnimator(
+                        Colors.BLACK,
+                        Colors.BORDER
+                    )
+                }
+            }
+        }
+
+        private val ToFrom = object : Extended {
+            override val DROPDOWN_ACTION: ObjectAnimator
+            override val DROPDOWN_TITLE: ObjectAnimator
+            override val CURRENCY_LAYOUT: ObjectAnimator
+            override val CURRENCY: ObjectAnimator
+            override val CURRENCY_DOUBLE: ObjectAnimator
+
+            init {
+                binding.fromCurrencyChooser.run {
+                    DROPDOWN_ACTION = dropdownAction.getBackgroundColorAnimator(
+                        Colors.CONTROL_NORMAL,
+                        Colors.DIVIDER
+                    )
+                    DROPDOWN_TITLE = dropdownTitle.getBackgroundAnimator(
+                        Colors.WHITE,
+                        Colors.LIGHT_GRAY
+                    )
+                    CURRENCY_LAYOUT = currencyLayout.getBackgroundAnimator(
+                        Colors.BORDER,
+                        Colors.WHITE,
+                        Colors.LIGHT_GRAY
+                    )
+                    CURRENCY = currency.getCurrencyAnimator(Colors.BLACK, Colors.BORDER)
+                    CURRENCY_DOUBLE = currencyDouble.getCurrencyAnimator(
+                        Colors.BLACK,
+                        Colors.BORDER
+                    )
+                }
+            }
+        }
+
+        interface Base {
+            val DROPDOWN_ACTION: ObjectAnimator
+            val DROPDOWN_TITLE: ObjectAnimator
+            val CURRENCY_LAYOUT: ObjectAnimator
+            val CURRENCY_DOUBLE: ObjectAnimator
+        }
+
+        interface Extended : Base {
+            val CURRENCY: ObjectAnimator
+        }
+
+        private fun ObjectAnimator.begin() {
+            if (isRunning) reverse()
+            else start()
+        }
+
+        private fun startFromObjectAnimators(scope: CoroutineScope) {
+            scope.launch {
+                launch { From.CURRENCY_LAYOUT.begin() }
+                launch { From.DROPDOWN_ACTION.begin() }
+                launch { From.DROPDOWN_TITLE.begin() }
+                launch { CONVERTER_LAYOUT.begin() }
+                launch { FromTo.CURRENCY_LAYOUT.begin() }
+                launch { FromTo.DROPDOWN_TITLE.begin() }
+                launch { FromTo.CURRENCY.begin() }
+                launch { FromTo.CURRENCY_DOUBLE.begin() }
+                launch { FromTo.DROPDOWN_ACTION.begin() }
+                launch { BOTTOM_NAVIGATION.begin() }
+                launch { DROPDOWN_SWAPPER.begin() }
+            }
+        }
+
+        private fun startToObjectAnimators(scope: CoroutineScope) {
+            scope.launch {
+                launch { To.CURRENCY_LAYOUT.begin() }
+                launch { To.DROPDOWN_ACTION.begin() }
+                launch { To.DROPDOWN_TITLE.begin() }
+                launch { CONVERTER_LAYOUT.begin() }
+                launch { ToFrom.CURRENCY_LAYOUT.begin() }
+                launch { ToFrom.DROPDOWN_TITLE.begin() }
+                launch { ToFrom.CURRENCY.begin() }
+                launch { ToFrom.CURRENCY_DOUBLE.begin() }
+                launch { ToFrom.DROPDOWN_ACTION.begin() }
+                launch { BOTTOM_NAVIGATION.begin() }
+                launch { DROPDOWN_SWAPPER.begin() }
+            }
+        }
+
+        private fun reverseFromObjectAnimators(scope: CoroutineScope) {
+            scope.launch {
+                launch { From.CURRENCY_LAYOUT.reverse() }
+                launch { From.DROPDOWN_ACTION.reverse() }
+                launch { From.DROPDOWN_TITLE.reverse() }
+                launch { CONVERTER_LAYOUT.reverse() }
+                launch { FromTo.CURRENCY_LAYOUT.reverse() }
+                launch { FromTo.DROPDOWN_TITLE.reverse() }
+                launch { FromTo.CURRENCY.reverse() }
+                launch { FromTo.CURRENCY_DOUBLE.reverse() }
+                launch { FromTo.DROPDOWN_ACTION.reverse() }
+                launch { BOTTOM_NAVIGATION.reverse() }
+                launch { DROPDOWN_SWAPPER.reverse() }
+            }
+        }
+
+        private fun reverseToObjectAnimators(scope: CoroutineScope) {
+            scope.launch {
+                launch { To.CURRENCY_LAYOUT.reverse() }
+                launch { To.DROPDOWN_ACTION.reverse() }
+                launch { To.DROPDOWN_TITLE.reverse() }
+                launch { CONVERTER_LAYOUT.reverse() }
+                launch { ToFrom.CURRENCY_LAYOUT.reverse() }
+                launch { ToFrom.DROPDOWN_TITLE.reverse() }
+                launch { ToFrom.CURRENCY.reverse() }
+                launch { ToFrom.CURRENCY_DOUBLE.reverse() }
+                launch { ToFrom.DROPDOWN_ACTION.reverse() }
+                launch { BOTTOM_NAVIGATION.reverse() }
+                launch { DROPDOWN_SWAPPER.reverse() }
+            }
+        }
+
+        fun animateCurrencySwapping(scope: CoroutineScope) {
+            scope.launch {
+                launch { CURRENCY_SWAPPING.begin() }
+                launch { From.CURRENCY_DOUBLE.begin() }
+                launch { To.CURRENCY_DOUBLE }
+            }
+        }
+
+        fun startObjectAnimators(dropdown: Dropdown, scope: CoroutineScope) {
+            if (dropdown == FROM) startFromObjectAnimators(scope)
+            else startToObjectAnimators(scope)
+        }
+
+        fun reverseObjectAnimators(dropdown: Dropdown, scope: CoroutineScope) {
+            if (dropdown == FROM) reverseFromObjectAnimators(scope)
+            else reverseToObjectAnimators(scope)
+        }
     }
 
     override fun onCreateView(
@@ -124,13 +328,16 @@ class ConverterFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         orientation = resources.configuration.orientation
-        initializeColors()
         binding = FragmentConverterBinding.inflate(inflater, container, false).apply {
             lifecycleOwner = viewLifecycleOwner
         }
         setDropdownsBackground()
         initializeAnimations()
-        initializeAnimators()
+        Animators = ObjectAnimators(
+            binding,
+            (requireActivity() as CurrencyConverterActivity).getBottomNavigationAnimator(),
+            Colors
+        )
         setUpConverterLayoutTransition()
         setUpRecyclerView()
         setListeners()
@@ -160,7 +367,10 @@ class ConverterFragment : Fragment() {
     }
 
     private fun setDropdownBackground(dropdown: LinearLayout) {
-        dropdown.background = dropdown.getGradientDrawable()
+        dropdown.background = dropdown.getGradientDrawable(
+            strokeColor = Colors.BORDER,
+            backgroundColor = Colors.WHITE
+        )
     }
 
     private fun initializeAnimations() {
@@ -169,18 +379,6 @@ class ConverterFragment : Fragment() {
 
         toFadeIn = AlphaAnimation(0f, 1f).setUp(resources)
         toFadeOut = AlphaAnimation(1f, 0f).setUp(resources)
-    }
-
-    private fun initializeAnimators() {
-        initializeCurrencyLayoutAnimators()
-        initializeDropdownTitleAnimators()
-        initializeDropdownActionAnimators()
-        initializeCurrencyAnimators()
-        initializeConverterLayoutAnimator()
-        initializeBottomNavigationAnimator()
-        initializeSwapAnimator()
-        initializeCurrencySwappingAnimator()
-        initializeCurrencyDoubleAnimators()
     }
 
     private fun setUpConverterLayoutTransition() {
@@ -192,120 +390,6 @@ class ConverterFragment : Fragment() {
             setInterpolator(DISAPPEARING, LinearInterpolator())
             setDuration(resources.getInteger(R.integer.anim_time).toLong())
         }
-    }
-
-    private fun initializeCurrencyLayoutAnimators() {
-        binding.fromCurrencyChooser.currencyLayout.run {
-            fromCurrencyLayoutAnimator = getAnimator()
-            toFromCurrencyLayoutAnimator = getBackgroundAnimator()
-        }
-
-        binding.toCurrencyChooser.currencyLayout.run {
-            toCurrencyLayoutAnimator = getAnimator()
-            fromToCurrencyLayoutAnimator = getBackgroundAnimator()
-        }
-    }
-
-    private fun initializeDropdownTitleAnimators() {
-        binding.fromCurrencyChooser.dropdownTitle.run {
-            fromDropdownTitleAnimator = getAnimator()
-            toFromDropdownTitleAnimator = getBackgroundAnimator()
-        }
-
-        binding.toCurrencyChooser.dropdownTitle.run {
-            toDropdownTitleAnimator = getAnimator()
-            fromToDropdownTitleAnimator = getBackgroundAnimator()
-        }
-    }
-
-    private fun initializeCurrencyAnimators() {
-        binding.fromCurrencyChooser.run {
-            toFromCurrencyAnimatorMain = currencyMain.getCurrencyAnimator()
-            toFromCurrencyAnimatorSecondary = currencySecondary.getCurrencyAnimator()
-        }
-
-        binding.toCurrencyChooser.run {
-            fromToCurrencyAnimatorMain = currencyMain.getCurrencyAnimator()
-            fromToCurrencyAnimatorSecondary = currencySecondary.getCurrencyAnimator()
-        }
-    }
-
-    private fun initializeDropdownActionAnimators() {
-        binding.fromCurrencyChooser.dropdownAction.run {
-            fromDropdownActionAnimator = getAnimator()
-            toFromDropdownActionAnimator = getBackgroundColorAnimator()
-        }
-
-        binding.toCurrencyChooser.dropdownAction.run {
-            toDropdownActionAnimator = getAnimator()
-            fromToDropdownActionAnimator = getBackgroundColorAnimator()
-        }
-    }
-
-    private fun initializeConverterLayoutAnimator() {
-        converterLayoutAnimator = binding.converterLayout.getAnimator()
-    }
-
-    private fun initializeBottomNavigationAnimator() {
-        bottomNavigationAnimator =
-            (requireActivity() as CurrencyConverterActivity).getBottomNavigationAnimator()
-    }
-
-    private fun initializeSwapAnimator() {
-        dropdownSwapperAnimator = binding.dropdownSwapper.getBackgroundColorAnimator()
-    }
-
-    private fun initializeCurrencySwappingAnimator() {
-        currencySwappingAnimator = ObjectAnimator.ofFloat(
-            binding.dropdownSwapper,
-            View.ROTATION,
-            binding.dropdownSwapper.rotation - 180f,
-            binding.dropdownSwapper.rotation
-        ).apply {
-            duration = 3000
-            interpolator = LinearInterpolator()
-        }
-    }
-
-    private fun initializeCurrencyDoubleAnimators() {
-        fromCurrencyDoubleAnimator = ObjectAnimator.ofFloat(
-            binding.fromCurrencyDouble,
-            View.TRANSLATION_Y,
-            binding.fromCurrencyDouble.translationY,
-            112f.toPixels(resources)
-        ).apply {
-            duration = 3000
-            interpolator = LinearInterpolator()
-        }
-
-        toCurrencyDoubleAnimator = ObjectAnimator.ofFloat(
-            binding.toCurrencyDouble,
-            View.TRANSLATION_Y,
-            binding.toCurrencyDouble.translationY,
-            -(112f.toPixels(resources))
-        ).apply {
-            duration = 3000
-            interpolator = LinearInterpolator()
-        }
-    }
-
-    private fun initializeColors() {
-        Colors.WHITE = getColorFromResource(R.color.white)
-        Colors.BLACK = getColorFromResource(R.color.black)
-        Colors.LIGHT_GRAY = getColorFromResource(R.color.light_gray)
-        Colors.PRIMARY = getColorFromAttribute(R.attr.colorPrimary)
-        Colors.PRIMARY_VARIANT = getColorFromAttribute(R.attr.colorPrimaryVariant)
-        Colors.BORDER = getColorFromResource(R.color.border)
-        Colors.DIVIDER = getColorFromResource(R.color.divider)
-        Colors.CONTROL_NORMAL = getColorFromAttribute(R.attr.colorControlNormal)
-    }
-
-    private fun getColorFromResource(@ColorRes id: Int): Int {
-        return ContextCompat.getColor(requireContext(), id)
-    }
-
-    private fun getColorFromAttribute(@AttrRes id: Int): Int {
-        return requireContext().getColorFromAttribute(id)
     }
 
     private fun setListeners() {
@@ -395,7 +479,11 @@ class ConverterFragment : Fragment() {
             collectWhenStarted(modifyDivider, ::onDividerHeightChanged)
             collectWhenStarted(countries, ::onCountriesUpdated)
             collectWhenStarted(searcherState, ::onSearcherStateChanged)
-            collectWhenStarted(animateCurrencySwapping, { animateCurrencySwapping() }, false)
+            collectWhenStarted(
+                animateCurrencySwapping,
+                { Animators.animateCurrencySwapping(viewLifecycleOwner.lifecycleScope) },
+                false
+            )
         }
     }
 
@@ -406,14 +494,14 @@ class ConverterFragment : Fragment() {
     private fun onSelectedCurrencyChanged(country: Country, from: Boolean) {
         if (from) onSelectedCurrencyChanged(
             country,
-            binding.fromCurrencyChooser.currencyMain,
-            binding.fromCurrencyChooser.currencySecondary,
+            binding.fromCurrencyChooser.currency,
+            binding.fromCurrencyChooser.currencyDouble,
             fromFadeIn,
             fromFadeOut
         ) else onSelectedCurrencyChanged(
             country,
-            binding.toCurrencyChooser.currencyMain,
-            binding.toCurrencyChooser.currencySecondary,
+            binding.toCurrencyChooser.currency,
+            binding.toCurrencyChooser.currencyDouble,
             toFadeIn,
             toFadeOut
         )
@@ -587,97 +675,8 @@ class ConverterFragment : Fragment() {
         setOnScreenTouched(dropdown, true)
     }
 
-    private fun animateCurrencySwapping() {
-        startObjectAnimator(currencySwappingAnimator)
-        startObjectAnimator(fromCurrencyDoubleAnimator)
-        startObjectAnimator(toCurrencyDoubleAnimator)
-    }
-
-    private fun startObjectAnimator(objectAnimator: ObjectAnimator) {
-        if (objectAnimator.isRunning) objectAnimator.reverse()
-        else objectAnimator.start()
-    }
-
-    private fun reverseObjectAnimator(objectAnimator: ObjectAnimator) {
-        objectAnimator.reverse()
-    }
-
-    private fun startObjectAnimators(dropdown: Dropdown) {
-        if (dropdown == FROM) startFromObjectAnimators()
-        else startToObjectAnimators()
-    }
-
-    private fun startFromObjectAnimators() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            launch { startObjectAnimator(fromCurrencyLayoutAnimator) }
-            launch { startObjectAnimator(fromDropdownActionAnimator) }
-            launch { startObjectAnimator(converterLayoutAnimator) }
-            launch { startObjectAnimator(fromDropdownTitleAnimator) }
-            launch { startObjectAnimator(fromToCurrencyLayoutAnimator) }
-            launch { startObjectAnimator(fromToDropdownTitleAnimator) }
-            launch { startObjectAnimator(fromToCurrencyAnimatorMain) }
-            launch { startObjectAnimator(fromToCurrencyAnimatorSecondary) }
-            launch { startObjectAnimator(fromToDropdownActionAnimator) }
-            launch { startObjectAnimator(bottomNavigationAnimator) }
-            launch { startObjectAnimator(dropdownSwapperAnimator) }
-        }
-    }
-
-    private fun startToObjectAnimators() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            launch { startObjectAnimator(toCurrencyLayoutAnimator) }
-            launch { startObjectAnimator(toDropdownActionAnimator) }
-            launch { startObjectAnimator(converterLayoutAnimator) }
-            launch { startObjectAnimator(toDropdownTitleAnimator) }
-            launch { startObjectAnimator(toFromCurrencyLayoutAnimator) }
-            launch { startObjectAnimator(toFromDropdownTitleAnimator) }
-            launch { startObjectAnimator(toFromCurrencyAnimatorMain) }
-            launch { startObjectAnimator(toFromCurrencyAnimatorSecondary) }
-            launch { startObjectAnimator(toFromDropdownActionAnimator) }
-            launch { startObjectAnimator(bottomNavigationAnimator) }
-            launch { startObjectAnimator(dropdownSwapperAnimator) }
-        }
-    }
-
-    private fun reverseObjectAnimators(dropdown: Dropdown) {
-        if (dropdown == FROM) reverseFromObjectAnimators()
-        else reverseToObjectAnimators()
-    }
-
-    private fun reverseFromObjectAnimators() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            launch { reverseObjectAnimator(fromCurrencyLayoutAnimator) }
-            launch { reverseObjectAnimator(fromDropdownActionAnimator) }
-            launch { reverseObjectAnimator(converterLayoutAnimator) }
-            launch { reverseObjectAnimator(fromDropdownTitleAnimator) }
-            launch { reverseObjectAnimator(fromToCurrencyLayoutAnimator) }
-            launch { reverseObjectAnimator(fromToDropdownTitleAnimator) }
-            launch { reverseObjectAnimator(fromToCurrencyAnimatorMain) }
-            launch { reverseObjectAnimator(fromToCurrencyAnimatorSecondary) }
-            launch { reverseObjectAnimator(fromToDropdownActionAnimator) }
-            launch { reverseObjectAnimator(bottomNavigationAnimator) }
-            launch { reverseObjectAnimator(dropdownSwapperAnimator) }
-        }
-    }
-
-    private fun reverseToObjectAnimators() {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            launch { reverseObjectAnimator(toCurrencyLayoutAnimator) }
-            launch { reverseObjectAnimator(toDropdownActionAnimator) }
-            launch { reverseObjectAnimator(converterLayoutAnimator) }
-            launch { reverseObjectAnimator(toDropdownTitleAnimator) }
-            launch { reverseObjectAnimator(toFromCurrencyLayoutAnimator) }
-            launch { reverseObjectAnimator(toFromDropdownTitleAnimator) }
-            launch { reverseObjectAnimator(toFromCurrencyAnimatorMain) }
-            launch { reverseObjectAnimator(toFromCurrencyAnimatorSecondary) }
-            launch { reverseObjectAnimator(toFromDropdownActionAnimator) }
-            launch { reverseObjectAnimator(bottomNavigationAnimator) }
-            launch { reverseObjectAnimator(dropdownSwapperAnimator) }
-        }
-    }
-
     private fun expandDropdown(dropdown: Dropdown) {
-        startObjectAnimators(dropdown)
+        Animators.startObjectAnimators(dropdown, viewLifecycleOwner.lifecycleScope)
         showCurrenciesCard(dropdown)
     }
 
@@ -821,7 +820,7 @@ class ConverterFragment : Fragment() {
     }
 
     private fun collapseDropdown(dropdown: Dropdown) {
-        reverseObjectAnimators(dropdown)
+        Animators.reverseObjectAnimators(dropdown, viewLifecycleOwner.lifecycleScope)
         hideCurrenciesCard()
         viewModel.onDropdownCollapsed()
     }

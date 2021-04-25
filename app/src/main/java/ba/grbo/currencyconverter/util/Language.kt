@@ -1,4 +1,4 @@
-package ba.grbo.currencyconverter.data.models.preferences
+package ba.grbo.currencyconverter.util
 
 import java.util.*
 

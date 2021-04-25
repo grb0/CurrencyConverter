@@ -1,11 +1,10 @@
-package ba.grbo.currencyconverter.data.models.managers
+package ba.grbo.currencyconverter.util
 
 import android.content.Context
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import ba.grbo.currencyconverter.R
-import ba.grbo.currencyconverter.util.getColorFromAttribute
 
 class Colors(private val context: Context) {
     val WHITE = getColorFromResource(R.color.white)

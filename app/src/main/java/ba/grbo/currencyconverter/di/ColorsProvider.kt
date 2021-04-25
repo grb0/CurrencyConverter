@@ -1,7 +1,7 @@
 package ba.grbo.currencyconverter.di
 
 import android.app.Activity
-import ba.grbo.currencyconverter.data.models.managers.Colors
+import ba.grbo.currencyconverter.util.Colors
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

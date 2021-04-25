@@ -5,9 +5,9 @@ import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Currency
-import ba.grbo.currencyconverter.data.models.preferences.FilterBy
-import ba.grbo.currencyconverter.data.models.preferences.Language
-import ba.grbo.currencyconverter.data.models.preferences.Theme
+import ba.grbo.currencyconverter.util.FilterBy
+import ba.grbo.currencyconverter.util.Language
+import ba.grbo.currencyconverter.util.Theme
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
