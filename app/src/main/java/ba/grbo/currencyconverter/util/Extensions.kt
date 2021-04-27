@@ -44,6 +44,7 @@ import ba.grbo.currencyconverter.util.Constants.PLACEHOLDER
 import ba.grbo.currencyconverter.util.Constants.TEXT_COLOR
 import ba.grbo.currencyconverter.util.Constants.TYPEFACE
 import com.google.android.material.transition.MaterialFadeThrough
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import java.util.*
@@ -105,6 +106,15 @@ fun <T> Fragment.collectWhenStarted(
     distinctUntilChanged: Boolean = true
 ) {
     collect(flow, action, Lifecycle.State.STARTED, distinctUntilChanged)
+}
+
+fun <T> Fragment.collectWhenStarted(
+    flow: Flow<T>,
+    action: suspend (T) -> Unit
+): Job {
+    return flow.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+        .onEach { action(it) }
+        .launchIn(viewLifecycleOwner.lifecycleScope)
 }
 
 fun ObjectAnimator.setUp(resources: Resources): ObjectAnimator {
@@ -362,16 +372,32 @@ fun View.setMargins(size: Float) {
     }
 }
 
-fun TextView.getDoubleAnimator(from: Boolean = false): ObjectAnimator {
-    return ObjectAnimator.ofFloat(
-        this,
-        View.TRANSLATION_Y,
-        translationY,
-        if (from) 112f.toPixels(resources) else -(112f.toPixels(resources))
-    ).apply {
-        duration = 3000
-        interpolator = LinearInterpolator()
-    }
+private fun TextView.getVerticalTranslationAnimator(
+    from: Boolean
+): ObjectAnimator = ObjectAnimator.ofFloat(
+    this,
+    View.TRANSLATION_Y,
+    translationY,
+    if (from) 112f.toPixels(resources) else -(112f.toPixels(resources))
+).setUp(resources)
+
+private fun TextView.getHorizontalTranslationAnimator(
+    from: Boolean,
+    width: Float
+): ObjectAnimator = ObjectAnimator.ofFloat(
+    this,
+    View.TRANSLATION_X,
+    translationX,
+    if (from) (width / 2) + 12f.toPixels(resources) else -((width / 2) + 12f.toPixels(resources))
+).setUp(resources)
+
+fun TextView.getTranslationAnimator(
+    from: Boolean,
+    landscape: Boolean,
+    width: Float
+): ObjectAnimator {
+    return if (!landscape) getVerticalTranslationAnimator(from)
+    else getHorizontalTranslationAnimator(from, width)
 }
 
 fun ImageButton.getRotationAnimatior(): ObjectAnimator {
@@ -380,10 +406,7 @@ fun ImageButton.getRotationAnimatior(): ObjectAnimator {
         View.ROTATION,
         rotation - 180f,
         rotation
-    ).apply {
-        duration = 3000
-        interpolator = LinearInterpolator()
-    }
+    ).setUp(resources)
 }
 
 fun getArgbPropertyValueHolderForProperty(

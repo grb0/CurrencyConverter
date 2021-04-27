@@ -31,12 +31,20 @@ class ConverterViewModel @Inject constructor(
     val dropdownState: StateFlow<DropdownState>
         get() = _dropdownState
 
-    private val _fromSelectedCurrency = MutableStateFlow(plainCountries[0])
-    val fromSelectedCurrency: StateFlow<Country>
+    private val _fromCurrency = MutableStateFlow(plainCountries[0])
+    val fromCurrency: StateFlow<Country>
+        get() = _fromCurrency
+
+    private val _toCurrency = MutableStateFlow(plainCountries[1])
+    val toCurrency: StateFlow<Country>
+        get() = _toCurrency
+
+    private val _fromSelectedCurrency = SingleSharedFlow<Country>()
+    val fromSelectedCurrency: SharedFlow<Country>
         get() = _fromSelectedCurrency
 
-    private val _toSelectedCurrency = MutableStateFlow(plainCountries[0])
-    val toSelectedCurrency: StateFlow<Country>
+    private val _toSelectedCurrency = SingleSharedFlow<Country>()
+    val toSelectedCurrency: SharedFlow<Country>
         get() = _toSelectedCurrency
 
     private val _searcherState = MutableStateFlow<SearcherState>(Unfocused(NONE))
@@ -55,9 +63,9 @@ class ConverterViewModel @Inject constructor(
     val resetSearcher: SharedFlow<Unit>
         get() = _resetSearcher
 
-    private val _animateCurrencySwapping = SingleSharedFlow<Unit>()
-    val animateCurrencySwapping: SharedFlow<Unit>
-        get() = _animateCurrencySwapping
+    private val _swappingState = MutableStateFlow(SwappingState.None)
+    val swappingState: SharedFlow<SwappingState>
+        get() = _swappingState
 
     private val onSearcherTextChanged = MutableStateFlow("")
 
@@ -65,6 +73,7 @@ class ConverterViewModel @Inject constructor(
 
     private var lastClickedDropdown = NONE
     private var currenciesCardModifiedForLandscape = false
+    private var initialSwappingState = SwappingState.None
 
     sealed class DropdownState {
         abstract val dropdown: Dropdown
@@ -80,6 +89,18 @@ class ConverterViewModel @Inject constructor(
         class Focusing(override val dropdown: Dropdown) : SearcherState()
         class Unfocusing(override val dropdown: Dropdown) : SearcherState()
         data class Unfocused(override val dropdown: Dropdown) : SearcherState()
+    }
+
+    enum class SwappingState {
+        Swapping,
+        SwappingInterrupted,
+        Swapped,
+        SwappedWithInterruption,
+        ReverseSwapping,
+        ReverseSwappingInterrupted,
+        ReverseSwapped,
+        ReverseSwappedWithInterruption,
+        None
     }
 
     enum class Dropdown {
@@ -130,20 +151,59 @@ class ConverterViewModel @Inject constructor(
     }
 
     fun onDropdownSwapperClicked() {
-        animateCurrencySwapping()
-        swapSelectedCurrencies()
+        _swappingState.value = when (_swappingState.value) {
+            SwappingState.None,
+            SwappingState.SwappedWithInterruption,
+            SwappingState.ReverseSwapped -> {
+                initialSwappingState = SwappingState.Swapping
+                SwappingState.Swapping
+            }
+            SwappingState.ReverseSwappedWithInterruption,
+            SwappingState.Swapped -> {
+                initialSwappingState = SwappingState.ReverseSwapping
+                SwappingState.ReverseSwapping
+            }
+            SwappingState.Swapping,
+            SwappingState.ReverseSwappingInterrupted -> SwappingState.SwappingInterrupted
+            SwappingState.ReverseSwapping,
+            SwappingState.SwappingInterrupted -> SwappingState.ReverseSwappingInterrupted
+        }
     }
 
-    private fun animateCurrencySwapping() {
-        _animateCurrencySwapping.tryEmit(Unit)
+    fun onSwapped() {
+        _swappingState.value = SwappingState.Swapped
+    }
+
+    fun onReverseSwapped() {
+        _swappingState.value = SwappingState.ReverseSwapped
+    }
+
+    fun onSwappingInterrupted() {
+        _swappingState.value = SwappingState.SwappedWithInterruption
+    }
+
+    fun onReverseSwappingInterrupted() {
+        _swappingState.value = SwappingState.ReverseSwappedWithInterruption
+    }
+
+    fun onSwappingCompleted() {
+        if (initialSwappingState == SwappingState.Swapping) swapSelectedCurrencies()
+    }
+
+    fun onReverseSwappingCompleted() {
+        if (initialSwappingState == SwappingState.ReverseSwapping) swapSelectedCurrencies()
+    }
+
+    fun resetSwappingState() {
+        _swappingState.value = SwappingState.None
     }
 
     private fun swapSelectedCurrencies() {
-        val fromCountry = _fromSelectedCurrency.value
-        val toCountry = _toSelectedCurrency.value
+        val fromCountry = _fromCurrency.value
+        val toCountry = _toCurrency.value
         viewModelScope.launch {
-            launch { _fromSelectedCurrency.value = toCountry }
-            launch { _toSelectedCurrency.value = fromCountry }
+            launch { _fromCurrency.value = toCountry }
+            launch { _toCurrency.value = fromCountry }
         }
     }
 
@@ -186,9 +246,13 @@ class ConverterViewModel @Inject constructor(
     }
 
     private fun updateSelectedCurrency(country: Country) {
-        if (_dropdownState.value.dropdown == FROM) _fromSelectedCurrency.value = country
-        else _toSelectedCurrency.value = country
-
+        if (_dropdownState.value.dropdown == FROM) {
+            _fromSelectedCurrency.tryEmit(country)
+            _fromCurrency.value = country
+        } else {
+            _toSelectedCurrency.tryEmit(country)
+            _toCurrency.value = country
+        }
     }
 
     fun onDropdownCollapsed(dropdown: Dropdown) {

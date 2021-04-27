@@ -12,7 +12,9 @@ import kotlinx.coroutines.launch
 class ObjectAnimators(
     binding: FragmentConverterBinding,
     bottomNavigationAnimator: ObjectAnimator,
-    Colors: Colors
+    Colors: Colors,
+    landscape: Boolean,
+    width: Float
 ) {
     private val CONVERTER_LAYOUT = binding.converterLayout.getAnimator(
         Colors.WHITE,
@@ -49,12 +51,16 @@ class ObjectAnimators(
                     Colors.WHITE,
                     Colors.LIGHT_GRAY
                 )
-                CURRENCY_DOUBLE = binding.fromCurrencyDouble.getDoubleAnimator(true)
+                CURRENCY_DOUBLE = binding.fromCurrencyDouble.getTranslationAnimator(
+                    true,
+                    landscape,
+                    width
+                )
             }
         }
     }
 
-    private val To = object : Base {
+    val To = object : Base {
         override val DROPDOWN_ACTION: ObjectAnimator
         override val DROPDOWN_TITLE: ObjectAnimator
         override val CURRENCY_LAYOUT: ObjectAnimator
@@ -78,7 +84,11 @@ class ObjectAnimators(
                     Colors.WHITE,
                     Colors.LIGHT_GRAY
                 )
-                CURRENCY_DOUBLE = binding.toCurrencyDouble.getDoubleAnimator()
+                CURRENCY_DOUBLE = binding.toCurrencyDouble.getTranslationAnimator(
+                    false,
+                    landscape,
+                    width
+                )
             }
         }
     }
@@ -229,7 +239,15 @@ class ObjectAnimators(
         scope.launchWhenStarted {
             launch { CURRENCY_SWAPPING.begin() }
             launch { From.CURRENCY_DOUBLE.begin() }
-            launch { To.CURRENCY_DOUBLE }
+            launch { To.CURRENCY_DOUBLE.begin() }
+        }
+    }
+
+    fun animateCurrencyReverseSwapping(scope: LifecycleCoroutineScope) {
+        scope.launchWhenStarted {
+            launch { CURRENCY_SWAPPING.begin() }
+            launch { From.CURRENCY_DOUBLE.reverse() }
+            launch { To.CURRENCY_DOUBLE.reverse() }
         }
     }
 

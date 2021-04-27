@@ -1,8 +1,6 @@
 package ba.grbo.currencyconverter.ui.fragments
 
 import android.animation.Animator
-import android.animation.LayoutTransition
-import android.animation.LayoutTransition.*
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Point
@@ -14,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
-import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageButton
 import android.widget.LinearLayout
@@ -31,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.data.models.Currency
+import ba.grbo.currencyconverter.databinding.DropdownCurrencyChooserBinding
 import ba.grbo.currencyconverter.databinding.FragmentConverterBinding
 import ba.grbo.currencyconverter.di.AutohideScrollbar
 import ba.grbo.currencyconverter.di.ExtendChooserLandscape
@@ -44,8 +42,10 @@ import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown.FROM
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Focusing
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocusing
+import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SwappingState.*
 import ba.grbo.currencyconverter.util.*
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import javax.inject.Inject
@@ -81,6 +81,8 @@ class ConverterFragment : Fragment() {
     private lateinit var Animations: Animations
 
     private lateinit var activity: CurrencyConverterActivity
+    private lateinit var fromCurrencyJob: Job
+    private lateinit var toCurrencyJob: Job
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -88,6 +90,11 @@ class ConverterFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         return setup(inflater, container)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewModel.resetSwappingState()
     }
 
     override fun onCreateAnimator(transit: Int, enter: Boolean, nextAnim: Int): Animator {
@@ -146,7 +153,6 @@ class ConverterFragment : Fragment() {
     private fun initMotions() {
         initAnimations()
         initAnimators()
-        setUpConverterLayoutTransition()
     }
 
     private fun initAnimations() {
@@ -157,19 +163,10 @@ class ConverterFragment : Fragment() {
         Animators = ObjectAnimators(
             binding,
             activity.getBottomNavigationAnimator(),
-            Colors
+            Colors,
+            orientation.isLandscape,
+            resources.displayMetrics.widthPixels.toFloat()
         )
-    }
-
-    private fun setUpConverterLayoutTransition() {
-        binding.converterLayout.layoutTransition = LayoutTransition().apply {
-            setInterpolator(CHANGE_APPEARING, LinearInterpolator())
-            setInterpolator(CHANGE_DISAPPEARING, LinearInterpolator())
-            setInterpolator(CHANGING, LinearInterpolator())
-            setInterpolator(APPEARING, LinearInterpolator())
-            setInterpolator(DISAPPEARING, LinearInterpolator())
-            setDuration(resources.getInteger(R.integer.anim_time).toLong())
-        }
     }
 
     private fun setUpRecyclerView() {
@@ -249,19 +246,36 @@ class ConverterFragment : Fragment() {
 
     private fun collectFlows() {
         viewModel.run {
-            collectWhenStarted(fromSelectedCurrency, { onSelectedCurrencyChanged(it, true) })
-            collectWhenStarted(toSelectedCurrency, { onSelectedCurrencyChanged(it, false) })
-            collectWhenStarted(dropdownState, ::onDropdownStateChanged)
-            collectWhenStarted(showResetButton, ::showResetButton)
+            fromCurrencyJob = collectWhenStarted(fromCurrency) { onCurrencyChanged(it, true) }
+            toCurrencyJob = collectWhenStarted(toCurrency) { onCurrencyChanged(it, false) }
+            collectWhenStarted(fromSelectedCurrency, { onSelectedCurrencyChanged(it, true) }, true)
+            collectWhenStarted(toSelectedCurrency, { onSelectedCurrencyChanged(it, false) }, true)
+            collectWhenStarted(dropdownState, ::onDropdownStateChanged, true)
+            collectWhenStarted(showResetButton, ::showResetButton, true)
             collectWhenStarted(resetSearcher, { resetSearcher() }, false)
-            collectWhenStarted(modifyDivider, ::modifyDividerDrawable)
-            collectWhenStarted(countries, ::onCountriesUpdated)
-            collectWhenStarted(searcherState, ::onSearcherStateChanged)
-            collectWhenStarted(
-                animateCurrencySwapping,
-                { Animators.animateCurrencySwapping(viewLifecycleOwner.lifecycleScope) },
-                false
-            )
+            collectWhenStarted(modifyDivider, ::modifyDividerDrawable, true)
+            collectWhenStarted(countries, ::onCountriesUpdated, true)
+            collectWhenStarted(searcherState, ::onSearcherStateChanged, true)
+            collectWhenStarted(swappingState, ::onSwappingStateChanged, false)
+        }
+    }
+
+    private fun onCurrencyChanged(country: Country, from: Boolean) {
+        fun updateCurrency(view: TextView) {
+            view.run {
+                if (text.isEmpty()) {
+                    text = country.currency.getUiName(uiName)
+                    setCompoundDrawablesWithIntrinsicBounds(country.flag, null, null, null)
+                }
+            }
+        }
+
+        if (from) {
+            updateCurrency(binding.fromCurrencyChooser.currency)
+            fromCurrencyJob.cancel()
+        } else {
+            updateCurrency(binding.toCurrencyChooser.currency)
+            toCurrencyJob.cancel()
         }
     }
 
@@ -293,12 +307,8 @@ class ConverterFragment : Fragment() {
         fadeOut: AlphaAnimation
     ) {
         when {
-            main.text.isEmpty() -> {
-                main.text = country.currency.getUiName(uiName)
-                main.setCompoundDrawablesWithIntrinsicBounds(country.flag, null, null, null)
-            }
-            secondary.isVisible -> changeCurrencyState(country, main, secondary, fadeIn, fadeOut)
             main.isVisible -> changeCurrencyState(country, secondary, main, fadeIn, fadeOut)
+            secondary.isVisible -> changeCurrencyState(country, main, secondary, fadeIn, fadeOut)
         }
     }
 
@@ -464,6 +474,153 @@ class ConverterFragment : Fragment() {
 
     private fun restoreOriginalOnScreenTouched(dropdown: Dropdown) {
         setOnScreenTouched(dropdown)
+    }
+
+    private fun onSwappingStateChanged(state: SwappingState) {
+        when (state) {
+            Swapping -> onSwapping()
+            SwappingInterrupted -> onSwappingInterrupted()
+            Swapped -> onSwapped()
+            SwappedWithInterruption -> onSwappedWithInterruption()
+            ReverseSwapping -> onReverseSwapping()
+            ReverseSwappingInterrupted -> onReverseSwappingInterrupted()
+            ReverseSwapped -> onReverseSwapped()
+            ReverseSwappedWithInterruption -> onReverseSwappedWithInterruption()
+            None -> {
+            } // Do nothing
+        }
+    }
+
+    private fun onSwapping() {
+        prepareForSwapping()
+        startSwappingAnimation()
+    }
+
+    private fun onSwappingInterrupted() {
+        prepareForReversingSwap()
+        startSwappingAnimation()
+    }
+
+    private fun prepareForReversingSwap() {
+        setAnimationListener(SwappingInterrupted)
+    }
+
+    private fun onSwapped() {
+        swapDoubleWithReal(binding.fromCurrencyChooser, binding.toCurrencyDouble)
+        swapDoubleWithReal(binding.toCurrencyChooser, binding.fromCurrencyDouble)
+        viewModel.onSwappingCompleted()
+    }
+
+    private fun onSwappedWithInterruption() {
+        onReverseSwapped()
+    }
+
+    private fun swapDoubleWithReal(binding: DropdownCurrencyChooserBinding, double: TextView) {
+        // becase main and double are both invisible it doesn't matter which one we use
+        binding.currency.text = double.text
+        binding.currency.setCompoundDrawablesWithIntrinsicBounds(
+            double.compoundDrawables[0], null, null, null
+        )
+
+        double.visibility = View.INVISIBLE
+        binding.currency.visibility = View.VISIBLE
+    }
+
+    private fun onReverseSwapping() {
+        prepareForReverseSwapping()
+        startReverseSwappingAnimation()
+    }
+
+    private fun onReverseSwappingInterrupted() {
+        prepareForReReversingSwap()
+        startReverseSwappingAnimation()
+    }
+
+    private fun prepareForReReversingSwap() {
+        setAnimationListener(ReverseSwappingInterrupted)
+    }
+
+    private fun onReverseSwapped() {
+        swapDoubleWithReal(binding.fromCurrencyChooser, binding.fromCurrencyDouble)
+        swapDoubleWithReal(binding.toCurrencyChooser, binding.toCurrencyDouble)
+        viewModel.onReverseSwappingCompleted()
+    }
+
+    private fun onReverseSwappedWithInterruption() {
+        onSwapped()
+    }
+
+    private fun prepareForReverseSwapping() {
+        swapCurrentlyVisibleWithDouble(binding.fromCurrencyChooser, binding.toCurrencyDouble)
+        swapCurrentlyVisibleWithDouble(binding.toCurrencyChooser, binding.fromCurrencyDouble)
+        setAnimationListener(ReverseSwapping)
+    }
+
+    private fun startReverseSwappingAnimation() {
+        Animators.animateCurrencyReverseSwapping(viewLifecycleOwner.lifecycleScope)
+    }
+
+    private fun prepareForSwapping() {
+        swapCurrentlyVisibleWithDouble(binding.fromCurrencyChooser, binding.fromCurrencyDouble)
+        swapCurrentlyVisibleWithDouble(binding.toCurrencyChooser, binding.toCurrencyDouble)
+        setAnimationListener(Swapping)
+    }
+
+    private fun startSwappingAnimation() {
+        Animators.animateCurrencySwapping(viewLifecycleOwner.lifecycleScope)
+    }
+
+    private fun swapCurrentlyVisibleWithDouble(
+        binding: DropdownCurrencyChooserBinding,
+        double: TextView
+    ) {
+        val data = if (binding.currency.isVisible) {
+            Pair(
+                binding.currency.text,
+                binding.currency.compoundDrawables[0]
+            )
+        } else {
+            Pair(
+                binding.currencyDouble.text,
+                binding.currencyDouble.compoundDrawables[0]
+            )
+        }
+
+        double.run {
+            text = data.first
+            setCompoundDrawablesWithIntrinsicBounds(data.second, null, null, null)
+        }
+
+
+        if (binding.currency.isVisible) {
+            binding.currency.visibility = View.INVISIBLE
+        } else binding.currencyDouble.visibility = View.INVISIBLE
+        double.visibility = View.VISIBLE
+    }
+
+    private fun setAnimationListener(state: SwappingState) {
+        Animators.To.CURRENCY_DOUBLE.removeAllListeners()
+        Animators.To.CURRENCY_DOUBLE.addListener(object : Animator.AnimatorListener {
+            override fun onAnimationStart(animation: Animator?) {
+            }
+
+            @Suppress("NON_EXHAUSTIVE_WHEN")
+            override fun onAnimationEnd(animation: Animator?) {
+                when (state) {
+                    Swapping -> viewModel.onSwapped()
+                    ReverseSwapping -> viewModel.onReverseSwapped()
+                    SwappingInterrupted -> viewModel.onSwappingInterrupted()
+                    ReverseSwappingInterrupted -> viewModel.onReverseSwappingInterrupted()
+                }
+                Animators.To.CURRENCY_DOUBLE.removeListener(this)
+            }
+
+            override fun onAnimationCancel(animation: Animator?) {
+            }
+
+            override fun onAnimationRepeat(animation: Animator?) {
+            }
+        })
     }
 
     private fun onDropdownExpanding(dropdown: Dropdown) {
