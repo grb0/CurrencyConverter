@@ -105,7 +105,7 @@ private fun <T> Fragment.collect(
 fun <T> Fragment.collectWhenStarted(
     flow: Flow<T>,
     action: suspend (T) -> Unit,
-    distinctUntilChanged: Boolean = true
+    distinctUntilChanged: Boolean
 ) {
     collect(flow, action, Lifecycle.State.STARTED, distinctUntilChanged)
 }

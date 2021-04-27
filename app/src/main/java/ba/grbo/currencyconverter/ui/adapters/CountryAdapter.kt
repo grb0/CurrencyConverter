@@ -12,7 +12,8 @@ import ba.grbo.currencyconverter.databinding.DropdownItemBinding
 class CountryAdapter(
     private val lifecycleOwner: LifecycleOwner,
     private val uiName: Currency.UiName,
-    private val onClick: (Country) -> Unit
+    private val onClick: (Country) -> Unit,
+    private val onCurrentListChanged: () -> Unit
 ) : ListAdapter<Country, CountryAdapter.CountryHolder>(CountryDiffCallbacks()) {
     class CountryHolder private constructor(
         private val binding: DropdownItemBinding
@@ -41,5 +42,12 @@ class CountryAdapter(
 
     override fun onBindViewHolder(holder: CountryHolder, position: Int) {
         holder.bind(getItem(position), uiName, onClick)
+    }
+
+    override fun onCurrentListChanged(
+        previousList: MutableList<Country>,
+        currentList: MutableList<Country>
+    ) {
+        onCurrentListChanged()
     }
 }

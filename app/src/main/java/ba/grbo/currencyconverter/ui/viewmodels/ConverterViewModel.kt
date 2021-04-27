@@ -67,6 +67,10 @@ class ConverterViewModel @Inject constructor(
     val swappingState: SharedFlow<SwappingState>
         get() = _swappingState
 
+    private val _scrollCurrenciesToTop = SingleSharedFlow<Unit>()
+    val scrollCurrenciesToTop: SharedFlow<Unit>
+        get() = _scrollCurrenciesToTop
+
     private val onSearcherTextChanged = MutableStateFlow("")
 
     private val filter: (Currency, String) -> Boolean
@@ -281,6 +285,10 @@ class ConverterViewModel @Inject constructor(
 
     fun onCountriesScrolled(topReached: Boolean) {
         _modifyDivider.value = topReached
+    }
+
+    fun onCountriesChanged() {
+        _scrollCurrenciesToTop.tryEmit(Unit)
     }
 
     fun shouldModifyCurrenciesCardPosition(dropdown: Dropdown): Boolean {

@@ -176,9 +176,12 @@ class ConverterFragment : Fragment() {
     }
 
     private fun assignAdapter() {
-        binding.currencies.adapter = CountryAdapter(viewLifecycleOwner, uiName) {
-            viewModel.onCurrencyClicked(it)
-        }
+        binding.currencies.adapter = CountryAdapter(
+            viewLifecycleOwner,
+            uiName,
+            { viewModel.onCurrencyClicked(it) },
+            { viewModel.onCountriesChanged() }
+        )
     }
 
     private fun addVerticalDivider(): DividerItemDecoration {
@@ -229,19 +232,19 @@ class ConverterFragment : Fragment() {
                     it?.let { viewModel.onSearcherTextChanged(it.toString()) }
                 }
             }
-            setOnScrollListener(currencies)
+            currencies.addOnScrollListener(getOnScrollListener { !it.canScrollVertically(-1) })
         }
     }
 
-    private fun setOnScrollListener(currencies: RecyclerView) {
-        currencies.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-            }
+    private fun getOnScrollListener(
+        onScrolled: (RecyclerView) -> Boolean
+    ) = object : RecyclerView.OnScrollListener() {
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+        }
 
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                viewModel.onCountriesScrolled(!currencies.canScrollVertically(-1))
-            }
-        })
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            viewModel.onCountriesScrolled(onScrolled(recyclerView))
+        }
     }
 
     private fun collectFlows() {
@@ -257,6 +260,7 @@ class ConverterFragment : Fragment() {
             collectWhenStarted(countries, ::onCountriesUpdated, true)
             collectWhenStarted(searcherState, ::onSearcherStateChanged, true)
             collectWhenStarted(swappingState, ::onSwappingStateChanged, false)
+            collectWhenStarted(scrollCurrenciesToTop, { scrollCurrenciesToTop() }, false)
         }
     }
 
@@ -474,6 +478,10 @@ class ConverterFragment : Fragment() {
 
     private fun restoreOriginalOnScreenTouched(dropdown: Dropdown) {
         setOnScreenTouched(dropdown)
+    }
+
+    private fun scrollCurrenciesToTop() {
+        binding.currencies.scrollToPosition(0)
     }
 
     private fun onSwappingStateChanged(state: SwappingState) {
