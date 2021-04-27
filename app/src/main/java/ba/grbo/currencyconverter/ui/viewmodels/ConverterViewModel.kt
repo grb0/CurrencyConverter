@@ -194,8 +194,9 @@ class ConverterViewModel @Inject constructor(
         if (initialSwappingState == SwappingState.ReverseSwapping) swapSelectedCurrencies()
     }
 
-    fun resetSwappingState() {
+    fun resetInternalState() {
         _swappingState.value = SwappingState.None
+        lastClickedDropdown = NONE
     }
 
     private fun swapSelectedCurrencies() {

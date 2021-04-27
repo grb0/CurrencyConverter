@@ -37,12 +37,14 @@ import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Focusing
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocusing
+import ba.grbo.currencyconverter.util.Constants.ALPHA
 import ba.grbo.currencyconverter.util.Constants.BACKGROUND
 import ba.grbo.currencyconverter.util.Constants.BACKGROUND_COLOR
 import ba.grbo.currencyconverter.util.Constants.IMAGE_TINT_LIST
 import ba.grbo.currencyconverter.util.Constants.PLACEHOLDER
 import ba.grbo.currencyconverter.util.Constants.TEXT_COLOR
 import ba.grbo.currencyconverter.util.Constants.TYPEFACE
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.transition.MaterialFadeThrough
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
@@ -407,6 +409,60 @@ fun ImageButton.getRotationAnimatior(): ObjectAnimator {
         rotation - 180f,
         rotation
     ).setUp(resources)
+}
+
+private fun getFadeAnimator(
+    view: View,
+    startAlpha: Float,
+    endAlpha: Float,
+    onAnimationStart: () -> Unit,
+    onAnimationEnd: () -> Unit
+): ObjectAnimator = ObjectAnimator.ofFloat(
+    view,
+    ALPHA,
+    startAlpha,
+    endAlpha
+).setUp(view.resources).apply {
+    addListener(getAnimatorListener(onAnimationStart, onAnimationEnd))
+}
+
+private fun getAnimatorListener(
+    onAnimationStart: () -> Unit,
+    onAnimationEnd: () -> Unit
+) = object : Animator.AnimatorListener {
+    override fun onAnimationStart(animation: Animator?) {
+        onAnimationStart()
+    }
+
+    override fun onAnimationEnd(animation: Animator?) {
+        onAnimationEnd()
+    }
+
+    override fun onAnimationCancel(animation: Animator?) {
+    }
+
+    override fun onAnimationRepeat(animation: Animator?) {
+    }
+}
+
+fun MaterialCardView.getFadeInAnimatorProducer(): (Float) -> ObjectAnimator = { startAlpha ->
+    getFadeAnimator(
+        this,
+        startAlpha,
+        1f,
+        { visibility = View.VISIBLE },
+        {}
+    )
+}
+
+fun MaterialCardView.getFadeOutAnimatorProducer(): (Float) -> ObjectAnimator = { startAlpha ->
+    getFadeAnimator(
+        this,
+        startAlpha,
+        0f,
+        {},
+        { visibility = View.INVISIBLE }
+    )
 }
 
 fun getArgbPropertyValueHolderForProperty(

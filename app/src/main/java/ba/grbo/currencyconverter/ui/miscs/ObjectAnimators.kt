@@ -16,6 +16,12 @@ class ObjectAnimators(
     landscape: Boolean,
     width: Float
 ) {
+    private val fadeInAnimatorProducer = binding.currenciesCard.getFadeInAnimatorProducer()
+    private val fadeOutAnimatorProducer = binding.currenciesCard.getFadeOutAnimatorProducer()
+
+    private var CURRENCIES_CARD_FADE_IN_DEFAULT = fadeInAnimatorProducer(0f)
+    private var CURRENCIES_CARD_FADE_OUT_DEFAULT = fadeOutAnimatorProducer(1f)
+
     private val CONVERTER_LAYOUT = binding.converterLayout.getAnimator(
         Colors.WHITE,
         Colors.LIGHT_GRAY
@@ -26,6 +32,9 @@ class ObjectAnimators(
     )
     private val BOTTOM_NAVIGATION = bottomNavigationAnimator
     private val CURRENCY_SWAPPING = binding.dropdownSwapper.getRotationAnimatior()
+
+    private var CURRENCIES_CARD_FADE_IN = CURRENCIES_CARD_FADE_IN_DEFAULT
+    private var CURRENCIES_CARD_FADE_OUT = CURRENCIES_CARD_FADE_OUT_DEFAULT
 
     private val From = object : Base {
         override val DROPDOWN_ACTION: ObjectAnimator
@@ -171,8 +180,25 @@ class ObjectAnimators(
         else start()
     }
 
+    private fun fadeInCurrenciesCard() {
+        CURRENCIES_CARD_FADE_IN = if (CURRENCIES_CARD_FADE_OUT.isRunning) {
+            val fraction = CURRENCIES_CARD_FADE_OUT.animatedFraction
+            CURRENCIES_CARD_FADE_OUT.cancel()
+            fadeInAnimatorProducer(fraction).apply { start() }
+        } else CURRENCIES_CARD_FADE_IN_DEFAULT.apply { start() }
+    }
+
+    private fun fadeOutCurrenciesCard() {
+        CURRENCIES_CARD_FADE_OUT = if (CURRENCIES_CARD_FADE_IN.isRunning) {
+            val fraction = CURRENCIES_CARD_FADE_IN.animatedFraction
+            CURRENCIES_CARD_FADE_IN.cancel()
+            fadeOutAnimatorProducer(fraction).apply { start() }
+        } else CURRENCIES_CARD_FADE_OUT_DEFAULT.apply { start() }
+    }
+
     private fun startFromObjectAnimators(scope: LifecycleCoroutineScope) {
         scope.launchWhenStarted {
+            launch { fadeInCurrenciesCard() }
             launch { From.CURRENCY_LAYOUT.begin() }
             launch { From.DROPDOWN_ACTION.begin() }
             launch { From.DROPDOWN_TITLE.begin() }
@@ -189,6 +215,7 @@ class ObjectAnimators(
 
     private fun startToObjectAnimators(scope: LifecycleCoroutineScope) {
         scope.launchWhenStarted {
+            launch { fadeInCurrenciesCard() }
             launch { To.CURRENCY_LAYOUT.begin() }
             launch { To.DROPDOWN_ACTION.begin() }
             launch { To.DROPDOWN_TITLE.begin() }
@@ -205,6 +232,7 @@ class ObjectAnimators(
 
     private fun reverseFromObjectAnimators(scope: LifecycleCoroutineScope) {
         scope.launchWhenStarted {
+            launch { fadeOutCurrenciesCard() }
             launch { From.CURRENCY_LAYOUT.reverse() }
             launch { From.DROPDOWN_ACTION.reverse() }
             launch { From.DROPDOWN_TITLE.reverse() }
@@ -221,6 +249,7 @@ class ObjectAnimators(
 
     private fun reverseToObjectAnimators(scope: LifecycleCoroutineScope) {
         scope.launchWhenStarted {
+            launch { fadeOutCurrenciesCard() }
             launch { To.CURRENCY_LAYOUT.reverse() }
             launch { To.DROPDOWN_ACTION.reverse() }
             launch { To.DROPDOWN_TITLE.reverse() }

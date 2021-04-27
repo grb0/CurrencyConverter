@@ -94,7 +94,7 @@ class ConverterFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        viewModel.resetSwappingState()
+        viewModel.resetInternalState()
     }
 
     override fun onCreateAnimator(transit: Int, enter: Boolean, nextAnim: Int): Animator {
@@ -288,14 +288,14 @@ class ConverterFragment : Fragment() {
             country,
             binding.fromCurrencyChooser.currency,
             binding.fromCurrencyChooser.currencyDouble,
-            Animations.From.FADE_IN,
-            Animations.From.FADE_OUT
+            Animations.FADE_IN,
+            Animations.FADE_OUT
         ) else onSelectedCurrencyChanged(
             country,
             binding.toCurrencyChooser.currency,
             binding.toCurrencyChooser.currencyDouble,
-            Animations.To.FADE_IN,
-            Animations.To.FADE_OUT
+            Animations.FADE_IN,
+            Animations.FADE_OUT
         )
     }
 
@@ -366,8 +366,8 @@ class ConverterFragment : Fragment() {
     }
 
     private fun showResetButton(showButton: Boolean) {
-        if (showButton) setAnimationListenerAndStartAnimation(Animations.From.FADE_IN, true)
-        else setAnimationListenerAndStartAnimation(Animations.From.FADE_OUT, false)
+        if (showButton) setAnimationListenerAndStartAnimation(Animations.FADE_IN, true)
+        else setAnimationListenerAndStartAnimation(Animations.FADE_OUT, false)
     }
 
     private fun setAnimationListenerAndStartAnimation(
@@ -378,8 +378,8 @@ class ConverterFragment : Fragment() {
             getAnimationListener(
                 binding.resetSearcher,
                 fadinIn,
-                Animations.From.FADE_IN,
-                Animations.From.FADE_OUT
+                Animations.FADE_IN,
+                Animations.FADE_OUT
             )
         )
         binding.resetSearcher.startAnimation(animation)
@@ -629,15 +629,8 @@ class ConverterFragment : Fragment() {
     }
 
     private fun expandDropdown(dropdown: Dropdown) {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            launch { Animators.startObjectAnimators(dropdown, viewLifecycleOwner.lifecycleScope) }
-            launch { showCurrenciesCard(dropdown) }
-        }
-    }
-
-    private fun showCurrenciesCard(dropdown: Dropdown) {
         modifyCurrenciesCardPosition(dropdown)
-        binding.currenciesCard.visibility = View.VISIBLE
+        Animators.startObjectAnimators(dropdown, viewLifecycleOwner.lifecycleScope)
     }
 
     private fun modifyCurrenciesCardPosition(dropdown: Dropdown) {
@@ -762,13 +755,6 @@ class ConverterFragment : Fragment() {
     }
 
     private fun collapseDropdown(dropdown: Dropdown) {
-        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            launch { Animators.reverseObjectAnimators(dropdown, viewLifecycleOwner.lifecycleScope) }
-            launch { hideCurrenciesCard() }
-        }
-    }
-
-    private fun hideCurrenciesCard() {
-        binding.currenciesCard.visibility = View.INVISIBLE
+        Animators.reverseObjectAnimators(dropdown, viewLifecycleOwner.lifecycleScope)
     }
 }

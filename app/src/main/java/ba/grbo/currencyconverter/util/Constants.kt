@@ -5,6 +5,7 @@ object Constants {
     const val TEXT_COLOR = "textColor"
     const val TYPEFACE = "typeface"
     const val BACKGROUND = "background"
+    const val ALPHA = "alpha"
     const val PLACEHOLDER = "placeholder"
     const val IMAGE_TINT_LIST = "imageTintList"
     const val ITEM_ICON_TINT_LIST = "itemIconTintList"
