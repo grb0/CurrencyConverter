@@ -14,8 +14,8 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageButton
-import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -147,7 +147,7 @@ class ConverterFragment : Fragment() {
         setDropdownBackground(binding.toCurrencyChooser.currencyLayout)
     }
 
-    private fun setDropdownBackground(dropdown: LinearLayout) {
+    private fun setDropdownBackground(dropdown: ConstraintLayout) {
         dropdown.background = dropdown.getGradientDrawable(Colors.WHITE, Colors.BORDER)
     }
 
@@ -419,7 +419,7 @@ class ConverterFragment : Fragment() {
         activity.onScreenTouched = { event ->
             val touchPoint = Point(event.rawX.roundToInt(), event.rawY.roundToInt())
 
-            val currencyLayout: LinearLayout
+            val currencyLayout: ConstraintLayout
             val dropdownTitle: TextView
 
             if (dropdown == FROM) {
@@ -717,7 +717,7 @@ class ConverterFragment : Fragment() {
         dropdown: Dropdown,
         touchPoint: Point
     ): Boolean {
-        val currencyLayout: LinearLayout
+        val currencyLayout: ConstraintLayout
         val dropdownTitle: TextView
 
         if (dropdown == FROM) {

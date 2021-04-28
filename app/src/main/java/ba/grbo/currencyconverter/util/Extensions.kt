@@ -20,7 +20,6 @@ import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
 import android.view.animation.LinearInterpolator
 import android.widget.ImageButton
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.AttrRes
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -210,13 +209,13 @@ fun TextView.getAnimator(
     ).setUp(resources)
 }
 
-fun LinearLayout.getBackgroundAnimator(
+fun ConstraintLayout.getBackgroundAnimator(
     strokeColor: Int,
     backgroundStartColor: Int,
     backgroundEndColor: Int,
 ) = ObjectAnimator.ofObject(
     this,
-    Property.of(LinearLayout::class.java, Drawable::class.java, BACKGROUND),
+    Property.of(ConstraintLayout::class.java, Drawable::class.java, BACKGROUND),
     { fraction, _, _ ->
         val colorEvaluator = ArgbEvaluator()
         val backgroundColor = colorEvaluator.evaluate(
@@ -235,14 +234,14 @@ fun LinearLayout.getBackgroundAnimator(
     getGradientDrawable(backgroundEndColor, strokeColor)
 ).setUp(resources)
 
-fun LinearLayout.getAnimator(
+fun ConstraintLayout.getAnimator(
     strokeStartColor: Int,
     strokeEndColor: Int,
     backgroundStartColor: Int,
     backgroundEndColor: Int
 ) = ObjectAnimator.ofObject(
     this,
-    Property.of(LinearLayout::class.java, Drawable::class.java, BACKGROUND),
+    Property.of(ConstraintLayout::class.java, Drawable::class.java, BACKGROUND),
     { fraction, _, _ ->
         val colorEvaluator = ArgbEvaluator()
 
@@ -340,7 +339,7 @@ fun ImageButton.getAnimator(
     ).setUp(resources)
 }
 
-fun LinearLayout.getGradientDrawable(
+fun ConstraintLayout.getGradientDrawable(
     backgroundColor: Int,
     strokeColor: Int,
     strokeWidth: Float = 1f
