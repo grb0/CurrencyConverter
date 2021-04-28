@@ -412,50 +412,60 @@ class ConverterFragment : Fragment() {
     }
 
     private fun onSearcherFocused(dropdown: Dropdown) {
-        modifyOnScreenTouched(dropdown)
+        setOnScreenTouched(dropdown, true)
     }
 
-    private fun modifyOnScreenTouched(dropdown: Dropdown) {
-        activity.onScreenTouched = { event ->
-            val touchPoint = Point(event.rawX.roundToInt(), event.rawY.roundToInt())
+    private fun onScreenTouched(
+        event: MotionEvent,
+        dropdown: Dropdown,
+        includeSearcher: Boolean
+    ): Boolean {
+        val touchPoint = Point(event.rawX.roundToInt(), event.rawY.roundToInt())
 
-            val currencyLayout: ConstraintLayout
-            val dropdownTitle: TextView
+        val currencyLayout: ConstraintLayout
+        val dropdownTitle: TextView
 
-            if (dropdown == FROM) {
-                currencyLayout = binding.fromCurrencyChooser.currencyLayout
-                dropdownTitle = binding.fromCurrencyChooser.dropdownTitle
-            } else {
-                currencyLayout = binding.toCurrencyChooser.currencyLayout
-                dropdownTitle = binding.toCurrencyChooser.dropdownTitle
-            }
+        if (dropdown == FROM) {
+            currencyLayout = binding.fromCurrencyChooser.currencyLayout
+            dropdownTitle = binding.fromCurrencyChooser.dropdownTitle
+        } else {
+            currencyLayout = binding.toCurrencyChooser.currencyLayout
+            dropdownTitle = binding.toCurrencyChooser.dropdownTitle
+        }
 
-            val currencyLayoutTouched = isPointInsideViewBounds(
-                currencyLayout,
-                touchPoint
-            )
+        val currencyLayoutTouched = isPointInsideViewBounds(
+            currencyLayout,
+            touchPoint
+        )
 
-            val dropdownTitleTouched = isPointInsideViewBounds(
-                dropdownTitle,
-                touchPoint
-            )
+        val dropdownTitleTouched = isPointInsideViewBounds(
+            dropdownTitle,
+            touchPoint
+        )
 
-            val currenciesCardTouched = isPointInsideViewBounds(
-                binding.currenciesCard,
-                touchPoint
-            )
+        val currenciesCardTouched = isPointInsideViewBounds(
+            binding.currenciesCard,
+            touchPoint
+        )
 
+        return if (includeSearcher) {
             val currenciesSearcherTouched = isPointInsideViewBounds(
                 binding.currenciesSearcher,
                 touchPoint
             )
-
             viewModel.onScreenTouched(
                 dropdown,
                 currencyLayoutTouched,
                 dropdownTitleTouched,
                 currenciesCardTouched,
                 currenciesSearcherTouched
+            )
+        } else {
+            viewModel.onScreenTouched(
+                dropdown,
+                currencyLayoutTouched,
+                dropdownTitleTouched,
+                currenciesCardTouched
             )
         }
     }
@@ -482,7 +492,7 @@ class ConverterFragment : Fragment() {
     }
 
     private fun restoreOriginalOnScreenTouched(dropdown: Dropdown) {
-        setOnScreenTouched(dropdown)
+        setOnScreenTouched(dropdown, false)
     }
 
     private fun scrollCurrenciesToTop() {
@@ -642,7 +652,7 @@ class ConverterFragment : Fragment() {
 
     private fun onDropdownExpanding(dropdown: Dropdown) {
         expandDropdown(dropdown)
-        setOnScreenTouched(dropdown)
+        setOnScreenTouched(dropdown, false)
     }
 
     private fun expandDropdown(dropdown: Dropdown) {
@@ -697,58 +707,12 @@ class ConverterFragment : Fragment() {
         }
     }
 
-    private fun setOnScreenTouched(dropdown: Dropdown) {
-        activity.onScreenTouched = { event -> onScreenTouched(dropdown, event) }
+    private fun setOnScreenTouched(dropdown: Dropdown, includeSearcher: Boolean) {
+        activity.onScreenTouched = { event -> onScreenTouched(event, dropdown, includeSearcher) }
     }
 
     private fun removeOnScreenTouched() {
         activity.onScreenTouched = null
-    }
-
-    private fun onScreenTouched(
-        dropdown: Dropdown,
-        event: MotionEvent
-    ): Boolean {
-        val touchPoint = Point(event.rawX.roundToInt(), event.rawY.roundToInt())
-        return onScreenTouched(dropdown, touchPoint)
-    }
-
-    private fun onScreenTouched(
-        dropdown: Dropdown,
-        touchPoint: Point
-    ): Boolean {
-        val currencyLayout: ConstraintLayout
-        val dropdownTitle: TextView
-
-        if (dropdown == FROM) {
-            currencyLayout = binding.fromCurrencyChooser.currencyLayout
-            dropdownTitle = binding.fromCurrencyChooser.dropdownTitle
-        } else {
-            currencyLayout = binding.toCurrencyChooser.currencyLayout
-            dropdownTitle = binding.toCurrencyChooser.dropdownTitle
-        }
-
-        val currencyLayoutTouched = isPointInsideViewBounds(
-            currencyLayout,
-            touchPoint
-        )
-
-        val dropdownTitleTouched = isPointInsideViewBounds(
-            dropdownTitle,
-            touchPoint
-        )
-
-        val currenciesCardTouched = isPointInsideViewBounds(
-            binding.currenciesCard,
-            touchPoint
-        )
-
-        return viewModel.onScreenTouched(
-            dropdown,
-            currencyLayoutTouched,
-            dropdownTitleTouched,
-            currenciesCardTouched
-        )
     }
 
     private fun isPointInsideViewBounds(view: View, point: Point): Boolean = Rect().run {
