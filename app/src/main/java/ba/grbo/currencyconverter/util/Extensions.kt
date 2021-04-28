@@ -37,11 +37,13 @@ import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Focusing
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocusing
-import ba.grbo.currencyconverter.util.Constants.ALPHA
+import ba.grbo.currencyconverter.util.Constants.ANIM_TIME
+import ba.grbo.currencyconverter.util.Constants.ANIM_TIME_DIFFERENTIATOR
 import ba.grbo.currencyconverter.util.Constants.BACKGROUND
 import ba.grbo.currencyconverter.util.Constants.BACKGROUND_COLOR
 import ba.grbo.currencyconverter.util.Constants.IMAGE_TINT_LIST
 import ba.grbo.currencyconverter.util.Constants.PLACEHOLDER
+import ba.grbo.currencyconverter.util.Constants.SCALE_END
 import ba.grbo.currencyconverter.util.Constants.TEXT_COLOR
 import ba.grbo.currencyconverter.util.Constants.TYPEFACE
 import com.google.android.material.card.MaterialCardView
@@ -51,6 +53,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import java.util.*
 import kotlin.math.roundToInt
+import kotlin.math.roundToLong
 
 fun Context.getColorFromAttribute(@AttrRes id: Int): Int {
     val typedValue = TypedValue()
@@ -419,7 +422,7 @@ private fun getFadeAnimator(
     onAnimationEnd: () -> Unit
 ): ObjectAnimator = ObjectAnimator.ofFloat(
     view,
-    ALPHA,
+    View.ALPHA,
     startAlpha,
     endAlpha
 ).setUp(view.resources).apply {
@@ -494,3 +497,90 @@ private fun getPropertyValueHolderForPropertyForImageTintList(
     ColorStateList.valueOf(startColor),
     ColorStateList.valueOf(endColor)
 )
+
+fun getScaleDownFadeOutAnimatorProducer(
+    first: ImageButton,
+    second: ImageButton
+): (Float, Float, Boolean, () -> Unit) -> ObjectAnimator {
+    return { scaleStart, fadeStart, takeFirst, onAnimationEnd ->
+        getScaleAndFadeAnimator(
+            if (takeFirst) first else second,
+            scaleStart,
+            SCALE_END,
+            fadeStart,
+            0f
+        ).apply {
+            duration = ANIM_TIME
+            addListener(
+                getAnimatorListener(
+                    {},
+                    {
+                        if (takeFirst) {
+                            first.visibility = View.INVISIBLE
+                            second.visibility = View.VISIBLE
+                        } else {
+                            first.visibility = View.VISIBLE
+                            second.visibility = View.INVISIBLE
+                        }
+                        onAnimationEnd()
+                    }
+                )
+            )
+        }
+    }
+}
+
+fun getScaleUpFadeInAnimatorProducer(
+    first: ImageButton,
+    second: ImageButton
+): (Float, Float, Boolean, () -> Unit) -> ObjectAnimator {
+    return { scaleStart, fadeStart, takeFirst, onAnimationEnd ->
+        getScaleAndFadeAnimator(
+            if (takeFirst) first else second,
+            scaleStart,
+            1f,
+            fadeStart,
+            1f
+        ).apply {
+            duration = (ANIM_TIME * ANIM_TIME_DIFFERENTIATOR).roundToLong()
+            addListener(
+                getAnimatorListener({}, onAnimationEnd)
+            )
+        }
+    }
+}
+
+private fun getScaleAndFadeAnimator(
+    button: ImageButton,
+    scaleStart: Float,
+    scaleEnd: Float,
+    fadeStart: Float,
+    fadeEnd: Float
+): ObjectAnimator {
+    val scaleX = PropertyValuesHolder.ofFloat(
+        View.SCALE_X,
+        scaleStart,
+        scaleEnd
+    )
+
+    val scaleY = PropertyValuesHolder.ofFloat(
+        View.SCALE_Y,
+        scaleStart,
+        scaleEnd
+    )
+
+    val fade = PropertyValuesHolder.ofFloat(
+        View.ALPHA,
+        fadeStart,
+        fadeEnd
+    )
+
+    return ObjectAnimator.ofPropertyValuesHolder(
+        button,
+        scaleX,
+        scaleY,
+        fade
+    ).apply {
+        interpolator = LinearInterpolator()
+    }
+}

@@ -6,6 +6,13 @@
 
     <data>
 
+        <import type="android.view.View" />
+
+        <import type="ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Favorites" />
+
+        <variable
+            name="favorites"
+            type="ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Favorites" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -38,7 +45,7 @@
             app:layout_constraintStart_toStartOf="@+id/from_currency_chooser"
             app:layout_constraintTop_toBottomOf="@+id/dropdown_swapper"
             app:title="@{`To`}"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/currencies_card"
@@ -53,70 +60,113 @@
             app:layout_constraintStart_toStartOf="@+id/from_currency_chooser"
             app:layout_constraintTop_toBottomOf="@+id/from_currency_chooser"
             app:layout_constraintVertical_bias="0.0"
-            tools:visibility="gone">
+            tools:visibility="visible">
 
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/currencies_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="0.5dp"
                 android:orientation="vertical"
                 tools:listitem="@layout/dropdown_item">
 
-                <RelativeLayout
-                    android:id="@+id/currencies_searcher_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                <EditText
+                    android:id="@+id/currencies_searcher"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="9dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/border_edit_text"
+                    android:ems="10"
+                    android:fontFamily="@font/roboto"
+                    android:hint="@string/search_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="text|textNoSuggestions"
+                    android:paddingStart="12dp"
+                    android:paddingTop="13dp"
+                    android:paddingEnd="45dp"
+                    android:paddingBottom="13dp"
+                    android:textColor="@color/black"
+                    android:textCursorDrawable="@drawable/cursor_edit_text"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toStartOf="@+id/favorites_empty"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <EditText
-                        android:id="@+id/currencies_searcher"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="8dp"
-                        android:background="@drawable/border_edit_text"
-                        android:ems="10"
-                        android:fontFamily="@font/roboto"
-                        android:hint="@string/search_hint"
-                        android:importantForAutofill="no"
-                        android:inputType="text|textNoSuggestions"
-                        android:paddingStart="8dp"
-                        android:paddingTop="12dp"
-                        android:paddingEnd="44dp"
-                        android:paddingBottom="12dp"
-                        android:textColor="@color/black"
-                        android:textCursorDrawable="@drawable/cursor_edit_text"
-                        android:textSize="16sp" />
+                <ImageButton
+                    android:id="@+id/reset_searcher"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/currencies_searcher"
+                    android:layout_alignEnd="@id/currencies_searcher"
+                    android:layout_alignBottom="@id/currencies_searcher"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/ripple_reset_searcher_btn"
+                    android:contentDescription="@string/close"
+                    android:padding="9dp"
+                    android:src="@drawable/ic_close"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@+id/currencies_searcher"
+                    app:layout_constraintEnd_toEndOf="@+id/currencies_searcher"
+                    app:layout_constraintTop_toTopOf="@+id/currencies_searcher"
+                    tools:visibility="visible" />
 
-                    <ImageButton
-                        android:id="@+id/reset_searcher"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignTop="@id/currencies_searcher"
-                        android:layout_alignEnd="@id/currencies_searcher"
-                        android:layout_alignBottom="@id/currencies_searcher"
-                        android:background="@drawable/ripple_reset_searcher_btn"
-                        android:contentDescription="@string/close"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
-                        android:src="@drawable/ic_close"
-                        android:visibility="invisible" />
-                </RelativeLayout>
+                <ImageButton
+                    android:id="@+id/favorites_empty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/ripple_action_btn"
+                    android:contentDescription="@string/empty_star"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_favorite_empty"
+                    android:visibility="@{favorites == Favorites.EMPTY ? View.VISIBLE : View.INVISIBLE}"
+                    app:layout_constraintBottom_toBottomOf="@+id/currencies_searcher"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/currencies_searcher" />
+
+                <ImageButton
+                    android:id="@+id/favorites_filled"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/ripple_action_btn"
+                    android:contentDescription="@string/filled_star"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_favorite_filled"
+                    android:visibility="@{favorites != Favorites.EMPTY ? View.VISIBLE : View.INVISIBLE}"
+                    app:layout_constraintBottom_toBottomOf="@+id/currencies_searcher"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/currencies_searcher" />
 
                 <View
                     android:id="@+id/divider"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/divider_height"
-                    android:background="@drawable/divider_top" />
+                    android:layout_marginTop="9dp"
+                    android:background="@drawable/divider_top"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/currencies_searcher"
+                    tools:visibility="visible" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/currencies"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
                     android:scrollbars="none"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/dropdown_item" />
-            </LinearLayout>
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/divider"
+                    app:layout_constraintVertical_bias="0.0"
+                    tools:itemCount="4"
+                    tools:listitem="@layout/dropdown_item"
+                    tools:visibility="visible" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <ImageButton
@@ -130,7 +180,8 @@
             android:src="@drawable/ic_swap_vertical"
             app:layout_constraintEnd_toEndOf="@+id/from_currency_chooser"
             app:layout_constraintStart_toStartOf="@+id/from_currency_chooser"
-            app:layout_constraintTop_toBottomOf="@+id/from_currency_chooser" />
+            app:layout_constraintTop_toBottomOf="@+id/from_currency_chooser"
+            tools:visibility="gone" />
 
         <TextView
             android:id="@+id/from_currency_double"
@@ -151,7 +202,7 @@
             app:layout_constraintEnd_toEndOf="@+id/from_currency_chooser"
             app:layout_constraintStart_toStartOf="@+id/from_currency_chooser"
             app:layout_constraintTop_toTopOf="@+id/from_currency_chooser"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
 
         <TextView
             android:id="@+id/to_currency_double"
@@ -172,7 +223,7 @@
             app:layout_constraintEnd_toEndOf="@+id/to_currency_chooser"
             app:layout_constraintStart_toStartOf="@+id/to_currency_chooser"
             app:layout_constraintTop_toTopOf="@+id/to_currency_chooser"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

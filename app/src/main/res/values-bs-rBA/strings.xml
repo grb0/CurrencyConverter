@@ -190,4 +190,6 @@
     <string name="close">Zatvori</string>
     <string name="title_extend_chooser_landscape">Proširi odabirač u horizontalnom modu</string>
     <string name="swap_arrows">Unakrsne strelice</string>
+    <string name="empty_star">Prazna zvijezda</string>
+    <string name="filled_star">ispunjena zvijezda</string>
 </resources>

@@ -127,6 +127,7 @@ class ConverterFragment : Fragment() {
     ) = FragmentConverterBinding.inflate(inflater, container, false).also {
         it.lifecycleOwner = viewLifecycleOwner
         binding = it
+        binding.favorites = viewModel.currentFavorites
     }.root
 
     private fun initializeFastScroller(recyclerView: RecyclerView) {
@@ -165,7 +166,9 @@ class ConverterFragment : Fragment() {
             activity.getBottomNavigationAnimator(),
             Colors,
             orientation.isLandscape,
-            resources.displayMetrics.widthPixels.toFloat()
+            resources.displayMetrics.widthPixels.toFloat(),
+            viewModel::onFavoritesEmptyDone,
+            viewModel::onFavoritesFilledDone
         )
     }
 
@@ -233,6 +236,8 @@ class ConverterFragment : Fragment() {
                 }
             }
             currencies.addOnScrollListener(getOnScrollListener { !it.canScrollVertically(-1) })
+            favoritesFilled.setOnClickListener { viewModel.onFavoritesClicked() }
+            favoritesEmpty.setOnClickListener { viewModel.onFavoritesClicked() }
         }
     }
 
@@ -261,6 +266,7 @@ class ConverterFragment : Fragment() {
             collectWhenStarted(searcherState, ::onSearcherStateChanged, true)
             collectWhenStarted(swappingState, ::onSwappingStateChanged, false)
             collectWhenStarted(scrollCurrenciesToTop, { scrollCurrenciesToTop() }, false)
+            collectWhenStarted(onFavoritesClicked, ::animateFavorites, false)
         }
     }
 
@@ -482,6 +488,10 @@ class ConverterFragment : Fragment() {
 
     private fun scrollCurrenciesToTop() {
         binding.currencies.scrollToPosition(0)
+    }
+
+    private fun animateFavorites(favorites: Favorites) {
+        Animators.onFavoritesClicked(favorites)
     }
 
     private fun onSwappingStateChanged(state: SwappingState) {

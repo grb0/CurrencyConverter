@@ -221,4 +221,6 @@
     <string name="hello_from_history_fragment">Hello there from HistoryFragment</string>
     <string name="close">Close</string>
     <string name="swap_arrows">Swap arrows</string>
+    <string name="empty_star">An empty star</string>
+    <string name="filled_star">A filled star</string>
 </resources>

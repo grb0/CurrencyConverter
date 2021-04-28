@@ -71,6 +71,10 @@ class ConverterViewModel @Inject constructor(
     val scrollCurrenciesToTop: SharedFlow<Unit>
         get() = _scrollCurrenciesToTop
 
+    private val _onFavoritesClicked = SingleSharedFlow<Favorites>()
+    val onFavoritesClicked: SharedFlow<Favorites>
+        get() = _onFavoritesClicked
+
     private val onSearcherTextChanged = MutableStateFlow("")
 
     private val filter: (Currency, String) -> Boolean
@@ -78,6 +82,10 @@ class ConverterViewModel @Inject constructor(
     private var lastClickedDropdown = NONE
     private var currenciesCardModifiedForLandscape = false
     private var initialSwappingState = SwappingState.None
+
+    private var _currentFavorites = Favorites.EMPTY
+    val currentFavorites: Favorites
+        get() = _currentFavorites
 
     sealed class DropdownState {
         abstract val dropdown: Dropdown
@@ -111,6 +119,12 @@ class ConverterViewModel @Inject constructor(
         FROM,
         TO,
         NONE
+    }
+
+    enum class Favorites {
+        EMPTY,
+        FILLED,
+        ANIMATING
     }
 
     init {
@@ -214,6 +228,23 @@ class ConverterViewModel @Inject constructor(
 
     fun onResetSearcherClicked() {
         _resetSearcher.tryEmit(Unit)
+    }
+
+    fun onFavoritesClicked() {
+        val fire = if (_currentFavorites != Favorites.ANIMATING) {
+            val temp = _currentFavorites
+            _currentFavorites = Favorites.ANIMATING
+            temp
+        } else Favorites.ANIMATING
+        _onFavoritesClicked.tryEmit(fire)
+    }
+
+    fun onFavoritesEmptyDone() {
+        _currentFavorites = Favorites.EMPTY
+    }
+
+    fun onFavoritesFilledDone() {
+        _currentFavorites = Favorites.FILLED
     }
 
     fun onCurrencyClicked(country: Country) {
