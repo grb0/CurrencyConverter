@@ -2,13 +2,13 @@ package ba.grbo.currencyconverter.ui.miscs
 
 import android.animation.ObjectAnimator
 import androidx.lifecycle.LifecycleCoroutineScope
+import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.databinding.FragmentConverterBinding
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown.FROM
 import ba.grbo.currencyconverter.util.*
 import ba.grbo.currencyconverter.util.Constants.ANIM_TIME_DIFFERENTIATOR
-import ba.grbo.currencyconverter.util.Constants.SCALE_END
 import kotlinx.coroutines.launch
 import kotlin.math.roundToLong
 
@@ -24,14 +24,9 @@ class ObjectAnimators(
 ) {
     private val fadeInAnimatorProducer = binding.currenciesCard.getFadeInAnimatorProducer()
     private val fadeOutAnimatorProducer = binding.currenciesCard.getFadeOutAnimatorProducer()
-    private val scaleUpFadeInAnimatorProducer = getScaleUpFadeInAnimatorProducer(
-        binding.favoritesEmpty,
-        binding.favoritesFilled
-    )
-    private val scaleDownFadeOutAnimatorProducer = getScaleDownFadeOutAnimatorProducer(
-        binding.favoritesEmpty,
-        binding.favoritesFilled
-    )
+    private val scaleUpFadeInAnimatorProducer = binding.favorites.getScaleUpFadeInAnimatorProducer()
+    private val scaleDownFadeOutAnimatorProducer =
+        binding.favorites.getScaleDownFadeOutAnimatorProducer()
 
     private var CURRENCIES_CARD_FADE_IN_DEFAULT = fadeInAnimatorProducer(0f)
     private var CURRENCIES_CARD_FADE_OUT_DEFAULT = fadeOutAnimatorProducer(1f)
@@ -223,22 +218,24 @@ class ObjectAnimators(
     }
 
     private fun getFavoriteEmptyScaleUpFadeInDefaultAnimator() = scaleUpFadeInAnimatorProducer(
-        SCALE_END, 0f, true, onFavoritesEmptyDone
+        onFavoritesEmptyDone
     )
 
     private fun getFavoriteEmptyScaleDownFadeOutDefaultAnimator() =
-        scaleDownFadeOutAnimatorProducer(
-            1f, 1f, true
-        ) { FavoritesFilled.SCALE_UP_FADE_IN.start() }
+        scaleDownFadeOutAnimatorProducer {
+            FavoritesFilled.SCALE_UP_FADE_IN.start()
+            R.drawable.ic_favorite_filled
+        }
 
     private fun getFavoriteFilledScaleUpFadeInDefaultAnimator() = scaleUpFadeInAnimatorProducer(
-        SCALE_END, 0f, false, onFavoritesFilledDone
+        onFavoritesFilledDone
     )
 
     private fun getFavoriteFilledScaleDownFadeOutDefaultAnimator() =
-        scaleDownFadeOutAnimatorProducer(
-            1f, 1f, false
-        ) { FavoritesEmpty.SCALE_UP_FADE_IN.start() }
+        scaleDownFadeOutAnimatorProducer {
+            FavoritesEmpty.SCALE_UP_FADE_IN.start()
+            R.drawable.ic_favorite_empty
+        }
 
     private fun ObjectAnimator.setupScaleDownFadeOutAnimator(
         time: Long
@@ -261,28 +258,32 @@ class ObjectAnimators(
         val time = FavoritesEmpty.SCALE_UP_FADE_IN.currentPlayTime
         FavoritesEmpty.SCALE_UP_FADE_IN.removeListenersAndCancel()
         FavoritesEmpty.SCALE_UP_FADE_IN = getFavoriteEmptyScaleUpFadeInDefaultAnimator()
-        getFavoriteEmptyScaleDownFadeOutDefaultAnimator().setupScaleDownFadeOutAnimator(time)
+        FavoritesEmpty.SCALE_DOWN_FADE_OUT =
+            getFavoriteEmptyScaleDownFadeOutDefaultAnimator().setupScaleDownFadeOutAnimator(time)
     }
 
     private fun reverseFavoritesEmptyScaleDownFadeOut() {
         val time = FavoritesEmpty.SCALE_DOWN_FADE_OUT.currentPlayTime
         FavoritesEmpty.SCALE_DOWN_FADE_OUT.removeListenersAndCancel()
         FavoritesEmpty.SCALE_DOWN_FADE_OUT = getFavoriteEmptyScaleDownFadeOutDefaultAnimator()
-        getFavoriteEmptyScaleUpFadeInDefaultAnimator().setupScaleUpFadeInAnimator(time)
+        FavoritesEmpty.SCALE_UP_FADE_IN =
+            getFavoriteEmptyScaleUpFadeInDefaultAnimator().setupScaleUpFadeInAnimator(time)
     }
 
     private fun reverseFavoritesFilledScaleUpFadeIn() {
         val time = FavoritesFilled.SCALE_UP_FADE_IN.currentPlayTime
         FavoritesFilled.SCALE_UP_FADE_IN.removeListenersAndCancel()
         FavoritesFilled.SCALE_UP_FADE_IN = getFavoriteFilledScaleUpFadeInDefaultAnimator()
-        getFavoriteFilledScaleDownFadeOutDefaultAnimator().setupScaleDownFadeOutAnimator(time)
+        FavoritesFilled.SCALE_DOWN_FADE_OUT =
+            getFavoriteFilledScaleDownFadeOutDefaultAnimator().setupScaleDownFadeOutAnimator(time)
     }
 
     private fun reverseFavoritesFilledScaleDownFadeOut() {
         val time = FavoritesFilled.SCALE_DOWN_FADE_OUT.currentPlayTime
         FavoritesFilled.SCALE_DOWN_FADE_OUT.removeListenersAndCancel()
         FavoritesFilled.SCALE_DOWN_FADE_OUT = getFavoriteFilledScaleDownFadeOutDefaultAnimator()
-        getFavoriteFilledScaleUpFadeInDefaultAnimator().setupScaleUpFadeInAnimator(time)
+        FavoritesFilled.SCALE_UP_FADE_IN =
+            getFavoriteFilledScaleUpFadeInDefaultAnimator().setupScaleUpFadeInAnimator(time)
     }
 
     fun onFavoritesClicked(favorites: ConverterViewModel.Favorites) {

@@ -127,7 +127,7 @@ class ConverterFragment : Fragment() {
     ) = FragmentConverterBinding.inflate(inflater, container, false).also {
         it.lifecycleOwner = viewLifecycleOwner
         binding = it
-        binding.favorites = viewModel.currentFavorites
+        binding.currentFavorites = viewModel.currentFavorites
     }.root
 
     private fun initializeFastScroller(recyclerView: RecyclerView) {
@@ -236,8 +236,7 @@ class ConverterFragment : Fragment() {
                 }
             }
             currencies.addOnScrollListener(getOnScrollListener { !it.canScrollVertically(-1) })
-            favoritesFilled.setOnClickListener { viewModel.onFavoritesClicked() }
-            favoritesEmpty.setOnClickListener { viewModel.onFavoritesClicked() }
+            favorites.setOnClickListener { viewModel.onFavoritesClicked() }
         }
     }
 

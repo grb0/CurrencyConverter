@@ -6,12 +6,8 @@
 
     <data>
 
-        <import type="android.view.View" />
-
-        <import type="ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Favorites" />
-
         <variable
-            name="favorites"
+            name="currentFavorites"
             type="ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Favorites" />
     </data>
 
@@ -90,7 +86,7 @@
                     android:textColor="@color/black"
                     android:textCursorDrawable="@drawable/cursor_edit_text"
                     android:textSize="16sp"
-                    app:layout_constraintEnd_toStartOf="@+id/favorites_empty"
+                    app:layout_constraintEnd_toStartOf="@+id/favorites"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -113,29 +109,15 @@
                     tools:visibility="visible" />
 
                 <ImageButton
-                    android:id="@+id/favorites_empty"
+                    android:id="@+id/favorites"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="4dp"
-                    android:background="@drawable/ripple_action_btn"
+                    android:background="@android:color/transparent"
                     android:contentDescription="@string/empty_star"
                     android:padding="12dp"
                     android:src="@drawable/ic_favorite_empty"
-                    android:visibility="@{favorites == Favorites.EMPTY ? View.VISIBLE : View.INVISIBLE}"
-                    app:layout_constraintBottom_toBottomOf="@+id/currencies_searcher"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/currencies_searcher" />
-
-                <ImageButton
-                    android:id="@+id/favorites_filled"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
-                    android:background="@drawable/ripple_action_btn"
-                    android:contentDescription="@string/filled_star"
-                    android:padding="12dp"
-                    android:src="@drawable/ic_favorite_filled"
-                    android:visibility="@{favorites != Favorites.EMPTY ? View.VISIBLE : View.INVISIBLE}"
+                    app:customDrawableResource="@{currentFavorites}"
                     app:layout_constraintBottom_toBottomOf="@+id/currencies_searcher"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/currencies_searcher" />

@@ -43,7 +43,8 @@ import ba.grbo.currencyconverter.util.Constants.BACKGROUND
 import ba.grbo.currencyconverter.util.Constants.BACKGROUND_COLOR
 import ba.grbo.currencyconverter.util.Constants.IMAGE_TINT_LIST
 import ba.grbo.currencyconverter.util.Constants.PLACEHOLDER
-import ba.grbo.currencyconverter.util.Constants.SCALE_END
+import ba.grbo.currencyconverter.util.Constants.SCALE_DOWN_END
+import ba.grbo.currencyconverter.util.Constants.SCALE_UP_START
 import ba.grbo.currencyconverter.util.Constants.TEXT_COLOR
 import ba.grbo.currencyconverter.util.Constants.TYPEFACE
 import com.google.android.material.card.MaterialCardView
@@ -498,54 +499,32 @@ private fun getPropertyValueHolderForPropertyForImageTintList(
     ColorStateList.valueOf(endColor)
 )
 
-fun getScaleDownFadeOutAnimatorProducer(
-    first: ImageButton,
-    second: ImageButton
-): (Float, Float, Boolean, () -> Unit) -> ObjectAnimator {
-    return { scaleStart, fadeStart, takeFirst, onAnimationEnd ->
+fun ImageButton.getScaleDownFadeOutAnimatorProducer(): (() -> Int) -> ObjectAnimator {
+    return { onAnimationEnd ->
         getScaleAndFadeAnimator(
-            if (takeFirst) first else second,
-            scaleStart,
-            SCALE_END,
-            fadeStart,
+            this,
+            1f,
+            SCALE_DOWN_END,
+            1f,
             0f
         ).apply {
             duration = ANIM_TIME
-            addListener(
-                getAnimatorListener(
-                    {},
-                    {
-                        if (takeFirst) {
-                            first.visibility = View.INVISIBLE
-                            second.visibility = View.VISIBLE
-                        } else {
-                            first.visibility = View.VISIBLE
-                            second.visibility = View.INVISIBLE
-                        }
-                        onAnimationEnd()
-                    }
-                )
-            )
+            addListener(getAnimatorListener({}, { setImageResource(onAnimationEnd()) }))
         }
     }
 }
 
-fun getScaleUpFadeInAnimatorProducer(
-    first: ImageButton,
-    second: ImageButton
-): (Float, Float, Boolean, () -> Unit) -> ObjectAnimator {
-    return { scaleStart, fadeStart, takeFirst, onAnimationEnd ->
+fun ImageButton.getScaleUpFadeInAnimatorProducer(): (() -> Unit) -> ObjectAnimator {
+    return { onAnimationEnd ->
         getScaleAndFadeAnimator(
-            if (takeFirst) first else second,
-            scaleStart,
+            this,
+            SCALE_UP_START,
             1f,
-            fadeStart,
+            0f,
             1f
         ).apply {
             duration = (ANIM_TIME * ANIM_TIME_DIFFERENTIATOR).roundToLong()
-            addListener(
-                getAnimatorListener({}, onAnimationEnd)
-            )
+            addListener(getAnimatorListener({}, onAnimationEnd))
         }
     }
 }
