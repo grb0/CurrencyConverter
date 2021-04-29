@@ -6,7 +6,8 @@ import androidx.annotation.StringRes
 
 data class Country(
     val currency: Currency,
-    val flag: Drawable
+    val flag: Drawable,
+    val favorite: Boolean
 ) {
     data class Resources(
         @StringRes val currencyName: Int,

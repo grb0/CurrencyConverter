@@ -8,16 +8,20 @@ import androidx.recyclerview.widget.RecyclerView
 import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.data.models.Currency
 import ba.grbo.currencyconverter.databinding.DropdownItemBinding
+import ba.grbo.currencyconverter.ui.miscs.FavoritesAnimator
 
 class CountryAdapter(
     private val lifecycleOwner: LifecycleOwner,
     private val uiName: Currency.UiName,
     private val onClick: (Country) -> Unit,
-    private val onCurrentListChanged: () -> Unit
+    private val onCurrentListChanged: () -> Unit,
+    private val onFavoritesAnimationEnd: (Country, Boolean, Int) -> Unit,
 ) : ListAdapter<Country, CountryAdapter.CountryHolder>(CountryDiffCallbacks()) {
     class CountryHolder private constructor(
         private val binding: DropdownItemBinding
     ) : RecyclerView.ViewHolder(binding.root) {
+        private lateinit var favoritesAnimator: FavoritesAnimator
+
         companion object {
             fun from(parent: ViewGroup, lifecycleOwner: LifecycleOwner) = CountryHolder(
                 DropdownItemBinding.inflate(
@@ -28,8 +32,22 @@ class CountryAdapter(
             )
         }
 
-        fun bind(country: Country, uiName: Currency.UiName, onClick: (Country) -> Unit) {
+        fun bind(
+            country: Country,
+            uiName: Currency.UiName,
+            onClick: (Country) -> Unit,
+            onFavoritesAnimationEnd: (Country, Boolean, Int) -> Unit
+        ) {
+            favoritesAnimator = FavoritesAnimator(binding.favorites) {
+                onFavoritesAnimationEnd(country, it, adapterPosition)
+            }
+
+            binding.favorites.setOnClickListener {
+                favoritesAnimator.onFavoritesClicked(!country.favorite)
+            }
+
             binding.root.setOnClickListener { onClick(country) }
+
             binding.country = country
             binding.uiName = uiName
             binding.executePendingBindings()
@@ -41,7 +59,7 @@ class CountryAdapter(
     }
 
     override fun onBindViewHolder(holder: CountryHolder, position: Int) {
-        holder.bind(getItem(position), uiName, onClick)
+        holder.bind(getItem(position), uiName, onClick, onFavoritesAnimationEnd)
     }
 
     override fun onCurrentListChanged(

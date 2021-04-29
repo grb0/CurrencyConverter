@@ -25,6 +25,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SimpleItemAnimator
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.data.models.Currency
@@ -127,7 +128,7 @@ class ConverterFragment : Fragment() {
     ) = FragmentConverterBinding.inflate(inflater, container, false).also {
         it.lifecycleOwner = viewLifecycleOwner
         binding = it
-        binding.currentFavorites = viewModel.currentFavorites
+        binding.showOnlyFavorites = viewModel.showOnlyFavorites
     }.root
 
     private fun initializeFastScroller(recyclerView: RecyclerView) {
@@ -167,12 +168,12 @@ class ConverterFragment : Fragment() {
             Colors,
             orientation.isLandscape,
             resources.displayMetrics.widthPixels.toFloat(),
-            viewModel::onFavoritesEmptyDone,
-            viewModel::onFavoritesFilledDone
+            viewModel::onFavoritesAnimationEnd,
         )
     }
 
     private fun setUpRecyclerView() {
+        disableItemChangedAnimation()
         assignAdapter()
         modifyHeightInPortraitMode(addVerticalDivider())
         initializeFastScroller(binding.currencies)
@@ -182,8 +183,9 @@ class ConverterFragment : Fragment() {
         binding.currencies.adapter = CountryAdapter(
             viewLifecycleOwner,
             uiName,
-            { viewModel.onCurrencyClicked(it) },
-            { viewModel.onCountriesChanged() }
+            viewModel::onCurrencyClicked,
+            viewModel::onCountriesChanged,
+            viewModel::onFavoritesAnimationEnd
         )
     }
 
@@ -266,7 +268,16 @@ class ConverterFragment : Fragment() {
             collectWhenStarted(swappingState, ::onSwappingStateChanged, false)
             collectWhenStarted(scrollCurrenciesToTop, { scrollCurrenciesToTop() }, false)
             collectWhenStarted(onFavoritesClicked, ::animateFavorites, false)
+            collectWhenStarted(notifyAdapter, ::onItemChanged, false)
         }
+    }
+
+    private fun onItemChanged(position: Int) {
+        (binding.currencies.adapter as CountryAdapter).notifyItemChanged(position)
+    }
+
+    private fun disableItemChangedAnimation() {
+        (binding.currencies.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
     }
 
     private fun onCurrencyChanged(country: Country, from: Boolean) {
@@ -499,7 +510,7 @@ class ConverterFragment : Fragment() {
         binding.currencies.scrollToPosition(0)
     }
 
-    private fun animateFavorites(favorites: Favorites) {
+    private fun animateFavorites(favorites: Boolean) {
         Animators.onFavoritesClicked(favorites)
     }
 

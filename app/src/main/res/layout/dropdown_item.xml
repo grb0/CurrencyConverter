@@ -17,6 +17,7 @@
             type="UiName" />
     </data>
 
+
     <com.balysv.materialripple.MaterialRippleLayout
         android:id="@+id/currency_ripple"
         android:layout_width="match_parent"
@@ -25,25 +26,53 @@
         app:mrl_rippleDelayClick="false"
         app:mrl_rippleDuration="@integer/anim_time">
 
-        <TextView
-            android:id="@+id/currency"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/currency_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:drawablePadding="8dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto"
-            android:gravity="center_vertical"
-            android:maxLines="1"
-            android:padding="16dp"
-            android:text="@{country.currency.getUiName(uiName)}"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            app:autoSizeMaxTextSize="16sp"
-            app:autoSizeMinTextSize="12sp"
-            app:autoSizeStepGranularity="1sp"
-            app:autoSizeTextType="uniform"
-            app:startDrawable="@{country.flag}"
-            tools:drawableStartCompat="@sample/data.json/countries/flag"
-            tools:text="@sample/data.json/countries/code" />
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/currency"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="16dp"
+                android:drawablePadding="8dp"
+                android:ellipsize="end"
+                android:fontFamily="@font/roboto"
+                android:gravity="center_vertical"
+                android:maxLines="1"
+                android:text="@{country.currency.getUiName(uiName)}"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:autoSizeMaxTextSize="16sp"
+                app:autoSizeMinTextSize="12sp"
+                app:autoSizeStepGranularity="1sp"
+                app:autoSizeTextType="uniform"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/favorites"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:startDrawable="@{country.flag}"
+                tools:drawableStartCompat="@sample/data.json/countries/flag"
+                tools:text="@sample/data.json/countries/code" />
+
+
+            <ImageButton
+                android:id="@+id/favorites"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/heart"
+                android:padding="18dp"
+                android:src="@drawable/ic_favorite_empty"
+                app:favoritesIcon="@{country.favorite}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </com.balysv.materialripple.MaterialRippleLayout>
 </layout>

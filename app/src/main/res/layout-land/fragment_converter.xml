@@ -7,8 +7,8 @@
     <data>
 
         <variable
-            name="currentFavorites"
-            type="ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Favorites" />
+            name="showOnlyFavorites"
+            type="Boolean" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -75,7 +75,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="9dp"
-                    android:layout_marginEnd="4dp"
+                    android:layout_marginEnd="8dp"
                     android:background="@drawable/border_edit_text"
                     android:ems="10"
                     android:fontFamily="@font/roboto"
@@ -115,12 +115,12 @@
                     android:id="@+id/favorites"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
+                    android:layout_marginEnd="8dp"
                     android:background="@android:color/transparent"
-                    android:contentDescription="@string/empty_star"
-                    android:padding="12dp"
+                    android:contentDescription="@string/heart"
+                    android:padding="18dp"
                     android:src="@drawable/ic_favorite_empty"
-                    app:customDrawableResource="@{currentFavorites}"
+                    app:favoritesIcon="@{showOnlyFavorites}"
                     app:layout_constraintBottom_toBottomOf="@+id/currencies_searcher"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/currencies_searcher" />
@@ -139,7 +139,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/currencies"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
                     android:scrollbars="none"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     app:layout_constraintBottom_toBottomOf="parent"

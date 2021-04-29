@@ -24,7 +24,7 @@ object CountriesProvider {
     fun provideCountries(
         @ApplicationContext context: Context,
         language: Locale
-    ): List<Country> {
+    ): MutableList<Country> {
         val modifiedContext = context.updateLocale(language)
         return CountryResources.value.map {
             Country(
@@ -35,8 +35,9 @@ object CountriesProvider {
                     ),
                     it.currencyCode
                 ),
-                ContextCompat.getDrawable(modifiedContext, it.flag)!!
+                ContextCompat.getDrawable(modifiedContext, it.flag)!!,
+                false
             )
-        }
+        }.toMutableList()
     }
 }

@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ConverterViewModel @Inject constructor(
-    private val plainCountries: List<Country>,
+    private val plainCountries: MutableList<Country>,
     filterBy: FilterBy,
 ) : ViewModel() {
     private val _countries = MutableStateFlow(plainCountries)
@@ -71,9 +71,13 @@ class ConverterViewModel @Inject constructor(
     val scrollCurrenciesToTop: SharedFlow<Unit>
         get() = _scrollCurrenciesToTop
 
-    private val _onFavoritesClicked = SingleSharedFlow<Favorites>()
-    val onFavoritesClicked: SharedFlow<Favorites>
+    private val _onFavoritesClicked = SingleSharedFlow<Boolean>()
+    val onFavoritesClicked: SharedFlow<Boolean>
         get() = _onFavoritesClicked
+
+    private val _notifyAdapter = SingleSharedFlow<Int>()
+    val notifyAdapter: SharedFlow<Int>
+        get() = _notifyAdapter
 
     private val onSearcherTextChanged = MutableStateFlow("")
 
@@ -83,9 +87,9 @@ class ConverterViewModel @Inject constructor(
     private var currenciesCardModifiedForLandscape = false
     private var initialSwappingState = SwappingState.None
 
-    private var _currentFavorites = Favorites.EMPTY
-    val currentFavorites: Favorites
-        get() = _currentFavorites
+    private var _showOnlyFavorites = false
+    val showOnlyFavorites: Boolean
+        get() = _showOnlyFavorites
 
     sealed class DropdownState {
         abstract val dropdown: Dropdown
@@ -119,12 +123,6 @@ class ConverterViewModel @Inject constructor(
         FROM,
         TO,
         NONE
-    }
-
-    enum class Favorites {
-        EMPTY,
-        FILLED,
-        ANIMATING
     }
 
     init {
@@ -231,20 +229,29 @@ class ConverterViewModel @Inject constructor(
     }
 
     fun onFavoritesClicked() {
-        val fire = if (_currentFavorites != Favorites.ANIMATING) {
-            val temp = _currentFavorites
-            _currentFavorites = Favorites.ANIMATING
-            temp
-        } else Favorites.ANIMATING
-        _onFavoritesClicked.tryEmit(fire)
+        _onFavoritesClicked.tryEmit(!showOnlyFavorites)
     }
 
-    fun onFavoritesEmptyDone() {
-        _currentFavorites = Favorites.EMPTY
+    fun onFavoritesAnimationEnd(isFavoritesOn: Boolean) {
+        _showOnlyFavorites = isFavoritesOn
     }
 
-    fun onFavoritesFilledDone() {
-        _currentFavorites = Favorites.FILLED
+    fun onFavoritesAnimationEnd(country: Country, isFavoritesOn: Boolean, position: Int) {
+        if (country.favorite != isFavoritesOn) {
+            updateCountry(country, isFavoritesOn)
+            notifyAdapter(position)
+        }
+    }
+
+    private fun notifyAdapter(position: Int) {
+        _notifyAdapter.tryEmit(position)
+    }
+
+    private fun updateCountry(country: Country, isFavoritesOn: Boolean) {
+        var index = plainCountries.indexOfFirst { it.currency.code == country.currency.code }
+        plainCountries[index] = country.copy(favorite = isFavoritesOn)
+        index = _countries.value.indexOfFirst { it.currency.code == country.currency.code }
+        _countries.value[index] = country.copy(favorite = isFavoritesOn)
     }
 
     fun onCurrencyClicked(country: Country) {
@@ -341,7 +348,7 @@ class ConverterViewModel @Inject constructor(
     }
 
     private fun filterCountries(query: String) {
-        _countries.value = plainCountries.filter { filter(it.currency, query) }
+        _countries.value = plainCountries.filter { filter(it.currency, query) }.toMutableList()
     }
 
     private fun mutateDropdown(dropdown: Dropdown) {
