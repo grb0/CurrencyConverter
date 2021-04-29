@@ -75,9 +75,13 @@ class ConverterViewModel @Inject constructor(
     val onFavoritesClicked: SharedFlow<Boolean>
         get() = _onFavoritesClicked
 
-    private val _notifyAdapter = SingleSharedFlow<Int>()
-    val notifyAdapter: SharedFlow<Int>
-        get() = _notifyAdapter
+    private val _notifyItemChanged = SingleSharedFlow<Int>()
+    val notifyItemChanged: SharedFlow<Int>
+        get() = _notifyItemChanged
+
+    private val _notifyItemRemoved = SingleSharedFlow<Int>()
+    val notifyItemRemoved: SharedFlow<Int>
+        get() = _notifyItemRemoved
 
     private val onSearcherTextChanged = MutableStateFlow("")
 
@@ -128,6 +132,7 @@ class ConverterViewModel @Inject constructor(
     init {
         filter = initializeFilter(filterBy)
         onSearcherTextChanged
+            .filter { filterQuery(it) }
             .debounce(250)
             .onEach { filterCountries(it) }
             .flowOn(Dispatchers.Default)
@@ -234,24 +239,52 @@ class ConverterViewModel @Inject constructor(
 
     fun onFavoritesAnimationEnd(isFavoritesOn: Boolean) {
         _showOnlyFavorites = isFavoritesOn
+        if (isFavoritesOn) filterCurrentCountries() // Since they're already filtered
+        else filterCountries(onSearcherTextChanged.value)
+    }
+
+    private fun filterCurrentCountries() {
+        _countries.value = _countries.value.filter { it.favorite }.toMutableList()
     }
 
     fun onFavoritesAnimationEnd(country: Country, isFavoritesOn: Boolean, position: Int) {
         if (country.favorite != isFavoritesOn) {
-            updateCountry(country, isFavoritesOn)
-            notifyAdapter(position)
+            updatePlainCountries(country, isFavoritesOn)
+            updateCountries(country, isFavoritesOn, position)
         }
     }
 
-    private fun notifyAdapter(position: Int) {
-        _notifyAdapter.tryEmit(position)
+    private fun notifyItemChanged(position: Int) {
+        _notifyItemChanged.tryEmit(position)
     }
 
-    private fun updateCountry(country: Country, isFavoritesOn: Boolean) {
-        var index = plainCountries.indexOfFirst { it.currency.code == country.currency.code }
+    private fun removeUnfavoritedCountry(index: Int, position: Int) {
+        _countries.value.removeAt(index)
+        notifyItemRemoved(position)
+    }
+
+    private fun notifyItemRemoved(position: Int) {
+        _notifyItemRemoved.tryEmit(position)
+    }
+
+    private fun updateCountries(country: Country, isFavoritesOn: Boolean, position: Int) {
+        val index = _countries.value.indexOfFirst { it.currency.code == country.currency.code }
+        if (showOnlyFavorites && !isFavoritesOn) removeUnfavoritedCountry(index, position)
+        else updateCountries(
+            country.copy(favorite = isFavoritesOn),
+            index,
+            position
+        )
+    }
+
+    private fun updateCountries(country: Country, index: Int, position: Int) {
+        _countries.value[index] = country
+        notifyItemChanged(position)
+    }
+
+    private fun updatePlainCountries(country: Country, isFavoritesOn: Boolean) {
+        val index = plainCountries.indexOfFirst { it.currency.code == country.currency.code }
         plainCountries[index] = country.copy(favorite = isFavoritesOn)
-        index = _countries.value.indexOfFirst { it.currency.code == country.currency.code }
-        _countries.value[index] = country.copy(favorite = isFavoritesOn)
     }
 
     fun onCurrencyClicked(country: Country) {
@@ -312,13 +345,16 @@ class ConverterViewModel @Inject constructor(
     }
 
     fun onSearcherTextChanged(query: String) {
-        if (query.isEmpty()) {
-            _countries.value = plainCountries
-            setResetButton(false)
-        } else {
-            setResetButton(true)
-            onSearcherTextChanged.value = query
-        }
+        onSearcherTextChanged.value = query
+    }
+
+    private fun filterQuery(query: String): Boolean {
+        return query.isNotEmpty().apply { if (!this) resetCountries() else setResetButton(true) }
+    }
+
+    private fun resetCountries() {
+        filterCountries("")
+        setResetButton(false)
     }
 
     fun onCountriesScrolled(topReached: Boolean) {
@@ -348,7 +384,20 @@ class ConverterViewModel @Inject constructor(
     }
 
     private fun filterCountries(query: String) {
-        _countries.value = plainCountries.filter { filter(it.currency, query) }.toMutableList()
+        if (!showOnlyFavorites) filterAllCountries(query)
+        else filterFavoriteCountries(query)
+    }
+
+    private fun filterAllCountries(query: String) {
+        _countries.value = if (query.isEmpty()) plainCountries
+        else plainCountries.filter { filter(it.currency, query) }.toMutableList()
+
+    }
+
+    private fun filterFavoriteCountries(query: String) {
+        _countries.value =
+            if (query.isEmpty()) plainCountries.filter { it.favorite }.toMutableList()
+            else plainCountries.filter { it.favorite && filter(it.currency, query) }.toMutableList()
     }
 
     private fun mutateDropdown(dropdown: Dropdown) {

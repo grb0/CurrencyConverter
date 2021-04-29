@@ -268,12 +268,17 @@ class ConverterFragment : Fragment() {
             collectWhenStarted(swappingState, ::onSwappingStateChanged, false)
             collectWhenStarted(scrollCurrenciesToTop, { scrollCurrenciesToTop() }, false)
             collectWhenStarted(onFavoritesClicked, ::animateFavorites, false)
-            collectWhenStarted(notifyAdapter, ::onItemChanged, false)
+            collectWhenStarted(notifyItemChanged, ::onItemChanged, false)
+            collectWhenStarted(notifyItemRemoved, ::onItemRemoved, false)
         }
     }
 
     private fun onItemChanged(position: Int) {
         (binding.currencies.adapter as CountryAdapter).notifyItemChanged(position)
+    }
+
+    private fun onItemRemoved(position: Int) {
+        (binding.currencies.adapter as CountryAdapter).notifyItemRemoved(position)
     }
 
     private fun disableItemChangedAnimation() {
