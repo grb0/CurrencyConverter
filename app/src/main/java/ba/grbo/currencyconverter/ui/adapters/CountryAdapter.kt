@@ -9,6 +9,7 @@ import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.data.models.Currency
 import ba.grbo.currencyconverter.databinding.DropdownItemBinding
 import ba.grbo.currencyconverter.ui.miscs.FavoritesAnimator
+import ba.grbo.currencyconverter.util.getScaleAndFadeAnimatorProducersPair
 
 class CountryAdapter(
     private val lifecycleOwner: LifecycleOwner,
@@ -38,9 +39,9 @@ class CountryAdapter(
             onClick: (Country) -> Unit,
             onFavoritesAnimationEnd: (Country, Boolean, Int) -> Unit
         ) {
-            favoritesAnimator = FavoritesAnimator(binding.favorites) {
-                onFavoritesAnimationEnd(country, it, adapterPosition)
-            }
+            favoritesAnimator = FavoritesAnimator(
+                binding.favorites.getScaleAndFadeAnimatorProducersPair(),
+            ) { onFavoritesAnimationEnd(country, it, adapterPosition) }
 
             binding.favorites.setOnClickListener {
                 favoritesAnimator.onFavoritesClicked(!country.favorite)

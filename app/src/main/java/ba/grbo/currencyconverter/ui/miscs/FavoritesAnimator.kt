@@ -1,132 +1,126 @@
 package ba.grbo.currencyconverter.ui.miscs
 
 import android.animation.ObjectAnimator
-import android.widget.ImageButton
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.util.Constants
-import ba.grbo.currencyconverter.util.getScaleDownFadeOutAnimatorProducer
-import ba.grbo.currencyconverter.util.getScaleUpFadeInAnimatorProducer
+import ba.grbo.currencyconverter.util.IncomingAnimatorProducer
+import ba.grbo.currencyconverter.util.OutgoingAnimatorProducer
 import kotlin.math.roundToLong
 
 @Suppress("PrivatePropertyName", "PropertyName")
 class FavoritesAnimator(
-    button: ImageButton,
+    animatorProducersPair: Pair<OutgoingAnimatorProducer, IncomingAnimatorProducer>,
     private val onAnimationEnd: (Boolean) -> Unit,
 ) {
     private var animating = false
 
-    private val scaleUpFadeInAnimatorProducer = button.getScaleUpFadeInAnimatorProducer()
-    private val scaleDownFadeOutAnimatorProducer = button.getScaleDownFadeOutAnimatorProducer()
+    private val outgoingAnimatorProducer = animatorProducersPair.first
+    private val incomingAnimatorProducer = animatorProducersPair.second
 
     private val Empty: Base = object : Base {
-        override var SCALE_UP_FADE_IN = getFavoriteEmptyScaleUpFadeInDefaultAnimator()
-        override var SCALE_DOWN_FADE_OUT = getFavoriteEmptyScaleDownFadeOutDefaultAnimator()
+        override var OUTGOING = getEmptyOutgoingDefaultAnimator()
+        override var INCOMING = getEmptyIncomingDefaultAnimator()
     }
 
     private val Filled: Base = object : Base {
-        override var SCALE_UP_FADE_IN = getFavoriteFilledScaleUpFadeInDefaultAnimator()
-        override var SCALE_DOWN_FADE_OUT = getFavoriteFilledScaleDownFadeOutDefaultAnimator()
+        override var OUTGOING = getFilledOutgoingDefaultAnimator()
+        override var INCOMING = getFilledIncomingDefaultAnimator()
     }
 
     private interface Base {
-        var SCALE_UP_FADE_IN: ObjectAnimator
-        var SCALE_DOWN_FADE_OUT: ObjectAnimator
+        var OUTGOING: ObjectAnimator
+        var INCOMING: ObjectAnimator
     }
 
-    private fun getFavoriteEmptyScaleUpFadeInDefaultAnimator() = scaleUpFadeInAnimatorProducer {
+    private fun getEmptyOutgoingDefaultAnimator() = outgoingAnimatorProducer {
+        Filled.INCOMING.start()
+        R.drawable.ic_favorite_filled
+    }
+
+    private fun getEmptyIncomingDefaultAnimator() = incomingAnimatorProducer {
         animating = false
         onAnimationEnd(false)
     }
 
-    private fun getFavoriteEmptyScaleDownFadeOutDefaultAnimator() =
-        scaleDownFadeOutAnimatorProducer {
-            Filled.SCALE_UP_FADE_IN.start()
-            R.drawable.ic_favorite_filled
-        }
+    private fun getFilledOutgoingDefaultAnimator() = outgoingAnimatorProducer {
+        Empty.INCOMING.start()
+        R.drawable.ic_favorite_empty
+    }
 
-    private fun getFavoriteFilledScaleUpFadeInDefaultAnimator() = scaleUpFadeInAnimatorProducer {
+    private fun getFilledIncomingDefaultAnimator() = incomingAnimatorProducer {
         animating = false
         onAnimationEnd(true)
     }
-
-    private fun getFavoriteFilledScaleDownFadeOutDefaultAnimator() =
-        scaleDownFadeOutAnimatorProducer {
-            Empty.SCALE_UP_FADE_IN.start()
-            R.drawable.ic_favorite_empty
-        }
 
     private fun ObjectAnimator.removeListenersAndCancel() {
         removeAllListeners()
         cancel()
     }
 
-    private fun ObjectAnimator.setupScaleDownFadeOutAnimator(
+    private fun ObjectAnimator.setupOutgoingAnimator(
         time: Long
     ): ObjectAnimator = this.apply {
         currentPlayTime = duration - (time / Constants.ANIM_TIME_DIFFERENTIATOR).roundToLong()
         start()
     }
 
-    private fun ObjectAnimator.setupScaleUpFadeInAnimator(time: Long): ObjectAnimator = this.apply {
+    private fun ObjectAnimator.setupIncomingAnimator(time: Long): ObjectAnimator = this.apply {
         currentPlayTime = duration - (time * Constants.ANIM_TIME_DIFFERENTIATOR).roundToLong()
         start()
     }
 
-    private fun reverseFavoritesEmptyScaleUpFadeIn() {
-        val time = Empty.SCALE_UP_FADE_IN.currentPlayTime
-        Empty.SCALE_UP_FADE_IN.removeListenersAndCancel()
-        Empty.SCALE_UP_FADE_IN = getFavoriteEmptyScaleUpFadeInDefaultAnimator()
-        Empty.SCALE_DOWN_FADE_OUT =
-            getFavoriteEmptyScaleDownFadeOutDefaultAnimator().setupScaleDownFadeOutAnimator(time)
+    private fun reverseEmptyOutgoingAnimator() {
+        val time = Empty.OUTGOING.currentPlayTime
+        Empty.OUTGOING.removeListenersAndCancel()
+        Empty.OUTGOING = getEmptyOutgoingDefaultAnimator()
+        Empty.INCOMING = getEmptyIncomingDefaultAnimator().setupIncomingAnimator(time)
     }
 
-    private fun reverseFavoritesEmptyScaleDownFadeOut() {
-        val time = Empty.SCALE_DOWN_FADE_OUT.currentPlayTime
-        Empty.SCALE_DOWN_FADE_OUT.removeListenersAndCancel()
-        Empty.SCALE_DOWN_FADE_OUT = getFavoriteEmptyScaleDownFadeOutDefaultAnimator()
-        Empty.SCALE_UP_FADE_IN =
-            getFavoriteEmptyScaleUpFadeInDefaultAnimator().setupScaleUpFadeInAnimator(time)
+    private fun reverseEmptyIncomingAnimator() {
+        val time = Empty.INCOMING.currentPlayTime
+        Empty.INCOMING.removeListenersAndCancel()
+        Empty.INCOMING = getEmptyIncomingDefaultAnimator()
+        Empty.OUTGOING = getEmptyOutgoingDefaultAnimator().setupOutgoingAnimator(time)
     }
 
-    private fun reverseFavoritesFilledScaleUpFadeIn() {
-        val time = Filled.SCALE_UP_FADE_IN.currentPlayTime
-        Filled.SCALE_UP_FADE_IN.removeListenersAndCancel()
-        Filled.SCALE_UP_FADE_IN = getFavoriteFilledScaleUpFadeInDefaultAnimator()
-        Filled.SCALE_DOWN_FADE_OUT =
-            getFavoriteFilledScaleDownFadeOutDefaultAnimator().setupScaleDownFadeOutAnimator(time)
+    private fun reverseFilledOutgoingAnimator() {
+        val time = Filled.OUTGOING.currentPlayTime
+        Filled.OUTGOING.removeListenersAndCancel()
+        Filled.OUTGOING = getFilledOutgoingDefaultAnimator()
+        Filled.INCOMING =
+            getFilledIncomingDefaultAnimator().setupIncomingAnimator(time)
     }
 
-    private fun reverseFavoritesFilledScaleDownFadeOut() {
-        val time = Filled.SCALE_DOWN_FADE_OUT.currentPlayTime
-        Filled.SCALE_DOWN_FADE_OUT.removeListenersAndCancel()
-        Filled.SCALE_DOWN_FADE_OUT = getFavoriteFilledScaleDownFadeOutDefaultAnimator()
-        Filled.SCALE_UP_FADE_IN =
-            getFavoriteFilledScaleUpFadeInDefaultAnimator().setupScaleUpFadeInAnimator(time)
+    private fun reverseFilledIncomingAnimator() {
+        val time = Filled.INCOMING.currentPlayTime
+        Filled.INCOMING.removeListenersAndCancel()
+        Filled.INCOMING = getFilledIncomingDefaultAnimator()
+        Filled.OUTGOING = getFilledOutgoingDefaultAnimator().setupOutgoingAnimator(time)
     }
 
     fun onFavoritesClicked(favorites: Boolean) {
         if (animating) {
             when {
-                Empty.SCALE_UP_FADE_IN.isRunning -> {
-                    reverseFavoritesEmptyScaleUpFadeIn()
+                Empty.INCOMING.isRunning -> {
+                    reverseEmptyIncomingAnimator()
                 }
-                Empty.SCALE_DOWN_FADE_OUT.isRunning -> {
-                    reverseFavoritesEmptyScaleDownFadeOut()
+                Empty.OUTGOING.isRunning -> {
+                    reverseEmptyOutgoingAnimator()
                 }
-                Filled.SCALE_UP_FADE_IN.isRunning -> {
-                    reverseFavoritesFilledScaleUpFadeIn()
+                Filled.INCOMING.isRunning -> {
+                    reverseFilledIncomingAnimator()
                 }
-                Filled.SCALE_DOWN_FADE_OUT.isRunning -> {
-                    reverseFavoritesFilledScaleDownFadeOut()
+                Filled.OUTGOING.isRunning -> {
+                    reverseFilledOutgoingAnimator()
                 }
             }
         } else when (favorites) {
             true -> {
-                Empty.SCALE_DOWN_FADE_OUT.start()
+                Empty.OUTGOING.start()
                 animating = true
             }
             else -> {
-                Filled.SCALE_DOWN_FADE_OUT.start()
+                Filled.OUTGOING.start()
                 animating = true
             }
         }

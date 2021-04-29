@@ -17,7 +17,9 @@ import android.util.Property
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
 import android.view.animation.AlphaAnimation
+import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import android.widget.ImageButton
 import android.widget.TextView
@@ -498,7 +500,34 @@ private fun getPropertyValueHolderForPropertyForImageTintList(
     ColorStateList.valueOf(endColor)
 )
 
-fun ImageButton.getScaleDownFadeOutAnimatorProducer(): (() -> Int) -> ObjectAnimator {
+private fun ObjectAnimator.setupOutgoingAnimator(onAnimationEnd: () -> Unit): ObjectAnimator {
+    duration = ANIM_TIME
+    interpolator = AccelerateInterpolator()
+    addListener(getAnimatorListener({}, onAnimationEnd))
+    return this
+}
+
+private fun ObjectAnimator.setupIncomingAnimator(onAnimationEnd: () -> Unit): ObjectAnimator {
+    duration = (ANIM_TIME * ANIM_TIME_DIFFERENTIATOR).roundToLong()
+    interpolator = DecelerateInterpolator()
+    addListener(getAnimatorListener({}, onAnimationEnd))
+    return this
+}
+
+typealias OutgoingAnimatorProducer = (() -> Int) -> ObjectAnimator
+typealias IncomingAnimatorProducer = (() -> Unit) -> ObjectAnimator
+
+fun ImageButton.getScaleAndFadeAnimatorProducersPair() = Pair(
+    getScaleDownFadeOutAnimatorProducer(),
+    getScaleUpFadeInAnimatorProducer()
+)
+
+fun ImageButton.getRotateAroundYAnimatorProducersPair() = Pair(
+    getRotationY0To90AnimatorProducer(),
+    getRotationY90To180AnimatorProducer()
+)
+
+private fun ImageButton.getScaleDownFadeOutAnimatorProducer(): OutgoingAnimatorProducer {
     return { onAnimationEnd ->
         getScaleAndFadeAnimator(
             this,
@@ -506,14 +535,11 @@ fun ImageButton.getScaleDownFadeOutAnimatorProducer(): (() -> Int) -> ObjectAnim
             SCALE_DOWN_END,
             1f,
             0f
-        ).apply {
-            duration = ANIM_TIME
-            addListener(getAnimatorListener({}, { setImageResource(onAnimationEnd()) }))
-        }
+        ).setupOutgoingAnimator { setImageResource(onAnimationEnd()) }
     }
 }
 
-fun ImageButton.getScaleUpFadeInAnimatorProducer(): (() -> Unit) -> ObjectAnimator {
+private fun ImageButton.getScaleUpFadeInAnimatorProducer(): IncomingAnimatorProducer {
     return { onAnimationEnd ->
         getScaleAndFadeAnimator(
             this,
@@ -521,12 +547,40 @@ fun ImageButton.getScaleUpFadeInAnimatorProducer(): (() -> Unit) -> ObjectAnimat
             1f,
             0f,
             1f
-        ).apply {
-            duration = (ANIM_TIME * ANIM_TIME_DIFFERENTIATOR).roundToLong()
-            addListener(getAnimatorListener({}, onAnimationEnd))
-        }
+        ).setupIncomingAnimator(onAnimationEnd)
     }
 }
+
+private fun ImageButton.getRotationY0To90AnimatorProducer(): OutgoingAnimatorProducer {
+    return { onAnimationEnd ->
+        getRotationYAnimator(
+            this,
+            0f,
+            90f
+        ).setupOutgoingAnimator { setImageResource(onAnimationEnd()) }
+    }
+}
+
+private fun ImageButton.getRotationY90To180AnimatorProducer(): IncomingAnimatorProducer {
+    return { onAnimationEnd ->
+        getRotationYAnimator(
+            this,
+            90f,
+            180f
+        ).setupIncomingAnimator(onAnimationEnd)
+    }
+}
+
+private fun getRotationYAnimator(
+    button: ImageButton,
+    startAngle: Float,
+    endAngle: Float
+): ObjectAnimator = ObjectAnimator.ofFloat(
+    button,
+    View.ROTATION_Y,
+    startAngle,
+    endAngle
+)
 
 private fun getScaleAndFadeAnimator(
     button: ImageButton,
@@ -558,7 +612,5 @@ private fun getScaleAndFadeAnimator(
         scaleX,
         scaleY,
         fade
-    ).apply {
-        interpolator = LinearInterpolator()
-    }
+    )
 }
