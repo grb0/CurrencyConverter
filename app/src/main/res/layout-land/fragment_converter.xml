@@ -129,6 +129,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
                     android:background="@android:color/transparent"
+                    android:clickable="false"
+                    android:focusable="false"
                     android:padding="18dp"
                     android:src="@drawable/ic_favorite_empty"
                     app:favoritesIcon="@{showOnlyFavorites}"

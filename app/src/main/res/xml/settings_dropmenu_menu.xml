@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/key_show_scrollbar"
+        android:title="@string/title_show_scrollbar"
+        app:icon="@drawable/ic_hide" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/key_auto_hide_scrollbar"
+        android:title="@string/title_auto_hide_scrollbar"
+        app:icon="@drawable/ic_hide" />
+
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="@string/key_extend_chooser_landscape"
+        android:title="@string/title_extend_chooser_landscape"
+        app:icon="@drawable/ic_extend" />
+
+    <ListPreference
+        android:defaultValue="@string/code_and_name_value"
+        android:entries="@array/filter_by_names"
+        android:entryValues="@array/filter_by_values"
+        android:key="@string/key_filter_by"
+        android:title="@string/title_filter_by"
+        app:icon="@drawable/ic_search"
+        app:useSimpleSummaryProvider="true" />
+</PreferenceScreen>

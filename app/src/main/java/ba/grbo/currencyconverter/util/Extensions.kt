@@ -6,6 +6,7 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.content.res.Resources
@@ -21,7 +22,9 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.AlphaAnimation
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
+import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.AttrRes
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -32,6 +35,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionValues
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown
@@ -50,12 +54,23 @@ import ba.grbo.currencyconverter.util.Constants.TEXT_COLOR
 import ba.grbo.currencyconverter.util.Constants.TYPEFACE
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.transition.MaterialFadeThrough
+import com.google.android.material.transition.MaterialSharedAxis
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
+
+fun SharedPreferences.putString(key: String, value: String) {
+    with(edit()) {
+        putString(key, value)
+        apply()
+    }
+}
 
 fun Context.getColorFromAttribute(@AttrRes id: Int): Int {
     val typedValue = TypedValue()
@@ -365,6 +380,113 @@ fun getMaterialFadeThroughAnimator(viewGroup: ViewGroup, enter: Boolean): Animat
     return getMaterialFadeThroughAnimator(
         if (enter) MaterialFadeThrough()::onAppear else MaterialFadeThrough()::onDisappear
     )
+}
+
+fun Fragment.getExitAndPopEnterMaterialSharedXAnimators(
+    nextAnim: Int,
+    onElse: (Int) -> Animator
+) = when (nextAnim) {
+    android.R.anim.fade_out -> view.getMaterialSharedXAxisExitBackwardAnimator()
+    android.R.anim.slide_in_left -> {
+        view.getMaterialSharedXAxisEnterForwardAnimator(viewLifecycleOwner.lifecycleScope)
+    }
+    else -> onElse(nextAnim)
+}
+
+fun Fragment.getEnterAndPopExitMaterialSharedXAnimators(nextAnim: Int) = when (nextAnim) {
+    android.R.anim.fade_in -> {
+        view.getMaterialSharedXAxisEnterBackwardAnimator(viewLifecycleOwner.lifecycleScope)
+    }
+    android.R.anim.slide_out_right -> view.getMaterialSharedXAxisExitForwardAnimator()
+    else -> throw IllegalArgumentException("Unknown nextAnim: $nextAnim")
+}
+
+fun View?.getMaterialSharedXAxisEnterForwardAnimator(scope: CoroutineScope): Animator {
+    return getMaterialSharedXAxisEnterAnimator(this, true, scope)
+}
+
+fun View?.getMaterialSharedXAxisEnterBackwardAnimator(scope: CoroutineScope): Animator {
+    return getMaterialSharedXAxisEnterAnimator(this, false, scope)
+}
+
+private fun getMaterialSharedXAxisEnterAnimator(
+    view: View?,
+    forward: Boolean,
+    scope: CoroutineScope
+): Animator {
+    val recyclerView = view.getRecyclerView()
+    return getMaterialSharedXAxisAnimator(
+        view as ViewGroup,
+        enter = true,
+        forward = forward,
+        onAnimationStart = { recyclerView.onCustomAnimationStart(scope) },
+        onAnimationEnd = recyclerView::onCustomAnimationEnd
+    )
+}
+
+fun View?.getMaterialSharedXAxisExitForwardAnimator(): Animator {
+    return getMaterialSharedXAxisExitAnimator(this, true)
+}
+
+fun View?.getMaterialSharedXAxisExitBackwardAnimator(): Animator {
+    return getMaterialSharedXAxisExitAnimator(this, false)
+}
+
+private fun getMaterialSharedXAxisExitAnimator(view: View?, forward: Boolean): Animator {
+    return getMaterialSharedXAxisAnimator(
+        view as ViewGroup,
+        false,
+        forward = forward,
+        {},
+        {}
+    )
+}
+
+private fun getMaterialSharedXAxisAnimator(
+    viewGroup: ViewGroup,
+    enter: Boolean,
+    forward: Boolean,
+    onAnimationStart: () -> Unit,
+    onAnimationEnd: () -> Unit
+): Animator {
+    fun getMaterialSharedXAxisAnimator(
+        function: (ViewGroup, View, TransitionValues, TransitionValues) -> Animator
+    ): Animator = function(
+        viewGroup,
+        viewGroup,
+        TransitionValues(viewGroup),
+        TransitionValues(viewGroup)
+    ).apply {
+        addListener(getAnimatorListener(onAnimationStart, onAnimationEnd))
+    }
+
+    return getMaterialSharedXAxisAnimator(
+        if (enter) MaterialSharedAxis(MaterialSharedAxis.X, forward)::onAppear
+        else MaterialSharedAxis(MaterialSharedAxis.X, forward)::onDisappear
+    )
+}
+
+private fun View?.getRecyclerView(): RecyclerView {
+    return ((this as LinearLayout).getChildAt(0) as FrameLayout).getChildAt(0) as RecyclerView
+}
+
+private fun RecyclerView.onCustomAnimationStart(scope: CoroutineScope) {
+    scope.launch {
+        while (childCount == 0) {
+            delay(1)
+        }
+        setChildrenClickability(false)
+    }
+}
+
+private fun RecyclerView.onCustomAnimationEnd() {
+    setChildrenClickability(true)
+}
+
+private fun RecyclerView.setChildrenClickability(clickable: Boolean) {
+    for (i in 0 until childCount) {
+        getChildAt(i).isClickable = clickable
+    }
 }
 
 fun View.setMargins(size: Float) {

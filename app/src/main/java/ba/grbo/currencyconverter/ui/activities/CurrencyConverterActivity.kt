@@ -17,6 +17,8 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
 import ba.grbo.currencyconverter.CurrencyConverterApplication
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.databinding.ActivityCurrencyConverterBinding
@@ -70,6 +72,10 @@ class CurrencyConverterActivity : AppCompatActivity() {
         } else super.dispatchTouchEvent(ev)
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        return navController.navigateUp()
+    }
+
     private fun preSuperOnCreateSetup() {
         setTheme(R.style.Theme_CurrencyConverter)
     }
@@ -77,6 +83,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
     private fun postSuperOnCreateSetup() {
         initBinding()
         initNavController()
+        setupActionBarWithNavController()
         setListeners()
         collectFlows()
     }
@@ -88,6 +95,15 @@ class CurrencyConverterActivity : AppCompatActivity() {
     private fun initNavController() {
         val fragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
         navController = (fragment as NavHostFragment).navController
+    }
+
+    private fun setupActionBarWithNavController() {
+        setupActionBarWithNavController(
+            navController,
+            AppBarConfiguration(
+                setOf(R.id.converterFragment, R.id.historyFragment, R.id.settingsFragment)
+            )
+        )
     }
 
     private fun setListeners() {
@@ -127,6 +143,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
             destinationId.collect(::onDestinationIdChanged)
             actionBarTitle.collect(::setActionBarTitle)
             selectedItemId.collect(::onSelectedItemIdChanged)
+            pressBack.collect { pressBack() }
             exitApp.collect { exitApp() }
         }
     }
@@ -143,6 +160,10 @@ class CurrencyConverterActivity : AppCompatActivity() {
     private fun onSelectedItemIdChanged(@IdRes itemId: Int) {
         // Triggers OnNavigationItemSelectedListener
         binding.bottomNavigation.selectedItemId = itemId
+    }
+
+    private fun pressBack() {
+        super.onBackPressed()
     }
 
     private fun exitApp() {

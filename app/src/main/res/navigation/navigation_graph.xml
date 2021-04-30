@@ -9,15 +9,39 @@
     <fragment
         android:id="@+id/converterFragment"
         android:name="ba.grbo.currencyconverter.ui.fragments.ConverterFragment"
-        android:label="@string/title_converter"
+        android:label="@string/label_converter"
         tools:layout="@layout/fragment_converter" />
     <fragment
         android:id="@+id/historyFragment"
         android:name="ba.grbo.currencyconverter.ui.fragments.HistoryFragment"
-        android:label="@string/title_history"
+        android:label="@string/label_history"
         tools:layout="@layout/fragment_history" />
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="ba.grbo.currencyconverter.ui.fragments.SettingsFragment"
-        android:label="@string/title_settings" />
+        android:name="ba.grbo.currencyconverter.ui.fragments.settings.SettingsFragment"
+        android:label="@string/label_settings">
+        <action
+            android:id="@+id/action_settingsFragment_to_chooserFragment"
+            app:destination="@id/chooserFragment"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/chooserFragment"
+        android:name="ba.grbo.currencyconverter.ui.fragments.settings.ChooserFragment"
+        android:label="@string/label_chooser">
+        <action
+            android:id="@+id/action_chooserFragment_to_dropdownMenuFragment"
+            app:destination="@id/dropdownMenuFragment"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/dropdownMenuFragment"
+        android:name="ba.grbo.currencyconverter.ui.fragments.settings.DropdownMenuFragment"
+        android:label="@string/label_dropdown" />
 </navigation>

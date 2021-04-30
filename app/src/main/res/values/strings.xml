@@ -2,17 +2,27 @@
     <string name="app_name" translatable="false">Currency Converter</string>
 
     <!--Action bar title-->
-    <string name="title_converter">Converter</string>
-    <string name="title_history">History</string>
-    <string name="title_settings">Settings</string>
+    <string name="label_converter">Converter</string>
+    <string name="label_history">History</string>
+    <string name="label_settings">Settings</string>
+    <string name="label_chooser">Chooser</string>
+    <string name="label_dropdown">Dropdown menu</string>
 
     <!--Settings-->
     <string name="title_miscellaneous">Miscellaneous</string>
     <string name="key_miscellaneous" translatable="false">miscellaneous</string>
+    <string name="key_chooser" translatable="false">chooser</string>
+    <string name="title_chooser">Chooser</string>
+    <string name="summary_chooser">Currency name, dropdown menu</string>
+    <string name="key_dropdown_menu" translatable="false">dropdown_menu</string>
+    <string name="title_dropdown_menu">Dropdown menu</string>
+    <string name="summary_dropdown_menu">Dropdown menu, scrollbar</string>
     <string name="key_auto_hide_scrollbar" translatable="false">autohide_scrollbar</string>
     <string name="title_auto_hide_scrollbar">Auto-hide scrollbar</string>
+    <string name="key_show_scrollbar" translatable="false">show_scrollbar</string>
+    <string name="title_show_scrollbar">Show scrollbar</string>
     <string name="key_extend_chooser_landscape" translatable="false">extend_chooser_landscape</string>
-    <string name="title_extend_chooser_landscape">Extend chooser in landscape mode</string>
+    <string name="title_extend_chooser_landscape">Extend dropdown menu in landscape mode</string>
     <string name="key_theme" translatable="false">theme</string>
     <string name="title_theme">Theme</string>
     <string name="key_language" translatable="false">language</string>

@@ -4,13 +4,13 @@
     <item
         android:id="@+id/converterNavigation"
         android:icon="@drawable/ic_converter"
-        android:title="@string/title_converter" />
+        android:title="@string/label_converter" />
     <item
         android:id="@+id/historyNavigation"
         android:icon="@drawable/ic_history"
-        android:title="@string/title_history" />
+        android:title="@string/label_history" />
     <item
         android:id="@+id/settingsNavigation"
         android:icon="@drawable/ic_settings"
-        android:title="@string/title_settings" />
+        android:title="@string/label_settings" />
 </menu>

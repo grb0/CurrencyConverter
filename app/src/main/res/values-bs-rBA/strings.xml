@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="title_converter">Konverter</string>
-    <string name="title_history">Historija</string>
-    <string name="title_settings">Postavke</string>
+    <string name="label_converter">Konverter</string>
+    <string name="label_history">Historija</string>
+    <string name="label_settings">Postavke</string>
     <string name="title_miscellaneous">Razno</string>
     <string name="title_auto_hide_scrollbar">Automatsko skrivanje sklizača</string>
     <string name="title_theme">Tema</string>
@@ -188,7 +188,14 @@
     <string name="currency_palladium_ounce">Paladij (Unca)</string>
     <string name="currency_platinum_ounce">Platina (Unca)</string>
     <string name="close">Zatvori</string>
-    <string name="title_extend_chooser_landscape">Proširi odabirač u horizontalnom modu</string>
+    <string name="title_extend_chooser_landscape">Proširi padajući meni u horizontalnom modu</string>
     <string name="swap_arrows">Unakrsne strelice</string>
     <string name="heart">Srce</string>
+    <string name="label_chooser">Odabirač</string>
+    <string name="title_chooser">Odabirač</string>
+    <string name="summary_chooser">Prikaži valutu kao, padajući meni</string>
+    <string name="title_dropdown_menu">Padajući meni</string>
+    <string name="title_show_scrollbar">Sklizač</string>
+    <string name="label_dropdown">Padajući meni</string>
+    <string name="summary_dropdown_menu">Padajući meni, sklizač</string>
 </resources>

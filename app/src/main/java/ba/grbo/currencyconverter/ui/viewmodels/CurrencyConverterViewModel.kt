@@ -27,6 +27,10 @@ class CurrencyConverterViewModel @Inject constructor() : ViewModel() {
     val exitApp: SharedFlow<Unit>
         get() = _exitApp
 
+    private val _pressBack = SingleSharedFlow<Unit>()
+    val pressBack: SharedFlow<Unit>
+        get() = _pressBack
+
     private var currentDestinationId: Int = Int.MIN_VALUE
 
     fun onNavigationItemSelected(@IdRes itemId: Int): Boolean {
@@ -47,9 +51,14 @@ class CurrencyConverterViewModel @Inject constructor() : ViewModel() {
     }
 
     fun onBackPressed() {
-        if (currentDestinationId != R.id.converterFragment) {
-            _selectedItemId.tryEmit(R.id.converterNavigation)
-        } else _exitApp.tryEmit(Unit)
+        when {
+            currentDestinationId == R.id.chooserFragment ||
+                    currentDestinationId == R.id.dropdownMenuFragment -> _pressBack.tryEmit(Unit)
+            currentDestinationId != R.id.converterFragment -> {
+                _selectedItemId.tryEmit(R.id.converterNavigation)
+            }
+            else -> _exitApp.tryEmit(Unit)
+        }
     }
 
     fun onDestinationChanged(destinationId: Int, actionBarTitle: String) {
