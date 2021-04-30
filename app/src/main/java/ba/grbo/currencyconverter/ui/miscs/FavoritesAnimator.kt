@@ -87,8 +87,7 @@ class FavoritesAnimator(
         val time = Filled.OUTGOING.currentPlayTime
         Filled.OUTGOING.removeListenersAndCancel()
         Filled.OUTGOING = getFilledOutgoingDefaultAnimator()
-        Filled.INCOMING =
-            getFilledIncomingDefaultAnimator().setupIncomingAnimator(time)
+        Filled.INCOMING = getFilledIncomingDefaultAnimator().setupIncomingAnimator(time)
     }
 
     private fun reverseFilledIncomingAnimator() {

@@ -40,7 +40,7 @@ class CountryAdapter(
             onFavoritesAnimationEnd: (Country, Boolean, Int) -> Unit
         ) {
             favoritesAnimator = FavoritesAnimator(
-                binding.favorites.getScaleAndFadeAnimatorProducersPair(),
+                binding.favoritesAnimation.getScaleAndFadeAnimatorProducersPair(),
             ) { onFavoritesAnimationEnd(country, it, adapterPosition) }
 
             binding.favorites.setOnClickListener {

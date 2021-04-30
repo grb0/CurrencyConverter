@@ -115,12 +115,26 @@
                     android:layout_marginEnd="8dp"
                     android:background="@android:color/transparent"
                     android:contentDescription="@string/heart"
+                    android:padding="30dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/currencies_searcher"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/currencies_searcher" />
+
+                <ImageButton
+                    android:id="@+id/favorites_animation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:background="@android:color/transparent"
+                    android:clickable="false"
+                    android:focusable="false"
                     android:padding="18dp"
                     android:src="@drawable/ic_favorite_empty"
                     app:favoritesIcon="@{showOnlyFavorites}"
                     app:layout_constraintBottom_toBottomOf="@+id/currencies_searcher"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/currencies_searcher" />
+                    app:layout_constraintTop_toTopOf="@+id/currencies_searcher"
+                    tools:ignore="ContentDescription" />
 
                 <View
                     android:id="@+id/divider"

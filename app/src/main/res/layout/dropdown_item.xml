@@ -59,7 +59,6 @@
                 tools:drawableStartCompat="@sample/data.json/countries/flag"
                 tools:text="@sample/data.json/countries/code" />
 
-
             <ImageButton
                 android:id="@+id/favorites"
                 android:layout_width="wrap_content"
@@ -67,12 +66,27 @@
                 android:layout_marginEnd="8dp"
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/heart"
+                android:padding="30dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/favorites_animation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="@android:color/transparent"
+                android:clickable="false"
                 android:padding="18dp"
+                android:focusable="false"
+                tools:ignore="ContentDescription"
                 android:src="@drawable/ic_favorite_empty"
                 app:favoritesIcon="@{country.favorite}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.balysv.materialripple.MaterialRippleLayout>
 </layout>

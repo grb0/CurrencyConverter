@@ -21,7 +21,7 @@ class ObjectAnimators(
     private val fadeOutAnimatorProducer = binding.currenciesCard.getFadeOutAnimatorProducer()
 
     private val favoritesAnimator = FavoritesAnimator(
-        binding.favorites.getRotateAroundYAnimatorProducersPair(),
+        binding.favoritesAnimation.getRotateAroundYAnimatorProducersPair(),
         onFavoritesAnimationEnd
     )
 
