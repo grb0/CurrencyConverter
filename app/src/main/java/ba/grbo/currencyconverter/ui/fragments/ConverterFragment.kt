@@ -132,11 +132,10 @@ class ConverterFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?
     ) = FragmentConverterBinding.inflate(inflater, container, false).also {
-        it.lifecycleOwner = viewLifecycleOwner
+        it.showOnlyFavorites = viewModel.showOnlyFavorites
+        it.showScrollbar = showScrollbar
+        it.extendDropdownMenuInLandscape = extendDropdownMenuInLandscape
         binding = it
-        binding.showOnlyFavorites = viewModel.showOnlyFavorites
-        binding.showScrollbar = showScrollbar
-        binding.extendDropdownMenuInLandscape = extendDropdownMenuInLandscape
     }.root
 
     private fun initializeFastScroller(recyclerView: RecyclerView) {
@@ -189,7 +188,6 @@ class ConverterFragment : Fragment() {
 
     private fun assignAdapter() {
         binding.currencies.adapter = CountryAdapter(
-            viewLifecycleOwner,
             uiName,
             showScrollbar,
             viewModel::onCurrencyClicked,

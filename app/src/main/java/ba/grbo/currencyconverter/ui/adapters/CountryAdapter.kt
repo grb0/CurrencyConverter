@@ -2,7 +2,6 @@ package ba.grbo.currencyconverter.ui.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ba.grbo.currencyconverter.data.models.Country
@@ -12,7 +11,6 @@ import ba.grbo.currencyconverter.ui.miscs.FavoritesAnimator
 import ba.grbo.currencyconverter.util.getScaleAndFadeAnimatorProducersPair
 
 class CountryAdapter(
-    private val lifecycleOwner: LifecycleOwner,
     private val uiName: Currency.UiName,
     private val showScrollbar: Boolean,
     private val onClick: (Country) -> Unit,
@@ -28,16 +26,12 @@ class CountryAdapter(
             fun from(
                 parent: ViewGroup,
                 showScrollbar: Boolean,
-                lifecycleOwner: LifecycleOwner
             ) = CountryHolder(
                 DropdownItemBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
-                ).apply {
-                    this.showScrollbar = showScrollbar
-                    this.lifecycleOwner = lifecycleOwner
-                }
+                ).apply { this.showScrollbar = showScrollbar }
             )
         }
 
@@ -64,7 +58,7 @@ class CountryAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CountryHolder {
-        return CountryHolder.from(parent, showScrollbar, lifecycleOwner)
+        return CountryHolder.from(parent, showScrollbar)
     }
 
     override fun onBindViewHolder(holder: CountryHolder, position: Int) {
