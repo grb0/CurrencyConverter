@@ -14,6 +14,7 @@ import ba.grbo.currencyconverter.util.getScaleAndFadeAnimatorProducersPair
 class CountryAdapter(
     private val lifecycleOwner: LifecycleOwner,
     private val uiName: Currency.UiName,
+    private val showScrollbar: Boolean,
     private val onClick: (Country) -> Unit,
     private val onCurrentListChanged: () -> Unit,
     private val onFavoritesAnimationEnd: (Country, Boolean, Int) -> Unit,
@@ -24,12 +25,19 @@ class CountryAdapter(
         private lateinit var favoritesAnimator: FavoritesAnimator
 
         companion object {
-            fun from(parent: ViewGroup, lifecycleOwner: LifecycleOwner) = CountryHolder(
+            fun from(
+                parent: ViewGroup,
+                showScrollbar: Boolean,
+                lifecycleOwner: LifecycleOwner
+            ) = CountryHolder(
                 DropdownItemBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
-                ).apply { this.lifecycleOwner = lifecycleOwner }
+                ).apply {
+                    this.showScrollbar = showScrollbar
+                    this.lifecycleOwner = lifecycleOwner
+                }
             )
         }
 
@@ -56,7 +64,7 @@ class CountryAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CountryHolder {
-        return CountryHolder.from(parent, lifecycleOwner)
+        return CountryHolder.from(parent, showScrollbar, lifecycleOwner)
     }
 
     override fun onBindViewHolder(holder: CountryHolder, position: Int) {

@@ -90,6 +90,17 @@ object ActivityScopedPreferences {
 @InstallIn(FragmentComponent::class)
 object FragmentScoped {
     @FragmentScoped
+    @ShowScrollbar
+    @Provides
+    fun provideShowScrollbar(
+        sharedPreferences: SharedPreferences,
+        @ApplicationContext context: Context
+    ) = sharedPreferences.getBoolean(
+        context.getString(R.string.key_show_scrollbar),
+        true
+    )
+
+    @FragmentScoped
     @AutohideScrollbar
     @Provides
     fun provideAutohideScrollbar(
@@ -101,9 +112,9 @@ object FragmentScoped {
     )
 
     @FragmentScoped
-    @ExtendChooserLandscape
+    @ExtendDropdownMenuInLandscape
     @Provides
-    fun provideBiggerChooserLandscape(
+    fun provideExtendDropdownMenuInLandscape(
         sharedPreferences: SharedPreferences,
         @ApplicationContext context: Context
     ) = sharedPreferences.getBoolean(

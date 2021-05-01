@@ -15,6 +15,10 @@
         <variable
             name="uiName"
             type="UiName" />
+
+        <variable
+            name="showScrollbar"
+            type="Boolean" />
     </data>
 
 
@@ -37,7 +41,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginEnd="8dp"
+                app:autoSizeStepGranularity="0.25sp"
                 android:layout_marginBottom="16dp"
                 android:drawablePadding="8dp"
                 android:ellipsize="end"
@@ -49,7 +53,7 @@
                 android:textSize="16sp"
                 app:autoSizeMaxTextSize="16sp"
                 app:autoSizeMinTextSize="12sp"
-                app:autoSizeStepGranularity="1sp"
+                app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
                 app:autoSizeTextType="uniform"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/favorites"
@@ -63,10 +67,13 @@
                 android:id="@+id/favorites"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
+                android:paddingStart="@{showScrollbar ? @dimen/favorite_padding_scroller : @dimen/favorite_padding_no_scroller}"
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/heart"
-                android:padding="30dp"
+                android:paddingTop="@dimen/favorite_padding_scroller"
+                android:paddingEnd="@{showScrollbar ? @dimen/favorite_padding_scroller : @dimen/favorite_padding_no_scroller}"
+                android:paddingBottom="@dimen/favorite_padding_scroller"
+                app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -75,17 +82,20 @@
                 android:id="@+id/favorites_animation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
+                android:paddingStart="@{showScrollbar ? @dimen/favorite_animation_padding_scroller : @dimen/favorite_animation_padding_no_scroller}"
                 android:background="@android:color/transparent"
                 android:clickable="false"
-                android:padding="18dp"
                 android:focusable="false"
-                tools:ignore="ContentDescription"
+                android:paddingTop="@dimen/favorite_animation_padding_scroller"
+                android:paddingEnd="@{showScrollbar ? @dimen/favorite_animation_padding_scroller : @dimen/favorite_animation_padding_no_scroller}"
+                android:paddingBottom="@dimen/favorite_animation_padding_scroller"
+                app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
                 android:src="@drawable/ic_favorite_empty"
                 app:favoritesIcon="@{country.favorite}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ContentDescription" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.balysv.materialripple.MaterialRippleLayout>

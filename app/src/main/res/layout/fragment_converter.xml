@@ -9,6 +9,10 @@
         <variable
             name="showOnlyFavorites"
             type="Boolean" />
+
+        <variable
+            name="showScrollbar"
+            type="Boolean" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -72,7 +76,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="9dp"
-                    android:layout_marginEnd="8dp"
+                    app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
                     android:background="@drawable/border_edit_text"
                     android:ems="10"
                     android:fontFamily="@font/roboto"
@@ -112,10 +116,13 @@
                     android:id="@+id/favorites"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
+                    android:paddingStart="@{showScrollbar ? @dimen/favorite_padding_scroller : @dimen/favorite_padding_no_scroller}"
                     android:background="@android:color/transparent"
                     android:contentDescription="@string/heart"
-                    android:padding="30dp"
+                    android:paddingTop="@dimen/favorite_padding_scroller"
+                    android:paddingEnd="@{showScrollbar ? @dimen/favorite_padding_scroller : @dimen/favorite_padding_no_scroller}"
+                    android:paddingBottom="@dimen/favorite_padding_scroller"
+                    app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
                     app:layout_constraintBottom_toBottomOf="@+id/currencies_searcher"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/currencies_searcher" />
@@ -124,11 +131,14 @@
                     android:id="@+id/favorites_animation"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
+                    android:paddingStart="@{showScrollbar ? @dimen/favorite_animation_padding_scroller : @dimen/favorite_animation_padding_no_scroller}"
                     android:background="@android:color/transparent"
                     android:clickable="false"
                     android:focusable="false"
-                    android:padding="18dp"
+                    android:paddingTop="@dimen/favorite_animation_padding_scroller"
+                    android:paddingEnd="@{showScrollbar ? @dimen/favorite_animation_padding_scroller : @dimen/favorite_animation_padding_no_scroller}"
+                    android:paddingBottom="@dimen/favorite_animation_padding_scroller"
+                    app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
                     android:src="@drawable/ic_favorite_empty"
                     app:favoritesIcon="@{showOnlyFavorites}"
                     app:layout_constraintBottom_toBottomOf="@+id/currencies_searcher"

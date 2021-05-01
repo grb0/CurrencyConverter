@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
+import androidx.preference.SwitchPreference
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.ui.viewmodels.DropdownMenuViewModel
 import ba.grbo.currencyconverter.util.FilterBy
@@ -20,6 +21,8 @@ import ba.grbo.currencyconverter.util.putString
 class DropdownMenuFragment : PreferenceFragmentCompat() {
     private val viewModel: DropdownMenuViewModel by viewModels()
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var showScrollbar: SwitchPreference
+    private lateinit var autohideScrollbar: SwitchPreference
     private var currencyKey = ""
     private var currencyCode = ""
     private var currencyName = ""
@@ -29,6 +32,7 @@ class DropdownMenuFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings_dropmenu_menu, rootKey)
         initVariables()
+        syncAutohideScrollbar()
         setListeners()
     }
 
@@ -47,7 +51,13 @@ class DropdownMenuFragment : PreferenceFragmentCompat() {
 
     private fun initVariables() {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        showScrollbar = findPreference(getString(R.string.key_show_scrollbar))!!
+        autohideScrollbar = findPreference(getString(R.string.key_auto_hide_scrollbar))!!
         initCurrencyValues()
+    }
+
+    private fun syncAutohideScrollbar() {
+        if (!showScrollbar.isChecked) autohideScrollbar.isEnabled = false
     }
 
     private fun initCurrencyValues() {
@@ -58,15 +68,32 @@ class DropdownMenuFragment : PreferenceFragmentCompat() {
     }
 
     private fun setListeners() {
+        observeShowScrollbar()
         observeFilterBy()
     }
 
     private fun collectFlows() {
-        collectWhenStarted(viewModel.filterBy, ::onFilterByChanged, true)
+        viewModel.run {
+            collectWhenStarted(showScrollbarChanged, ::onShowScrollbarChanged, true)
+            collectWhenStarted(filterBy, ::onFilterByChanged, true)
+        }
+    }
+
+    private fun onShowScrollbarChanged(showScrollbar: Boolean) {
+        if (!showScrollbar) autohideScrollbar.isChecked = false
+        autohideScrollbar.isEnabled = showScrollbar
     }
 
     private fun onFilterByChanged(filterBy: String) {
         synchCurrencyName(filterBy)
+    }
+
+    private fun observeShowScrollbar() {
+        showScrollbar.run {
+            setOnPreferenceChangeListener { _, newValue ->
+                viewModel.onShowScrollbarChanged(isChecked, newValue as Boolean)
+            }
+        }
     }
 
     private fun observeFilterBy() {

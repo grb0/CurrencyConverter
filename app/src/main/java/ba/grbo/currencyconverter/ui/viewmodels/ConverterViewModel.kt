@@ -88,7 +88,6 @@ class ConverterViewModel @Inject constructor(
     private val filter: (Currency, String) -> Boolean
 
     private var lastClickedDropdown = NONE
-    private var currenciesCardModifiedForLandscape = false
     private var initialSwappingState = SwappingState.None
 
     private var _showOnlyFavorites = false
@@ -365,18 +364,11 @@ class ConverterViewModel @Inject constructor(
         _scrollCurrenciesToTop.tryEmit(Unit)
     }
 
-    fun shouldModifyCurrenciesCardPosition(dropdown: Dropdown): Boolean {
-        return if (currenciesCardModifiedForLandscape) {
-            currenciesCardModifiedForLandscape = false
-            lastClickedDropdown = NONE
-            true
-        } else lastClickedDropdown != dropdown
-    }
-
-    fun shouldModifyCurrenciesCardPosition() = !currenciesCardModifiedForLandscape
-
-    fun onCurrenciesCardPositionModified() {
-        currenciesCardModifiedForLandscape = true
+    fun shouldModifyCurrenciesCardPosition(
+        dropdown: Dropdown,
+        landscapeModificator: Boolean
+    ): Boolean {
+        return !landscapeModificator && lastClickedDropdown != dropdown
     }
 
     private fun setResetButton(hasText: Boolean) {

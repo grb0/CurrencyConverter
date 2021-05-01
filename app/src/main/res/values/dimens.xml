@@ -8,4 +8,14 @@
     <dimen name="reset_searcher_ripple">20dp</dimen>
     <dimen name="divider_height">1.4dp</dimen>
     <dimen name="logo_size">200dp</dimen>
+
+    <dimen name="margin_scroller">6dp</dimen>
+    <dimen name="margin_no_scroller">0dp</dimen>
+    <dimen name="favorite_padding_scroller">30dp</dimen>
+    <dimen name="favorite_padding_no_scroller">28dp</dimen>
+    <dimen name="favorite_animation_padding_scroller">18dp</dimen>
+    <dimen name="favorite_animation_padding_no_scroller">16dp</dimen>
+
+    <dimen name="margin_material_card_extended">8dp</dimen>
+    <dimen name="margin_material_card_normal">16dp</dimen>
 </resources>

@@ -4,8 +4,12 @@ import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
+annotation class ShowScrollbar
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class AutohideScrollbar
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class ExtendChooserLandscape
+annotation class ExtendDropdownMenuInLandscape

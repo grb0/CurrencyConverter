@@ -32,7 +32,8 @@ import ba.grbo.currencyconverter.data.models.Currency
 import ba.grbo.currencyconverter.databinding.DropdownCurrencyChooserBinding
 import ba.grbo.currencyconverter.databinding.FragmentConverterBinding
 import ba.grbo.currencyconverter.di.AutohideScrollbar
-import ba.grbo.currencyconverter.di.ExtendChooserLandscape
+import ba.grbo.currencyconverter.di.ExtendDropdownMenuInLandscape
+import ba.grbo.currencyconverter.di.ShowScrollbar
 import ba.grbo.currencyconverter.ui.activities.CurrencyConverterActivity
 import ba.grbo.currencyconverter.ui.adapters.CountryAdapter
 import ba.grbo.currencyconverter.ui.miscs.Animations
@@ -66,14 +67,19 @@ class ConverterFragment : Fragment() {
     lateinit var Colors: Colors
 
     @Inject
+    @ShowScrollbar
+    @JvmField
+    var showScrollbar: Boolean = true
+
+    @Inject
     @AutohideScrollbar
     @JvmField
     var autohideScroller: Boolean = false
 
     @Inject
-    @ExtendChooserLandscape
+    @ExtendDropdownMenuInLandscape
     @JvmField
-    var extendChooserInLandscape: Boolean = false
+    var extendDropdownMenuInLandscape: Boolean = false
 
     private var orientation = Int.MIN_VALUE
     private var recyclerViewHeight = Int.MIN_VALUE
@@ -129,6 +135,8 @@ class ConverterFragment : Fragment() {
         it.lifecycleOwner = viewLifecycleOwner
         binding = it
         binding.showOnlyFavorites = viewModel.showOnlyFavorites
+        binding.showScrollbar = showScrollbar
+        binding.extendDropdownMenuInLandscape = extendDropdownMenuInLandscape
     }.root
 
     private fun initializeFastScroller(recyclerView: RecyclerView) {
@@ -176,13 +184,14 @@ class ConverterFragment : Fragment() {
         disableItemChangedAnimation()
         assignAdapter()
         modifyHeightInPortraitMode(addVerticalDivider())
-        initializeFastScroller(binding.currencies)
+        if (showScrollbar) initializeFastScroller(binding.currencies)
     }
 
     private fun assignAdapter() {
         binding.currencies.adapter = CountryAdapter(
             viewLifecycleOwner,
             uiName,
+            showScrollbar,
             viewModel::onCurrencyClicked,
             viewModel::onCountriesChanged,
             viewModel::onFavoritesAnimationEnd
@@ -677,28 +686,22 @@ class ConverterFragment : Fragment() {
     }
 
     private fun modifyCurrenciesCardPosition(dropdown: Dropdown) {
-        if (extendChooserInLandscape && orientation.isLandscape) {
-            if (viewModel.shouldModifyCurrenciesCardPosition()) {
-                modifyCurrenciesCardPosition(binding.converterLayout.id, true)
-                viewModel.onCurrenciesCardPositionModified()
-            }
-        } else {
-            if (viewModel.shouldModifyCurrenciesCardPosition(dropdown)) {
-                val viewId = if (dropdown == FROM) binding.fromCurrencyChooser.dropdownLayout.id
-                else binding.toCurrencyChooser.dropdownLayout.id
-                modifyCurrenciesCardPosition(viewId)
-            }
+        val landscapeModificator = orientation.isLandscape && extendDropdownMenuInLandscape
+        if (viewModel.shouldModifyCurrenciesCardPosition(dropdown, landscapeModificator)) {
+            val viewId = if (dropdown == FROM) binding.fromCurrencyChooser.dropdownLayout.id
+            else binding.toCurrencyChooser.dropdownLayout.id
+            modifyCurrenciesCardPosition(viewId)
         }
     }
 
-    private fun modifyCurrenciesCardPosition(viewId: Int, extended: Boolean = false) {
+    private fun modifyCurrenciesCardPosition(viewId: Int) {
         ConstraintSet().apply {
             clone(binding.converterLayout)
             connect(
                 binding.currenciesCard.id,
                 ConstraintSet.TOP,
                 viewId,
-                if (extended) ConstraintSet.TOP else ConstraintSet.BOTTOM
+                ConstraintSet.BOTTOM
             )
             connect(
                 binding.currenciesCard.id,
@@ -719,7 +722,6 @@ class ConverterFragment : Fragment() {
                 ConstraintSet.END
             )
             applyTo(binding.converterLayout)
-            if (extended) binding.currenciesCard.setMargins(8f)
         }
     }
 

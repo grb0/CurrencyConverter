@@ -27,7 +27,7 @@ class ChooserFragment : PreferenceFragmentCompat() {
     private var filterKey = ""
     private var filterCode = ""
     private var filterName = ""
-    private var currency: ListPreference? = null
+    private lateinit var currency: ListPreference
     private var currencyKey = ""
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -55,13 +55,13 @@ class ChooserFragment : PreferenceFragmentCompat() {
 
     override fun onStart() {
         super.onStart()
-        currency?.value = sharedPreferences.getString(currencyKey, null)
+        currency.value = sharedPreferences.getString(currencyKey, null)
     }
 
     private fun initVariables() {
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
         currencyKey = getString(R.string.key_ui_name)
-        currency = findPreference(currencyKey)
+        currency = findPreference(currencyKey)!!
         initFilterValues()
     }
 
@@ -77,7 +77,7 @@ class ChooserFragment : PreferenceFragmentCompat() {
     }
 
     private fun observeUiName() {
-        currency?.run {
+        currency.run {
             setOnPreferenceChangeListener { _, newValue ->
                 viewModel.onUiNameChanged(value, newValue as String)
             }
