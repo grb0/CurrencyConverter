@@ -7,6 +7,14 @@
     <data>
 
         <variable
+            name="from"
+            type="String" />
+
+        <variable
+            name="to"
+            type="String" />
+
+        <variable
             name="showOnlyFavorites"
             type="Boolean" />
 
@@ -33,7 +41,7 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:title="@{`From`}" />
+            app:title="@{from}" />
 
         <include
             android:id="@+id/to_currency_chooser"
@@ -44,7 +52,7 @@
             app:layout_constraintEnd_toEndOf="@+id/from_currency_chooser"
             app:layout_constraintStart_toStartOf="@+id/from_currency_chooser"
             app:layout_constraintTop_toBottomOf="@+id/dropdown_swapper"
-            app:title="@{`To`}"
+            app:title="@{to}"
             tools:visibility="gone" />
 
         <com.google.android.material.card.MaterialCardView
@@ -76,7 +84,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="9dp"
-                    app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
                     android:background="@drawable/border_edit_text"
                     android:ems="10"
                     android:fontFamily="@font/roboto"
@@ -90,6 +97,7 @@
                     android:textColor="@color/black"
                     android:textCursorDrawable="@drawable/cursor_edit_text"
                     android:textSize="16sp"
+                    app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
                     app:layout_constraintEnd_toStartOf="@+id/favorites"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -116,9 +124,9 @@
                     android:id="@+id/favorites"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingStart="@{showScrollbar ? @dimen/favorite_padding_scroller : @dimen/favorite_padding_no_scroller}"
                     android:background="@android:color/transparent"
                     android:contentDescription="@string/heart"
+                    android:paddingStart="@{showScrollbar ? @dimen/favorite_padding_scroller : @dimen/favorite_padding_no_scroller}"
                     android:paddingTop="@dimen/favorite_padding_scroller"
                     android:paddingEnd="@{showScrollbar ? @dimen/favorite_padding_scroller : @dimen/favorite_padding_no_scroller}"
                     android:paddingBottom="@dimen/favorite_padding_scroller"
@@ -131,15 +139,15 @@
                     android:id="@+id/favorites_animation"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingStart="@{showScrollbar ? @dimen/favorite_animation_padding_scroller : @dimen/favorite_animation_padding_no_scroller}"
                     android:background="@android:color/transparent"
                     android:clickable="false"
                     android:focusable="false"
+                    android:paddingStart="@{showScrollbar ? @dimen/favorite_animation_padding_scroller : @dimen/favorite_animation_padding_no_scroller}"
                     android:paddingTop="@dimen/favorite_animation_padding_scroller"
                     android:paddingEnd="@{showScrollbar ? @dimen/favorite_animation_padding_scroller : @dimen/favorite_animation_padding_no_scroller}"
                     android:paddingBottom="@dimen/favorite_animation_padding_scroller"
-                    app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
                     android:src="@drawable/ic_favorite_empty"
+                    app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
                     app:favoritesIcon="@{showOnlyFavorites}"
                     app:layout_constraintBottom_toBottomOf="@+id/currencies_searcher"
                     app:layout_constraintEnd_toEndOf="parent"

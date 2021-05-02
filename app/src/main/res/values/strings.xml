@@ -62,6 +62,8 @@
     <string name="img_description_country_flag">Country flag</string>
     <string name="img_description_expand">Expand</string>
     <string name="search_hint">Currency</string>
+    <string name="from_label">From</string>
+    <string name="to_label">To</string>
 
     <!--Country codes-->
     <string name="currency_united_arab_emirates">United Arab Emirates Dirham</string>

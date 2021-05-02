@@ -23,10 +23,6 @@ class CurrencyConverterApplication : Application() {
         initializeTimber()
     }
 
-    private fun initializeTimber() {
-        if (BuildConfig.DEBUG) Timber.plant(Timber.DebugTree())
-    }
-
     fun setTheme(theme: Theme): Boolean {
         this.theme = theme
         AppCompatDelegate.setDefaultNightMode(
@@ -41,5 +37,22 @@ class CurrencyConverterApplication : Application() {
 
     fun setLanguage(language: Language) {
         this.language = language.toLocale()
+    }
+
+    private fun initializeTimber() {
+        val tree = object : Timber.DebugTree() {
+            override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+                super.log(priority, "ba.grbo -> $tag", message, t)
+            }
+
+            override fun createStackElementTag(element: StackTraceElement): String {
+                return String.format(
+                    "%s -> %s",
+                    super.createStackElementTag(element),
+                    element.methodName
+                )
+            }
+        }
+        if (BuildConfig.DEBUG) Timber.plant(tree)
     }
 }

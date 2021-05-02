@@ -132,6 +132,8 @@ class ConverterFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?
     ) = FragmentConverterBinding.inflate(inflater, container, false).also {
+        it.from = getString(R.string.from_label)
+        it.to = getString(R.string.to_label)
         it.showOnlyFavorites = viewModel.showOnlyFavorites
         it.showScrollbar = showScrollbar
         it.extendDropdownMenuInLandscape = extendDropdownMenuInLandscape

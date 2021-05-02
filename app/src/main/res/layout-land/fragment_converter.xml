@@ -6,7 +6,13 @@
 
     <data>
 
-        <import type="androidx.constraintlayout.widget.ConstraintSet" />
+        <variable
+            name="from"
+            type="String" />
+
+        <variable
+            name="to"
+            type="String" />
 
         <variable
             name="showOnlyFavorites"
@@ -45,7 +51,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0"
-            app:title="@{`From`}" />
+            app:title="@{from}" />
 
         <include
             android:id="@+id/to_currency_chooser"
@@ -57,7 +63,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/dropdown_swapper"
             app:layout_constraintTop_toTopOf="@+id/from_currency_chooser"
-            app:title="@{`To`}"
+            app:title="@{to}"
             tools:visibility="visible" />
 
         <com.google.android.material.card.MaterialCardView

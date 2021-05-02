@@ -4,12 +4,14 @@
         <item>@string/bosnian_name</item>
         <item>@string/english_name</item>
         <item>@string/german_name</item>
+        <item>@string/device_name</item>
     </string-array>
 
     <string-array name="language_values">
         <item>@string/bosnian_value</item>
         <item>@string/english_value</item>
         <item>@string/german_value</item>
+        <item>@string/device_value</item>
     </string-array>
 
     <string-array name="filter_by_names">

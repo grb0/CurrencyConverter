@@ -198,4 +198,6 @@
     <string name="title_show_scrollbar">Sklizač</string>
     <string name="label_dropdown">Padajući meni</string>
     <string name="summary_dropdown_menu">Padajući meni, sklizač</string>
+    <string name="from_label">Iz</string>
+    <string name="to_label">U</string>
 </resources>
