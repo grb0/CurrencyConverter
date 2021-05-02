@@ -5,7 +5,6 @@ import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.content.res.Configuration
@@ -35,6 +34,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionValues
 import ba.grbo.currencyconverter.R
@@ -151,17 +151,41 @@ fun AlphaAnimation.setUp(resources: Resources): AlphaAnimation {
     return this
 }
 
-fun Context.updateLocale(language: Locale): ContextWrapper {
+fun Context.getLocale(): Locale {
+    return getLanguage().toLocale()
+}
+
+fun Context.getLanguage(): Language {
+    val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+    val language = sharedPreferences.getString(
+        this.getString(R.string.key_language),
+        Language.ENGLISH.name
+    ) ?: Language.ENGLISH.name
+
+    return Language.valueOf(language)
+}
+
+fun Context.updateLocale(): Context {
+    return updateLocale(getLocale())
+}
+
+@Suppress("DEPRECATION")
+fun Context.updateLocale(locale: Locale): Context {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        resources.configuration.setLocale(language)
-    } else resources.configuration.locale = language
+        resources.configuration.setLocale(locale)
+    } else resources.configuration.locale = locale
+
+    Locale.setDefault(locale)
 
     var context: Context = this
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-        context = context.createConfigurationContext(resources.configuration)
-    } else resources.updateConfiguration(context.resources.configuration, resources.displayMetrics)
+        context = createConfigurationContext(resources.configuration)
+    } else context.resources.updateConfiguration(
+        context.resources.configuration,
+        context.resources.displayMetrics
+    )
 
-    return ContextWrapper(context)
+    return context
 }
 
 @Suppress("FunctionName", "UNCHECKED_CAST")
@@ -486,18 +510,6 @@ private fun RecyclerView.onCustomAnimationEnd() {
 private fun RecyclerView.setChildrenClickability(clickable: Boolean) {
     for (i in 0 until childCount) {
         getChildAt(i).isClickable = clickable
-    }
-}
-
-fun View.setMargins(size: Float) {
-    if (layoutParams is ViewGroup.MarginLayoutParams) {
-        val params = layoutParams as ViewGroup.MarginLayoutParams
-        val margin = size.toPixels(resources).roundToInt()
-        params.leftMargin = margin
-        params.topMargin = margin
-        params.rightMargin = margin
-        params.bottomMargin = margin
-        requestLayout()
     }
 }
 

@@ -19,7 +19,6 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
-import ba.grbo.currencyconverter.CurrencyConverterApplication
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.databinding.ActivityCurrencyConverterBinding
 import ba.grbo.currencyconverter.ui.viewmodels.CurrencyConverterViewModel
@@ -35,7 +34,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import java.util.*
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -50,18 +48,16 @@ class CurrencyConverterActivity : AppCompatActivity() {
     @Inject
     lateinit var Colors: Colors
 
-    @Inject
-    lateinit var language: Locale
-
     override fun onCreate(savedInstanceState: Bundle?) {
         preSuperOnCreateSetup()
         super.onCreate(savedInstanceState)
         postSuperOnCreateSetup()
     }
 
-    override fun attachBaseContext(newBase: Context?) {
-        val language = (newBase?.applicationContext as CurrencyConverterApplication).language
-        super.attachBaseContext(newBase.updateLocale(language))
+    override fun attachBaseContext(newBase: Context) {
+        val newContext = newBase.updateLocale()
+        applyOverrideConfiguration(newContext.resources.configuration)
+        super.attachBaseContext(newContext)
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {

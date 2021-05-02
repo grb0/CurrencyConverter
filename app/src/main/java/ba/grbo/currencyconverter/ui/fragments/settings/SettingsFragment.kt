@@ -7,14 +7,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IdRes
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import ba.grbo.currencyconverter.CurrencyConverterApplication
 import ba.grbo.currencyconverter.R
+import ba.grbo.currencyconverter.data.source.local.static.Countries
 import ba.grbo.currencyconverter.ui.viewmodels.SettingsViewModel
 import ba.grbo.currencyconverter.util.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SettingsFragment : PreferenceFragmentCompat() {
     private val viewModel: SettingsViewModel by viewModels()
@@ -81,10 +86,18 @@ class SettingsFragment : PreferenceFragmentCompat() {
     }
 
     private fun onLanguageChanged(language: String) {
-        (requireActivity().application as CurrencyConverterApplication).setLanguage(
-            Language.valueOf(language)
-        )
-        recreateActivity()
+        viewModel.viewModelScope.launch {
+            updateCountries(language)
+            recreateActivity()
+        }
+    }
+
+    private suspend fun updateCountries(language: String) {
+        withContext(Dispatchers.Default) {
+            val modifiedContext =
+                requireActivity().baseContext.updateLocale(Language.valueOf(language).toLocale())
+            Countries.updateCountries(modifiedContext)
+        }
     }
 
     private fun onThemeChanged(theme: String) {

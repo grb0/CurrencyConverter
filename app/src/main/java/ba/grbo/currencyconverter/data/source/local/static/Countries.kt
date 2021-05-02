@@ -1,11 +1,47 @@
 package ba.grbo.currencyconverter.data.source.local.static
 
+import android.content.Context
+import androidx.core.content.ContextCompat
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.Code.*
+import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.data.models.Country.Resources
+import ba.grbo.currencyconverter.data.models.Currency
 
-object CountryResources {
-    val value = listOf(
+object Countries {
+    lateinit var countries: MutableList<Country>
+
+    fun toCountries(context: Context) = resources.map {
+        Country(
+            Currency(
+                Currency.Name(
+                    it.currencyCode.name,
+                    context.getString(it.currencyName)
+                ),
+                it.currencyCode
+            ),
+            ContextCompat.getDrawable(context, it.flag)!!,
+            false
+        )
+    }.toMutableList().also { countries = it }
+
+    fun areInitialized() = ::countries.isInitialized
+
+    fun updateCountries(context: Context) {
+        countries.forEachIndexed { index, country ->
+            val currency = Currency(
+                Currency.Name(
+                    country.currency.name.code,
+                    context.getString(resources[index].currencyName)
+                ),
+                country.currency.code
+            )
+
+            countries[index] = country.copy(currency = currency)
+        }
+    }
+
+    private val resources = listOf(
         Resources(
             R.string.currency_united_arab_emirates,
             AED,

@@ -1,26 +1,31 @@
 package ba.grbo.currencyconverter
 
 import android.app.Application
+import android.content.Context
+import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatDelegate
 import ba.grbo.currencyconverter.util.Language
 import ba.grbo.currencyconverter.util.Theme
+import ba.grbo.currencyconverter.util.getLanguage
+import ba.grbo.currencyconverter.util.updateLocale
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
-import java.util.*
 import javax.inject.Inject
+import kotlin.system.exitProcess
 
 @HiltAndroidApp
 class CurrencyConverterApplication : Application() {
     @Inject
     lateinit var theme: Theme
 
-    @Inject
-    lateinit var language: Locale
-
     override fun onCreate() {
         super.onCreate()
         setTheme(theme)
         initializeTimber()
+    }
+
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base.updateLocale())
     }
 
     fun setTheme(theme: Theme): Boolean {
@@ -33,10 +38,6 @@ class CurrencyConverterApplication : Application() {
             }
         )
         return true
-    }
-
-    fun setLanguage(language: Language) {
-        this.language = language.toLocale()
     }
 
     private fun initializeTimber() {
@@ -54,5 +55,10 @@ class CurrencyConverterApplication : Application() {
             }
         }
         if (BuildConfig.DEBUG) Timber.plant(tree)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (getLanguage() == Language.DEVICE) exitProcess(0)
     }
 }
