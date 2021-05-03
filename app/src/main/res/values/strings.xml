@@ -112,7 +112,7 @@
     <string name="currency_egypt">Egyptian Pound</string>
     <string name="currency_eritrea">Eritrean Nakfa</string>
     <string name="currency_ethiopia">Ethiopian Birr</string>
-    <string name="currency_european_union">Euro</string>
+    <string name="currency_european_union" translatable="false">Euro</string>
     <string name="currency_fiji">Fijian Dollar</string>
     <string name="currency_falkland_islands">Falkland Islands Pound</string>
     <string name="currency_united_kingdom">British Pound Sterling</string>

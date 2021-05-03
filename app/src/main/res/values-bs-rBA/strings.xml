@@ -40,7 +40,7 @@
     <string name="currency_bangladesh">Bangladeška Taka</string>
     <string name="currency_bulgaria">Bugarski Lev</string>
     <string name="currency_bahrain">Bahreinski Dinar</string>
-    <string name="currency_burundi">Barundski Franak</string>
+    <string name="currency_burundi">Burundski Franak</string>
     <string name="currency_bermuda">Bermudski Dolar</string>
     <string name="currency_brunei">Brunejski Dolar</string>
     <string name="currency_bolivia">Bolivijski Bolivijano</string>
@@ -71,7 +71,6 @@
     <string name="currency_egypt">Egipatska Funta</string>
     <string name="currency_eritrea">Eritrejska Nakfa</string>
     <string name="currency_ethiopia">Etiopijski Birr</string>
-    <string name="currency_european_union">Euro</string>
     <string name="currency_fiji">Fidžijski Dolar</string>
     <string name="currency_falkland_islands">Falklandotočna Funta</string>
     <string name="currency_united_kingdom">Britanska Funta</string>
@@ -195,7 +194,7 @@
     <string name="title_chooser">Odabirač</string>
     <string name="summary_chooser">Prikaži valutu kao, padajući meni</string>
     <string name="title_dropdown_menu">Padajući meni</string>
-    <string name="title_show_scrollbar">Sklizač</string>
+    <string name="title_show_scrollbar">Prikaži sklizač</string>
     <string name="label_dropdown">Padajući meni</string>
     <string name="summary_dropdown_menu">Padajući meni, sklizač</string>
     <string name="from_label">Iz</string>
