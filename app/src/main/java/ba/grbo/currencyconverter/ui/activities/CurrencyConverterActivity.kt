@@ -20,6 +20,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import ba.grbo.currencyconverter.R
+import ba.grbo.currencyconverter.data.models.Country
 import ba.grbo.currencyconverter.databinding.ActivityCurrencyConverterBinding
 import ba.grbo.currencyconverter.ui.viewmodels.CurrencyConverterViewModel
 import ba.grbo.currencyconverter.util.Colors
@@ -47,6 +48,9 @@ class CurrencyConverterActivity : AppCompatActivity() {
     @Suppress("PropertyName")
     @Inject
     lateinit var Colors: Colors
+
+    @Inject // Injecting so we force first initialization upon activity creation
+    lateinit var countries: MutableList<Country>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         preSuperOnCreateSetup()
