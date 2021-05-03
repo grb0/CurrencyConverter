@@ -79,7 +79,7 @@ class ConverterFragment : Fragment() {
     @Inject
     @ExtendDropdownMenuInLandscape
     @JvmField
-    var extendDropdownMenuInLandscape: Boolean = false
+    var extendDropdownMenuInLandscape: Boolean = true
 
     private var orientation = Int.MIN_VALUE
     private var recyclerViewHeight = Int.MIN_VALUE

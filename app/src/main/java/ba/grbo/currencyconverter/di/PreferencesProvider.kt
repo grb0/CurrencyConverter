@@ -119,6 +119,6 @@ object FragmentScoped {
         @ApplicationContext context: Context
     ) = sharedPreferences.getBoolean(
         context.getString(R.string.key_extend_chooser_landscape),
-        false
+        true
     )
 }
