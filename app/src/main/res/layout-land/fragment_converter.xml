@@ -7,6 +7,10 @@
     <data>
 
         <variable
+            name="lastUpdate"
+            type="String" />
+
+        <variable
             name="from"
             type="String" />
 
@@ -31,11 +35,28 @@
         android:id="@+id/converter_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingStart="1.5dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="1.5dp"
         app:extended="@{extendDropdownMenuInLandscape}"
         app:targetView="@{currenciesCard}"
         app:toBinding="@{fromCurrencyChooser}"
         app:toView="@{converterLayout}"
         tools:context=".ui.fragments.ConverterFragment">
+
+        <TextView
+            android:id="@+id/last_updated"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="@font/roboto"
+            android:text="@{@string/last_updated(lastUpdate)}"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <include
             android:id="@+id/from_currency_chooser"
@@ -43,13 +64,13 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="14dp"
             android:layout_marginEnd="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/dropdown_swapper"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/last_updated"
             app:layout_constraintVertical_bias="0.0"
             app:title="@{from}" />
 
@@ -108,7 +129,7 @@
                     android:paddingBottom="13dp"
                     android:textColor="@color/black"
                     android:textCursorDrawable="@drawable/cursor_edit_text"
-                    android:textSize="16sp"
+                    android:textSize="17sp"
                     app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
                     app:layout_constraintEnd_toStartOf="@+id/favorites"
                     app:layout_constraintStart_toStartOf="parent"
@@ -207,7 +228,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:background="@drawable/ripple_action_btn"
+            android:background="@drawable/ripple_swap_vertical"
             android:contentDescription="@string/swap_arrows"
             android:padding="10dp"
             android:src="@drawable/ic_swap_horizontal"
@@ -218,18 +239,13 @@
 
         <TextView
             android:id="@+id/from_currency_double"
+            style="@style/ChooserText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="22dp"
-            android:layout_marginEnd="52.5dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginEnd="54dp"
             android:drawablePadding="8dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto"
-            android:gravity="center_vertical"
-            android:maxLines="1"
-            android:textColor="@color/black"
-            android:textSize="16sp"
             android:visibility="invisible"
             app:drawableStartCompat="@drawable/ic_flag_united_arab_emirates"
             app:layout_constraintEnd_toEndOf="@+id/from_currency_chooser"
@@ -239,18 +255,13 @@
 
         <TextView
             android:id="@+id/to_currency_double"
+            style="@style/ChooserText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="22dp"
-            android:layout_marginEnd="52.5dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginEnd="54dp"
             android:drawablePadding="8dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto"
-            android:gravity="center_vertical"
-            android:maxLines="1"
-            android:textColor="@color/black"
-            android:textSize="16sp"
             android:visibility="invisible"
             app:drawableStartCompat="@drawable/ic_flag_united_arab_emirates"
             app:layout_constraintEnd_toEndOf="@+id/to_currency_chooser"

@@ -199,4 +199,5 @@
     <string name="currency_gold_ounce">Goldunze</string>
     <string name="currency_palladium_ounce">Palladiumunze</string>
     <string name="currency_platinum_ounce">Platinunze</string>
+    <string name="last_updated">Letzte Aktualisierung: %s</string>
 </resources>

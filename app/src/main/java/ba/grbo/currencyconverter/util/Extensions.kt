@@ -388,7 +388,7 @@ fun ConstraintLayout.getGradientDrawable(
     shape = GradientDrawable.RECTANGLE
     setStroke(strokeWidth.toPixels(resources).roundToInt(), strokeColor)
     setColor(backgroundColor)
-    cornerRadius = 5f.toPixels(resources)
+    cornerRadius = 7.5f.toPixels(resources)
 }
 
 fun getMaterialFadeThroughAnimator(viewGroup: ViewGroup, enter: Boolean): Animator {
@@ -519,7 +519,7 @@ private fun TextView.getVerticalTranslationAnimator(
     this,
     View.TRANSLATION_Y,
     translationY,
-    if (from) 112f.toPixels(resources) else -(112f.toPixels(resources))
+    if (from) 120f.toPixels(resources) else -(120f.toPixels(resources))
 ).setUp(resources)
 
 private fun TextView.getHorizontalTranslationAnimator(
@@ -529,7 +529,7 @@ private fun TextView.getHorizontalTranslationAnimator(
     this,
     View.TRANSLATION_X,
     translationX,
-    if (from) (width / 2) + 12f.toPixels(resources) else -((width / 2) + 12f.toPixels(resources))
+    if (from) (width / 2) + 13.5f.toPixels(resources) else -((width / 2) + 13.5f.toPixels(resources))
 ).setUp(resources)
 
 fun TextView.getTranslationAnimator(

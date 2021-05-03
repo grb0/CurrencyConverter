@@ -199,4 +199,5 @@
     <string name="summary_dropdown_menu">Padajući meni, sklizač</string>
     <string name="from_label">Iz</string>
     <string name="to_label">U</string>
+    <string name="last_updated">Posljednje ažuriranje: %s</string>
 </resources>

@@ -16,7 +16,7 @@
         app:icon="@drawable/ic_hide" />
 
     <SwitchPreference
-        android:defaultValue="false"
+        android:defaultValue="true"
         android:key="@string/key_extend_chooser_landscape"
         android:title="@string/title_extend_chooser_landscape"
         app:icon="@drawable/ic_extend" />

@@ -1,7 +1,7 @@
 <vector
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="@dimen/flag_size"
-    android:height="@dimen/flag_size"
+    android:width="@dimen/expand_icon"
+    android:height="@dimen/expand_icon"
     android:tint="?attr/colorControlNormal"
     android:viewportWidth="24"
     android:viewportHeight="24">
