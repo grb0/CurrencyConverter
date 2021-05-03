@@ -10,6 +10,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.BindingAdapter
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.databinding.DropdownCurrencyChooserBinding
+import ba.grbo.currencyconverter.databinding.DropdownMenuBinding
 import kotlin.math.roundToInt
 
 @BindingAdapter("startDrawable")
@@ -46,9 +47,9 @@ fun View.bindCustomMargin(value: Float, extended: Boolean) {
     this.layoutParams = layoutParams
 }
 
-@BindingAdapter("targetView", "toView", "toBinding", "extended", requireAll = true)
+@BindingAdapter("targetBinding", "toView", "toBinding", "extended", requireAll = true)
 fun ConstraintLayout.bindCustomConstraints(
-    targetView: View,
+    targetBinding: DropdownMenuBinding,
     toView: View,
     toBinding: DropdownCurrencyChooserBinding,
     extended: Boolean
@@ -57,25 +58,25 @@ fun ConstraintLayout.bindCustomConstraints(
     ConstraintSet().apply {
         clone(this@bindCustomConstraints)
         connect(
-            targetView.id,
+            targetBinding.currenciesCard.id,
             ConstraintSet.TOP,
             view.id,
             if (extended) ConstraintSet.TOP else ConstraintSet.BOTTOM
         )
         connect(
-            targetView.id,
+            targetBinding.currenciesCard.id,
             ConstraintSet.BOTTOM,
             id,
             ConstraintSet.BOTTOM
         )
         connect(
-            targetView.id,
+            targetBinding.currenciesCard.id,
             ConstraintSet.START,
             view.id,
             ConstraintSet.START
         )
         connect(
-            targetView.id,
+            targetBinding.currenciesCard.id,
             ConstraintSet.END,
             view.id,
             ConstraintSet.END

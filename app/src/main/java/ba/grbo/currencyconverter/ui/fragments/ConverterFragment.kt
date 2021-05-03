@@ -137,7 +137,8 @@ class ConverterFragment : Fragment() {
         it.to = getString(R.string.to_label)
         it.showOnlyFavorites = viewModel.showOnlyFavorites
         it.showScrollbar = showScrollbar
-        it.extendDropdownMenuInLandscape = extendDropdownMenuInLandscape
+        it.extended = orientation.isLandscape && extendDropdownMenuInLandscape
+        it.lastTo = viewModel.wasLastClickedTo()
         binding = it
     }.root
 
@@ -186,11 +187,11 @@ class ConverterFragment : Fragment() {
         disableItemChangedAnimation()
         assignAdapter()
         modifyHeightInPortraitMode(addVerticalDivider())
-        if (showScrollbar) initializeFastScroller(binding.currencies)
+        if (showScrollbar) initializeFastScroller(binding.dropdownMenu.currencies)
     }
 
     private fun assignAdapter() {
-        binding.currencies.adapter = CountryAdapter(
+        binding.dropdownMenu.currencies.adapter = CountryAdapter(
             uiName,
             showScrollbar,
             viewModel::onCurrencyClicked,
@@ -203,23 +204,23 @@ class ConverterFragment : Fragment() {
         return DividerItemDecoration(
             requireContext(),
             DividerItemDecoration.VERTICAL
-        ).also { binding.currencies.addItemDecoration(it) }
+        ).also { binding.dropdownMenu.currencies.addItemDecoration(it) }
     }
 
     private fun modifyHeightInPortraitMode(verticalDivider: DividerItemDecoration) {
         // Only in portrait mode
         if (!orientation.isLandscape) {
-            val countryHolder = binding.currencies.adapter!!.createViewHolder(
-                binding.currencies,
+            val countryHolder = binding.dropdownMenu.currencies.adapter!!.createViewHolder(
+                binding.dropdownMenu.currencies,
                 0
             )
             val verticalDividersHeight = ((verticalDivider.drawable?.intrinsicHeight ?: 3) * 4)
             val countryHoldersHeight = countryHolder.itemView.layoutParams.height * 4
             recyclerViewHeight = verticalDividersHeight + countryHoldersHeight
-            binding.currencies.layoutParams.height = recyclerViewHeight
+            binding.dropdownMenu.currencies.layoutParams.height = recyclerViewHeight
 
             // Let it not be in vain :)
-            binding.currencies.recycledViewPool.putRecycledView(countryHolder)
+            binding.dropdownMenu.currencies.recycledViewPool.putRecycledView(countryHolder)
         }
     }
 
@@ -238,17 +239,19 @@ class ConverterFragment : Fragment() {
 
         binding.run {
             dropdownSwapper.setOnClickListener { viewModel.onDropdownSwapperClicked() }
-            resetSearcher.setOnClickListener { viewModel.onResetSearcherClicked() }
-            currenciesSearcher.run {
-                setOnFocusChangeListener { _, hasFocus ->
-                    viewModel.onSearcherFocusChanged(hasFocus)
+            dropdownMenu.run {
+                resetSearcher.setOnClickListener { viewModel.onResetSearcherClicked() }
+                currenciesSearcher.run {
+                    setOnFocusChangeListener { _, hasFocus ->
+                        viewModel.onSearcherFocusChanged(hasFocus)
+                    }
+                    addTextChangedListener {
+                        it?.let { viewModel.onSearcherTextChanged(it.toString()) }
+                    }
                 }
-                addTextChangedListener {
-                    it?.let { viewModel.onSearcherTextChanged(it.toString()) }
-                }
+                currencies.addOnScrollListener(getOnScrollListener { !it.canScrollVertically(-1) })
+                favorites.setOnClickListener { viewModel.onFavoritesClicked() }
             }
-            currencies.addOnScrollListener(getOnScrollListener { !it.canScrollVertically(-1) })
-            favorites.setOnClickListener { viewModel.onFavoritesClicked() }
         }
     }
 
@@ -284,15 +287,16 @@ class ConverterFragment : Fragment() {
     }
 
     private fun onItemChanged(position: Int) {
-        (binding.currencies.adapter as CountryAdapter).notifyItemChanged(position)
+        (binding.dropdownMenu.currencies.adapter as CountryAdapter).notifyItemChanged(position)
     }
 
     private fun onItemRemoved(position: Int) {
-        (binding.currencies.adapter as CountryAdapter).notifyItemRemoved(position)
+        (binding.dropdownMenu.currencies.adapter as CountryAdapter).notifyItemRemoved(position)
     }
 
     private fun disableItemChangedAnimation() {
-        (binding.currencies.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        (binding.dropdownMenu.currencies.itemAnimator as SimpleItemAnimator).supportsChangeAnimations =
+            false
     }
 
     private fun onCurrencyChanged(country: Country, from: Boolean) {
@@ -315,7 +319,7 @@ class ConverterFragment : Fragment() {
     }
 
     private fun onCountriesUpdated(countries: List<Country>) {
-        (binding.currencies.adapter as CountryAdapter).submitList(countries)
+        (binding.dropdownMenu.currencies.adapter as CountryAdapter).submitList(countries)
     }
 
     private fun onSelectedCurrencyChanged(country: Country, from: Boolean) {
@@ -411,22 +415,22 @@ class ConverterFragment : Fragment() {
     ) {
         animation.setAnimationListener(
             getAnimationListener(
-                binding.resetSearcher,
+                binding.dropdownMenu.resetSearcher,
                 fadinIn,
                 Animations.FADE_IN,
                 Animations.FADE_OUT
             )
         )
-        binding.resetSearcher.startAnimation(animation)
+        binding.dropdownMenu.resetSearcher.startAnimation(animation)
     }
 
     private fun resetSearcher() {
-        binding.currenciesSearcher.setText("")
+        binding.dropdownMenu.currenciesSearcher.setText("")
     }
 
     private fun modifyDividerDrawable(topReached: Boolean) {
         val drawable = if (topReached) R.drawable.divider_top else R.drawable.divider_bottom
-        binding.divider.setBackgroundResource(drawable)
+        binding.dropdownMenu.divider.setBackgroundResource(drawable)
     }
 
     private fun onSearcherStateChanged(state: SearcherState) = when (state) {
@@ -470,13 +474,13 @@ class ConverterFragment : Fragment() {
         )
 
         val currenciesCardTouched = isPointInsideViewBounds(
-            binding.currenciesCard,
+            binding.dropdownMenu.currenciesCard,
             touchPoint
         )
 
         return if (includeSearcher) {
             val currenciesSearcherTouched = isPointInsideViewBounds(
-                binding.currenciesSearcher,
+                binding.dropdownMenu.currenciesSearcher,
                 touchPoint
             )
             viewModel.onScreenTouched(
@@ -504,7 +508,7 @@ class ConverterFragment : Fragment() {
     }
 
     private fun releaseFocus() {
-        binding.currenciesSearcher.clearFocus()
+        binding.dropdownMenu.currenciesSearcher.clearFocus()
     }
 
 
@@ -522,7 +526,7 @@ class ConverterFragment : Fragment() {
     }
 
     private fun scrollCurrenciesToTop() {
-        binding.currencies.scrollToPosition(0)
+        binding.dropdownMenu.currencies.scrollToPosition(0)
     }
 
     private fun animateFavorites(favorites: Boolean) {
@@ -679,6 +683,7 @@ class ConverterFragment : Fragment() {
     private fun onDropdownExpanding(dropdown: Dropdown) {
         expandDropdown(dropdown)
         setOnScreenTouched(dropdown, false)
+        viewModel.onDropdownExpanded(dropdown)
     }
 
     private fun expandDropdown(dropdown: Dropdown) {
@@ -699,25 +704,25 @@ class ConverterFragment : Fragment() {
         ConstraintSet().apply {
             clone(binding.converterLayout)
             connect(
-                binding.currenciesCard.id,
+                binding.dropdownMenu.currenciesCard.id,
                 ConstraintSet.TOP,
                 viewId,
                 ConstraintSet.BOTTOM
             )
             connect(
-                binding.currenciesCard.id,
+                binding.dropdownMenu.currenciesCard.id,
                 ConstraintSet.BOTTOM,
                 binding.converterLayout.id,
                 ConstraintSet.BOTTOM
             )
             connect(
-                binding.currenciesCard.id,
+                binding.dropdownMenu.currenciesCard.id,
                 ConstraintSet.START,
                 viewId,
                 ConstraintSet.START
             )
             connect(
-                binding.currenciesCard.id,
+                binding.dropdownMenu.currenciesCard.id,
                 ConstraintSet.END,
                 viewId,
                 ConstraintSet.END
@@ -751,7 +756,7 @@ class ConverterFragment : Fragment() {
     private fun onDropdownCollapsing(dropdown: Dropdown) {
         collapseDropdown(dropdown)
         removeOnScreenTouched()
-        viewModel.onDropdownCollapsed(dropdown)
+        viewModel.onDropdownCollapsed()
     }
 
     private fun collapseDropdown(dropdown: Dropdown) {

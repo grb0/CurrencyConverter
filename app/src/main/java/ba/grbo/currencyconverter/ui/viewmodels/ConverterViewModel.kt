@@ -216,8 +216,9 @@ class ConverterViewModel @Inject constructor(
 
     fun resetInternalState() {
         _swappingState.value = SwappingState.None
-        lastClickedDropdown = NONE
     }
+
+    fun wasLastClickedTo() = lastClickedDropdown == TO
 
     private fun swapSelectedCurrencies() {
         val fromCountry = _fromCurrency.value
@@ -330,8 +331,11 @@ class ConverterViewModel @Inject constructor(
         }
     }
 
-    fun onDropdownCollapsed(dropdown: Dropdown) {
+    fun onDropdownCollapsed() {
         _dropdownState.value = Collapsed(NONE)
+    }
+
+    fun onDropdownExpanded(dropdown: Dropdown) {
         lastClickedDropdown = dropdown
     }
 

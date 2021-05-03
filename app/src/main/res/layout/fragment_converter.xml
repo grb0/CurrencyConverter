@@ -25,29 +25,36 @@
         <variable
             name="showScrollbar"
             type="Boolean" />
+
+        <variable
+            name="extended"
+            type="Boolean" />
+
+        <variable
+            name="lastTo"
+            type="Boolean" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/converter_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="2.5dp"
-        android:paddingTop="6dp"
-        android:paddingEnd="2.5dp"
+        app:extended="@{extended}"
+        app:targetBinding="@{dropdownMenu}"
+        app:toBinding="@{lastTo ? toCurrencyChooser : fromCurrencyChooser}"
+        app:toView="@{converterLayout}"
         tools:context=".ui.fragments.ConverterFragment">
 
         <TextView
             android:id="@+id/last_updated"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
             android:fontFamily="@font/roboto"
             android:text="@{@string/last_updated(lastUpdate)}"
             android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/from_currency_chooser"
+            app:layout_constraintStart_toStartOf="@+id/from_currency_chooser"
             app:layout_constraintTop_toTopOf="parent" />
 
         <include
@@ -56,7 +63,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
@@ -76,136 +83,21 @@
             app:title="@{to}"
             tools:visibility="visible" />
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/currencies_card"
+        <include
+            android:id="@+id/dropdown_menu"
+            layout="@layout/dropdown_menu"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:visibility="invisible"
-            app:cardElevation="20dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/from_currency_chooser"
-            app:layout_constraintHorizontal_bias="0.6"
-            app:layout_constraintStart_toStartOf="@+id/from_currency_chooser"
-            app:layout_constraintTop_toBottomOf="@+id/from_currency_chooser"
-            app:layout_constraintVertical_bias="0.0"
+            app:extended="@{extended}"
+            app:layout_constraintEnd_toEndOf="@+id/to_currency_chooser"
+            app:layout_constraintStart_toStartOf="@+id/to_currency_chooser"
+            app:layout_constraintTop_toBottomOf="@+id/to_currency_chooser"
+            app:layout_constraintVertical_bias="0"
+            app:showOnlyFavorites="@{showOnlyFavorites}"
+            app:showScrollbar="@{showScrollbar}"
             tools:layout_constraintEnd_toEndOf="@+id/to_currency_chooser"
             tools:layout_constraintStart_toStartOf="@+id/to_currency_chooser"
-            tools:layout_constraintTop_toBottomOf="@+id/to_currency_chooser"
-            tools:visibility="visible">
-
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/currencies_layout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                tools:listitem="@layout/dropdown_item">
-
-                <EditText
-                    android:id="@+id/currencies_searcher"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="9dp"
-                    android:background="@drawable/border_edit_text"
-                    android:ems="10"
-                    android:fontFamily="@font/roboto"
-                    android:hint="@string/search_hint"
-                    android:importantForAutofill="no"
-                    android:inputType="text|textNoSuggestions"
-                    android:paddingStart="12dp"
-                    android:paddingTop="13dp"
-                    android:paddingEnd="45dp"
-                    android:paddingBottom="13dp"
-                    android:textColor="@color/black"
-                    android:textCursorDrawable="@drawable/cursor_edit_text"
-                    android:textSize="17sp"
-                    app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
-                    app:layout_constraintEnd_toStartOf="@+id/favorites"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ImageButton
-                    android:id="@+id/reset_searcher"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignTop="@id/currencies_searcher"
-                    android:layout_alignEnd="@id/currencies_searcher"
-                    android:layout_alignBottom="@id/currencies_searcher"
-                    android:layout_marginEnd="4dp"
-                    android:background="@drawable/ripple_reset_searcher_btn"
-                    android:contentDescription="@string/close"
-                    android:padding="9dp"
-                    android:src="@drawable/ic_close"
-                    android:visibility="invisible"
-                    app:layout_constraintBottom_toBottomOf="@+id/currencies_searcher"
-                    app:layout_constraintEnd_toEndOf="@+id/currencies_searcher"
-                    app:layout_constraintTop_toTopOf="@+id/currencies_searcher"
-                    tools:visibility="visible" />
-
-                <ImageButton
-                    android:id="@+id/favorites"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
-                    android:contentDescription="@string/heart"
-                    android:paddingStart="@{showScrollbar ? @dimen/favorite_padding_scroller : @dimen/favorite_padding_no_scroller}"
-                    android:paddingTop="@dimen/favorite_padding_scroller"
-                    android:paddingEnd="@{showScrollbar ? @dimen/favorite_padding_scroller : @dimen/favorite_padding_no_scroller}"
-                    android:paddingBottom="@dimen/favorite_padding_scroller"
-                    app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
-                    app:layout_constraintBottom_toBottomOf="@+id/currencies_searcher"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/currencies_searcher" />
-
-                <ImageButton
-                    android:id="@+id/favorites_animation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@android:color/transparent"
-                    android:clickable="false"
-                    android:focusable="false"
-                    android:paddingStart="@{showScrollbar ? @dimen/favorite_animation_padding_scroller : @dimen/favorite_animation_padding_no_scroller}"
-                    android:paddingTop="@dimen/favorite_animation_padding_scroller"
-                    android:paddingEnd="@{showScrollbar ? @dimen/favorite_animation_padding_scroller : @dimen/favorite_animation_padding_no_scroller}"
-                    android:paddingBottom="@dimen/favorite_animation_padding_scroller"
-                    android:src="@drawable/ic_favorite_empty"
-                    app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
-                    app:favoritesIcon="@{showOnlyFavorites}"
-                    app:layout_constraintBottom_toBottomOf="@+id/currencies_searcher"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/currencies_searcher"
-                    tools:ignore="ContentDescription" />
-
-                <View
-                    android:id="@+id/divider"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/divider_height"
-                    android:layout_marginTop="9dp"
-                    android:background="@drawable/divider_top"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/currencies_searcher"
-                    tools:visibility="visible" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/currencies"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:scrollbars="none"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/divider"
-                    app:layout_constraintVertical_bias="0.0"
-                    tools:itemCount="4"
-                    tools:listitem="@layout/dropdown_item"
-                    tools:visibility="visible" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.google.android.material.card.MaterialCardView>
+            tools:layout_constraintTop_toBottomOf="@+id/to_currency_chooser" />
 
         <ImageButton
             android:id="@+id/dropdown_swapper"
@@ -228,7 +120,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="25dp"
-            android:layout_marginEnd="54dp"
+            android:layout_marginEnd="56dp"
             android:drawablePadding="8dp"
             android:visibility="invisible"
             app:drawableStartCompat="@drawable/ic_flag_united_arab_emirates"
@@ -244,7 +136,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="25dp"
-            android:layout_marginEnd="54dp"
+            android:layout_marginEnd="56dp"
             android:drawablePadding="8dp"
             android:visibility="invisible"
             app:drawableStartCompat="@drawable/ic_flag_united_arab_emirates"

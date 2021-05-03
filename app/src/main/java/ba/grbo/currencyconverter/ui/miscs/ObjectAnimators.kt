@@ -17,11 +17,13 @@ class ObjectAnimators(
     width: Float,
     onFavoritesAnimationEnd: (Boolean) -> Unit
 ) {
-    private val fadeInAnimatorProducer = binding.currenciesCard.getFadeInAnimatorProducer()
-    private val fadeOutAnimatorProducer = binding.currenciesCard.getFadeOutAnimatorProducer()
+    private val fadeInAnimatorProducer =
+        binding.dropdownMenu.currenciesCard.getFadeInAnimatorProducer()
+    private val fadeOutAnimatorProducer =
+        binding.dropdownMenu.currenciesCard.getFadeOutAnimatorProducer()
 
     private val favoritesAnimator = FavoritesAnimator(
-        binding.favoritesAnimation.getRotateAroundYAnimatorProducersPair(),
+        binding.dropdownMenu.favoritesAnimation.getRotateAroundYAnimatorProducersPair(),
         onFavoritesAnimationEnd
     )
 
