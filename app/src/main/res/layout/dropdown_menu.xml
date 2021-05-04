@@ -56,7 +56,7 @@
                 android:paddingBottom="13dp"
                 android:textColor="@color/black"
                 android:textCursorDrawable="@drawable/cursor_edit_text"
-                android:textSize="17sp"
+                android:textSize="16sp"
                 app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
                 app:layout_constraintEnd_toStartOf="@+id/favorites"
                 app:layout_constraintStart_toStartOf="parent"

@@ -14,7 +14,11 @@ import ba.grbo.currencyconverter.util.SingleSharedFlow
 import ba.grbo.currencyconverter.util.toSearcherState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -94,6 +98,10 @@ class ConverterViewModel @Inject constructor(
     val showOnlyFavorites: Boolean
         get() = _showOnlyFavorites
 
+    companion object {
+        const val DEBOUNCE_PERIOD = 250L
+    }
+
     sealed class DropdownState {
         abstract val dropdown: Dropdown
 
@@ -130,12 +138,17 @@ class ConverterViewModel @Inject constructor(
 
     init {
         filter = initializeFilter(filterBy)
-        onSearcherTextChanged
-            .filter { filterQuery(it) }
-            .debounce(250)
-            .onEach { filterCountries(it) }
-            .flowOn(Dispatchers.Default)
-            .launchIn(viewModelScope)
+        viewModelScope.launch(Dispatchers.Default) {
+            onSearcherTextChanged
+                .collectLatest {
+                    if (it.isEmpty()) resetCountries()
+                    else {
+                        setResetButton(true)
+                        delay(DEBOUNCE_PERIOD)
+                        filterCountries(it)
+                    }
+                }
+        }
     }
 
     private fun initializeFilter(
@@ -349,10 +362,6 @@ class ConverterViewModel @Inject constructor(
 
     fun onSearcherTextChanged(query: String) {
         onSearcherTextChanged.value = query
-    }
-
-    private fun filterQuery(query: String): Boolean {
-        return query.isNotEmpty().apply { if (!this) resetCountries() else setResetButton(true) }
     }
 
     private fun resetCountries() {

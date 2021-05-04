@@ -519,7 +519,7 @@ private fun TextView.getVerticalTranslationAnimator(
     this,
     View.TRANSLATION_Y,
     translationY,
-    if (from) 120f.toPixels(resources) else -(120f.toPixels(resources))
+    if (from) 114f.toPixels(resources) else -(114f.toPixels(resources))
 ).setUp(resources)
 
 private fun TextView.getHorizontalTranslationAnimator(
@@ -529,7 +529,7 @@ private fun TextView.getHorizontalTranslationAnimator(
     this,
     View.TRANSLATION_X,
     translationX,
-    if (from) (width / 2) + 13f.toPixels(resources) else -((width / 2) + 13f.toPixels(resources))
+    if (from) (width / 2) + 8f.toPixels(resources) else -((width / 2) + 8f.toPixels(resources))
 ).setUp(resources)
 
 fun TextView.getTranslationAnimator(
