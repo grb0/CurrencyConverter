@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="label_converter">Konverter</string>
+    <string name="label_popular">Popularno</string>
     <string name="label_history">Historija</string>
     <string name="label_settings">Postavke</string>
     <string name="title_miscellaneous">Razno</string>
@@ -200,4 +201,5 @@
     <string name="from_label">Iz</string>
     <string name="to_label">U</string>
     <string name="last_updated">Posljednje ažuriranje: %s</string>
+    <string name="hello_from_popular_fragment">Pozdrav iz PopularFragmenta</string>
 </resources>

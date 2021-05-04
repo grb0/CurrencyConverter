@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="label_converter">Umformer</string>
+    <string name="label_popular">Beliebt</string>
     <string name="label_history">Geschichte</string>
     <string name="label_settings">Einstellungen</string>
     <string name="label_chooser">Wähler</string>
@@ -200,4 +201,5 @@
     <string name="currency_palladium_ounce">Palladiumunze</string>
     <string name="currency_platinum_ounce">Platinunze</string>
     <string name="last_updated">Letzte Aktualisierung: %s</string>
+    <string name="hello_from_popular_fragment">Hallo aus PopularFragment</string>
 </resources>

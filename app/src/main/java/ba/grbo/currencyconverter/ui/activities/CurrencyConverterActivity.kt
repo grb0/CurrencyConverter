@@ -101,7 +101,12 @@ class CurrencyConverterActivity : AppCompatActivity() {
         setupActionBarWithNavController(
             navController,
             AppBarConfiguration(
-                setOf(R.id.converterFragment, R.id.historyFragment, R.id.settingsFragment)
+                setOf(
+                    R.id.converterFragment,
+                    R.id.popularFragment,
+                    R.id.historyFragment,
+                    R.id.settingsFragment
+                )
             )
         )
     }

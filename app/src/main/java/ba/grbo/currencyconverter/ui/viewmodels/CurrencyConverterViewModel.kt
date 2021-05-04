@@ -37,6 +37,7 @@ class CurrencyConverterViewModel @Inject constructor() : ViewModel() {
         _destinationId.tryEmit(
             when (itemId) {
                 R.id.converterNavigation -> R.id.converterFragment
+                R.id.popularNavigation -> R.id.popularFragment
                 R.id.historyNavigation -> R.id.historyFragment
                 R.id.settingsNavigation -> R.id.settingsFragment
                 else -> throw IllegalArgumentException("Unknown itemId: $itemId")

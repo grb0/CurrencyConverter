@@ -44,4 +44,9 @@
         android:id="@+id/dropdownMenuFragment"
         android:name="ba.grbo.currencyconverter.ui.fragments.settings.DropdownMenuFragment"
         android:label="@string/label_dropdown" />
+    <fragment
+        android:id="@+id/popularFragment"
+        android:name="ba.grbo.currencyconverter.ui.fragments.PopularFragment"
+        android:label="@string/label_popular"
+        tools:layout="@layout/fragment_popular" />
 </navigation>
