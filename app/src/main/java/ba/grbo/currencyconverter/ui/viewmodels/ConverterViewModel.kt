@@ -2,8 +2,8 @@ package ba.grbo.currencyconverter.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ba.grbo.currencyconverter.data.models.Country
-import ba.grbo.currencyconverter.data.models.Currency
+import ba.grbo.currencyconverter.data.models.domain.Currency
+import ba.grbo.currencyconverter.data.source.CurrenciesRepository
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocused
@@ -24,31 +24,32 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ConverterViewModel @Inject constructor(
-    private val plainCountries: MutableList<Country>,
+    private val currencies: MutableStateFlow<List<Currency>>,
+    private val repository: CurrenciesRepository,
     filterBy: FilterBy,
 ) : ViewModel() {
-    private val _countries = MutableStateFlow(plainCountries)
-    val countries: StateFlow<List<Country>>
+    private val _countries = MutableStateFlow(currencies.value.toMutableList())
+    val countries: StateFlow<List<Currency>>
         get() = _countries
 
     private val _dropdownState = MutableStateFlow<DropdownState>(Collapsed(NONE))
     val dropdownState: StateFlow<DropdownState>
         get() = _dropdownState
 
-    private val _fromCurrency = MutableStateFlow(plainCountries[0])
-    val fromCurrency: StateFlow<Country>
+    private val _fromCurrency = MutableStateFlow(currencies.value[0])
+    val fromCurrency: StateFlow<Currency>
         get() = _fromCurrency
 
-    private val _toCurrency = MutableStateFlow(plainCountries[1])
-    val toCurrency: StateFlow<Country>
+    private val _toCurrency = MutableStateFlow(currencies.value[1])
+    val toCurrency: StateFlow<Currency>
         get() = _toCurrency
 
-    private val _fromSelectedCurrency = SingleSharedFlow<Country>()
-    val fromSelectedCurrency: SharedFlow<Country>
+    private val _fromSelectedCurrency = SingleSharedFlow<Currency>()
+    val fromSelectedCurrency: SharedFlow<Currency>
         get() = _fromSelectedCurrency
 
-    private val _toSelectedCurrency = SingleSharedFlow<Country>()
-    val toSelectedCurrency: SharedFlow<Country>
+    private val _toSelectedCurrency = SingleSharedFlow<Currency>()
+    val toSelectedCurrency: SharedFlow<Currency>
         get() = _toSelectedCurrency
 
     private val _searcherState = MutableStateFlow<SearcherState>(Unfocused(NONE))
@@ -257,13 +258,13 @@ class ConverterViewModel @Inject constructor(
     }
 
     private fun filterCurrentCountries() {
-        _countries.value = _countries.value.filter { it.favorite }.toMutableList()
+        _countries.value = _countries.value.filter { it.isFavorite }.toMutableList()
     }
 
-    fun onFavoritesAnimationEnd(country: Country, isFavoritesOn: Boolean, position: Int) {
-        if (country.favorite != isFavoritesOn) {
-            updatePlainCountries(country, isFavoritesOn)
-            updateCountries(country, isFavoritesOn, position)
+    fun onFavoritesAnimationEnd(currency: Currency, isFavoritesOn: Boolean, position: Int) {
+        if (currency.isFavorite != isFavoritesOn) {
+            // updatePlainCountries(country, isFavoritesOn)
+            updateCountries(currency, isFavoritesOn, position)
         }
     }
 
@@ -280,28 +281,32 @@ class ConverterViewModel @Inject constructor(
         _notifyItemRemoved.tryEmit(position)
     }
 
-    private fun updateCountries(country: Country, isFavoritesOn: Boolean, position: Int) {
-        val index = _countries.value.indexOfFirst { it.currency.code == country.currency.code }
+    private fun updateCountries(currency: Currency, isFavoritesOn: Boolean, position: Int) {
+        val index = _countries.value.indexOfFirst { it.code == currency.code }
         if (showOnlyFavorites && !isFavoritesOn) removeUnfavoritedCountry(index, position)
         else updateCountries(
-            country.copy(favorite = isFavoritesOn),
+            currency.copy(isFavorite = isFavoritesOn),
             index,
             position
         )
     }
 
-    private fun updateCountries(country: Country, index: Int, position: Int) {
-        _countries.value[index] = country
+    private fun updateCountries(currency: Currency, index: Int, position: Int) {
+        _countries.value[index] = currency
+        viewModelScope.launch {
+            repository.updateCurrency(currency.toDatabase())
+        }
         notifyItemChanged(position)
     }
 
-    private fun updatePlainCountries(country: Country, isFavoritesOn: Boolean) {
-        val index = plainCountries.indexOfFirst { it.currency.code == country.currency.code }
-        plainCountries[index] = country.copy(favorite = isFavoritesOn)
-    }
+    // private fun updatePlainCountries(currency: Currency, isFavoritesOn: Boolean) {
+    //     val index = plainCountries.indexOfFirst { it.currency.code == country.currency.code }
+    //     plainCountries[index] =
+    //         country.copy(currency = country.currency.copy(isFavorite = isFavoritesOn))
+    // }
 
-    fun onCurrencyClicked(country: Country) {
-        updateSelectedCurrency(country)
+    fun onCurrencyClicked(currency: Currency) {
+        updateSelectedCurrency(currency)
         collapseDropdown(_dropdownState.value.dropdown)
     }
 
@@ -334,13 +339,13 @@ class ConverterViewModel @Inject constructor(
         }
     }
 
-    private fun updateSelectedCurrency(country: Country) {
+    private fun updateSelectedCurrency(currency: Currency) {
         if (_dropdownState.value.dropdown == FROM) {
-            _fromSelectedCurrency.tryEmit(country)
-            _fromCurrency.value = country
+            _fromSelectedCurrency.tryEmit(currency)
+            _fromCurrency.value = currency
         } else {
-            _toSelectedCurrency.tryEmit(country)
-            _toCurrency.value = country
+            _toSelectedCurrency.tryEmit(currency)
+            _toCurrency.value = currency
         }
     }
 
@@ -394,15 +399,15 @@ class ConverterViewModel @Inject constructor(
     }
 
     private fun filterAllCountries(query: String) {
-        _countries.value = if (query.isEmpty()) plainCountries
-        else plainCountries.filter { filter(it.currency, query) }.toMutableList()
+        _countries.value = if (query.isEmpty()) currencies.value.toMutableList()
+        else currencies.value.filter { filter(it, query) }.toMutableList()
 
     }
 
     private fun filterFavoriteCountries(query: String) {
         _countries.value =
-            if (query.isEmpty()) plainCountries.filter { it.favorite }.toMutableList()
-            else plainCountries.filter { it.favorite && filter(it.currency, query) }.toMutableList()
+            if (query.isEmpty()) currencies.value.filter { it.isFavorite }.toMutableList()
+            else currencies.value.filter { it.isFavorite && filter(it, query) }.toMutableList()
     }
 
     private fun mutateDropdown(dropdown: Dropdown) {

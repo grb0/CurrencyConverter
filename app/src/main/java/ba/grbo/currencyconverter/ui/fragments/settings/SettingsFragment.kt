@@ -14,7 +14,6 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import ba.grbo.currencyconverter.CurrencyConverterApplication
 import ba.grbo.currencyconverter.R
-import ba.grbo.currencyconverter.data.source.local.static.Countries
 import ba.grbo.currencyconverter.ui.viewmodels.SettingsViewModel
 import ba.grbo.currencyconverter.util.*
 import kotlinx.coroutines.Dispatchers
@@ -96,7 +95,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         withContext(Dispatchers.Default) {
             val modifiedContext =
                 requireActivity().baseContext.updateLocale(Language.valueOf(language).toLocale())
-            Countries.updateCountries(modifiedContext)
+            // Currencies.updateCountries(modifiedContext)
         }
     }
 

@@ -1,0 +1,125 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "a3abf744c4e699d13b1918c89cc784fa",
+    "entities": [
+      {
+        "tableName": "currencies_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`code` TEXT NOT NULL, `nameResourceName` TEXT NOT NULL, `flagResourceName` TEXT NOT NULL, `isFavorite` INTEGER NOT NULL, PRIMARY KEY(`code`))",
+        "fields": [
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nameResourceName",
+            "columnName": "nameResourceName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "flagResourceName",
+            "columnName": "flagResourceName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isFavorite",
+            "columnName": "isFavorite",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "code"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_currencies_table_nameResourceName",
+            "unique": true,
+            "columnNames": [
+              "nameResourceName"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_currencies_table_nameResourceName` ON `${TABLE_NAME}` (`nameResourceName`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "exchange_rates_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `code` TEXT NOT NULL, `value` REAL NOT NULL, `date` INTEGER NOT NULL, FOREIGN KEY(`code`) REFERENCES `currencies_table`(`code`) ON UPDATE RESTRICT ON DELETE RESTRICT )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "value",
+            "columnName": "value",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_exchange_rates_table_code",
+            "unique": false,
+            "columnNames": [
+              "code"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_exchange_rates_table_code` ON `${TABLE_NAME}` (`code`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "currencies_table",
+            "onDelete": "RESTRICT",
+            "onUpdate": "RESTRICT",
+            "columns": [
+              "code"
+            ],
+            "referencedColumns": [
+              "code"
+            ]
+          }
+        ]
+      }
+    ],
+    "views": [
+      {
+        "viewName": "MostRecentExchangeRate",
+        "createSql": "CREATE VIEW `${VIEW_NAME}` AS SELECT * FROM exchange_rates_table ORDER BY date ASC"
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a3abf744c4e699d13b1918c89cc784fa')"
+    ]
+  }
+}

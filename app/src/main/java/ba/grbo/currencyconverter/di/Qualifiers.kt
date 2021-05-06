@@ -13,3 +13,7 @@ annotation class AutohideScrollbar
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class ExtendDropdownMenuInLandscape
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class DispatcherIO

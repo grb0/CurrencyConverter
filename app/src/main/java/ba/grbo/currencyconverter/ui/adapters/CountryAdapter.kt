@@ -4,8 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import ba.grbo.currencyconverter.data.models.Country
-import ba.grbo.currencyconverter.data.models.Currency
+import ba.grbo.currencyconverter.data.models.domain.Currency
 import ba.grbo.currencyconverter.databinding.DropdownItemBinding
 import ba.grbo.currencyconverter.ui.miscs.FavoritesAnimator
 import ba.grbo.currencyconverter.util.getScaleAndFadeAnimatorProducersPair
@@ -13,10 +12,10 @@ import ba.grbo.currencyconverter.util.getScaleAndFadeAnimatorProducersPair
 class CountryAdapter(
     private val uiName: Currency.UiName,
     private val showScrollbar: Boolean,
-    private val onClick: (Country) -> Unit,
+    private val onClick: (Currency) -> Unit,
     private val onCurrentListChanged: () -> Unit,
-    private val onFavoritesAnimationEnd: (Country, Boolean, Int) -> Unit,
-) : ListAdapter<Country, CountryAdapter.CountryHolder>(CountryDiffCallbacks()) {
+    private val onFavoritesAnimationEnd: (Currency, Boolean, Int) -> Unit,
+) : ListAdapter<Currency, CountryAdapter.CountryHolder>(CountryDiffCallbacks()) {
     class CountryHolder private constructor(
         private val binding: DropdownItemBinding
     ) : RecyclerView.ViewHolder(binding.root) {
@@ -36,22 +35,22 @@ class CountryAdapter(
         }
 
         fun bind(
-            country: Country,
+            currency: Currency,
             uiName: Currency.UiName,
-            onClick: (Country) -> Unit,
-            onFavoritesAnimationEnd: (Country, Boolean, Int) -> Unit
+            onClick: (Currency) -> Unit,
+            onFavoritesAnimationEnd: (Currency, Boolean, Int) -> Unit
         ) {
             favoritesAnimator = FavoritesAnimator(
                 binding.favoritesAnimation.getScaleAndFadeAnimatorProducersPair(),
-            ) { onFavoritesAnimationEnd(country, it, adapterPosition) }
+            ) { onFavoritesAnimationEnd(currency, it, adapterPosition) }
 
             binding.favorites.setOnClickListener {
-                favoritesAnimator.onFavoritesClicked(!country.favorite)
+                favoritesAnimator.onFavoritesClicked(!currency.isFavorite)
             }
 
-            binding.root.setOnClickListener { onClick(country) }
+            binding.root.setOnClickListener { onClick(currency) }
 
-            binding.country = country
+            binding.curr = currency
             binding.uiName = uiName
             binding.executePendingBindings()
         }
@@ -66,8 +65,8 @@ class CountryAdapter(
     }
 
     override fun onCurrentListChanged(
-        previousList: MutableList<Country>,
-        currentList: MutableList<Country>
+        previousList: MutableList<Currency>,
+        currentList: MutableList<Currency>
     ) {
         onCurrentListChanged()
     }

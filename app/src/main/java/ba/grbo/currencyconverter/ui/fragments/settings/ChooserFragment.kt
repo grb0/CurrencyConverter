@@ -14,7 +14,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import ba.grbo.currencyconverter.R
-import ba.grbo.currencyconverter.data.models.Currency
+import ba.grbo.currencyconverter.data.models.domain.Currency
 import ba.grbo.currencyconverter.ui.viewmodels.ChooserViewModel
 import ba.grbo.currencyconverter.util.collectWhenStarted
 import ba.grbo.currencyconverter.util.getEnterAndPopExitMaterialSharedXAnimators

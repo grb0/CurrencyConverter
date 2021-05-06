@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.res.ColorStateList
@@ -204,6 +205,7 @@ fun <T> SharedStateLikeFlow() = MutableSharedFlow<T>(
     onBufferOverflow = BufferOverflow.DROP_OLDEST
 )
 
+@SuppressLint("Recycle")
 fun TextView.getBackgroundAnimator(startColor: Int, endColor: Int) = ObjectAnimator.ofArgb(
     this,
     BACKGROUND_COLOR,
@@ -211,6 +213,7 @@ fun TextView.getBackgroundAnimator(startColor: Int, endColor: Int) = ObjectAnima
     endColor
 ).setUp(resources)
 
+@SuppressLint("Recycle")
 fun TextView.getAnimator(
     backgroundStartColor: Int,
     backgroundEndColor: Int,
@@ -250,6 +253,7 @@ fun TextView.getAnimator(
     ).setUp(resources)
 }
 
+@SuppressLint("Recycle")
 fun ConstraintLayout.getBackgroundAnimator(
     strokeColor: Int,
     backgroundStartColor: Int,
@@ -275,6 +279,7 @@ fun ConstraintLayout.getBackgroundAnimator(
     getGradientDrawable(backgroundEndColor, strokeColor)
 ).setUp(resources)
 
+@SuppressLint("Recycle")
 fun ConstraintLayout.getAnimator(
     strokeStartColor: Int,
     strokeEndColor: Int,
@@ -312,6 +317,7 @@ fun ConstraintLayout.getAnimator(
     getGradientDrawable(backgroundEndColor, strokeEndColor, 2f)
 ).setUp(resources)
 
+@SuppressLint("Recycle")
 fun ConstraintLayout.getAnimator(startColor: Int, endColor: Int) = ObjectAnimator.ofArgb(
     this,
     BACKGROUND_COLOR,
@@ -319,6 +325,7 @@ fun ConstraintLayout.getAnimator(startColor: Int, endColor: Int) = ObjectAnimato
     endColor
 ).setUp(resources)
 
+@SuppressLint("Recycle")
 fun TextView.getCurrencyAnimator(startColor: Int, endColor: Int): ObjectAnimator {
     val alphaProperty = PropertyValuesHolder.ofObject(
         PLACEHOLDER,
@@ -347,6 +354,7 @@ fun TextView.getCurrencyAnimator(startColor: Int, endColor: Int): ObjectAnimator
     ).setUp(resources)
 }
 
+@SuppressLint("Recycle")
 fun ImageButton.getBackgroundColorAnimator(
     startColor: Int,
     endColor: Int
@@ -362,6 +370,7 @@ fun ImageButton.getBackgroundColorAnimator(
     ).setUp(resources)
 }
 
+@SuppressLint("Recycle")
 fun ImageButton.getAnimator(
     startColor: Int,
     endColor: Int
@@ -513,6 +522,7 @@ private fun RecyclerView.setChildrenClickability(clickable: Boolean) {
     }
 }
 
+@SuppressLint("Recycle")
 private fun TextView.getVerticalTranslationAnimator(
     from: Boolean
 ): ObjectAnimator = ObjectAnimator.ofFloat(
@@ -522,6 +532,7 @@ private fun TextView.getVerticalTranslationAnimator(
     if (from) 114f.toPixels(resources) else -(114f.toPixels(resources))
 ).setUp(resources)
 
+@SuppressLint("Recycle")
 private fun TextView.getHorizontalTranslationAnimator(
     from: Boolean,
     width: Float
@@ -541,6 +552,7 @@ fun TextView.getTranslationAnimator(
     else getHorizontalTranslationAnimator(from, width)
 }
 
+@SuppressLint("Recycle")
 fun ImageButton.getRotationAnimatior(): ObjectAnimator {
     return ObjectAnimator.ofFloat(
         this,
@@ -550,6 +562,7 @@ fun ImageButton.getRotationAnimatior(): ObjectAnimator {
     ).setUp(resources)
 }
 
+@SuppressLint("Recycle")
 private fun getFadeAnimator(
     view: View,
     startAlpha: Float,

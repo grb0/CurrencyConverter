@@ -6,15 +6,13 @@
 
     <data>
 
-        <import type="ba.grbo.currencyconverter.data.models.Currency.UiName" />
-
         <variable
-            name="country"
-            type="ba.grbo.currencyconverter.data.models.Country" />
+            name="curr"
+            type="ba.grbo.currencyconverter.data.models.domain.Currency" />
 
         <variable
             name="uiName"
-            type="UiName" />
+            type="ba.grbo.currencyconverter.data.models.domain.Currency.UiName" />
 
         <variable
             name="showScrollbar"
@@ -48,7 +46,7 @@
                 android:fontFamily="@font/roboto"
                 android:gravity="center_vertical"
                 android:maxLines="1"
-                android:text="@{country.currency.getUiName(uiName)}"
+                android:text="@{curr.getUiName(uiName)}"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 app:autoSizeMaxTextSize="16sp"
@@ -59,7 +57,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/favorites"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:startDrawable="@{country.flag}"
+                app:startDrawable="@{curr.flag}"
                 tools:drawableStartCompat="@sample/data.json/countries/flag"
                 tools:text="@sample/data.json/countries/code" />
 
@@ -91,7 +89,7 @@
                 android:paddingBottom="@dimen/favorite_animation_padding_scroller"
                 app:customMarginEnd="@{showScrollbar ? @dimen/margin_scroller : @dimen/margin_no_scroller}"
                 android:src="@drawable/ic_favorite_empty"
-                app:favoritesIcon="@{country.favorite}"
+                app:favoritesIcon="@{curr.favorite}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"

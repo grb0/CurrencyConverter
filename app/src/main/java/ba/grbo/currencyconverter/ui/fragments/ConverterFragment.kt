@@ -27,8 +27,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import ba.grbo.currencyconverter.R
-import ba.grbo.currencyconverter.data.models.Country
-import ba.grbo.currencyconverter.data.models.Currency
+import ba.grbo.currencyconverter.data.models.domain.Currency
 import ba.grbo.currencyconverter.databinding.DropdownCurrencyChooserBinding
 import ba.grbo.currencyconverter.databinding.FragmentConverterBinding
 import ba.grbo.currencyconverter.di.AutohideScrollbar
@@ -299,12 +298,12 @@ class ConverterFragment : Fragment() {
             false
     }
 
-    private fun onCurrencyChanged(country: Country, from: Boolean) {
+    private fun onCurrencyChanged(currency: Currency, from: Boolean) {
         fun updateCurrency(view: TextView) {
             view.run {
                 if (text.isEmpty()) {
-                    text = country.currency.getUiName(uiName)
-                    setCompoundDrawablesWithIntrinsicBounds(country.flag, null, null, null)
+                    text = currency.getUiName(uiName)
+                    setCompoundDrawablesWithIntrinsicBounds(currency.flag, null, null, null)
                 }
             }
         }
@@ -318,19 +317,19 @@ class ConverterFragment : Fragment() {
         }
     }
 
-    private fun onCountriesUpdated(countries: List<Country>) {
-        (binding.dropdownMenu.currencies.adapter as CountryAdapter).submitList(countries)
+    private fun onCountriesUpdated(currencies: List<Currency>) {
+        (binding.dropdownMenu.currencies.adapter as CountryAdapter).submitList(currencies)
     }
 
-    private fun onSelectedCurrencyChanged(country: Country, from: Boolean) {
+    private fun onSelectedCurrencyChanged(currency: Currency, from: Boolean) {
         if (from) onSelectedCurrencyChanged(
-            country,
+            currency,
             binding.fromCurrencyChooser.currency,
             binding.fromCurrencyChooser.currencyDouble,
             Animations.FADE_IN,
             Animations.FADE_OUT
         ) else onSelectedCurrencyChanged(
-            country,
+            currency,
             binding.toCurrencyChooser.currency,
             binding.toCurrencyChooser.currencyDouble,
             Animations.FADE_IN,
@@ -339,28 +338,28 @@ class ConverterFragment : Fragment() {
     }
 
     private fun onSelectedCurrencyChanged(
-        country: Country,
+        currency: Currency,
         main: TextView,
         secondary: TextView,
         fadeIn: AlphaAnimation,
         fadeOut: AlphaAnimation
     ) {
         when {
-            main.isVisible -> changeCurrencyState(country, secondary, main, fadeIn, fadeOut)
-            secondary.isVisible -> changeCurrencyState(country, main, secondary, fadeIn, fadeOut)
+            main.isVisible -> changeCurrencyState(currency, secondary, main, fadeIn, fadeOut)
+            secondary.isVisible -> changeCurrencyState(currency, main, secondary, fadeIn, fadeOut)
         }
     }
 
     private fun changeCurrencyState(
-        country: Country,
+        currency: Currency,
         fadedIn: TextView,
         fadedOut: TextView,
         fadeIn: AlphaAnimation,
         fadeOut: AlphaAnimation
     ) {
         fadedIn.run {
-            text = country.currency.getUiName(uiName)
-            setCompoundDrawablesWithIntrinsicBounds(country.flag, null, null, null)
+            text = currency.getUiName(uiName)
+            setCompoundDrawablesWithIntrinsicBounds(currency.flag, null, null, null)
         }
 
         fadeIn.setAnimationListener(getAnimationListener(fadedIn, true, fadeIn, fadeOut))

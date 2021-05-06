@@ -3,6 +3,7 @@ package ba.grbo.currencyconverter.ui.activities
 import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.os.Bundle
@@ -20,21 +21,21 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import ba.grbo.currencyconverter.R
-import ba.grbo.currencyconverter.data.models.Country
+import ba.grbo.currencyconverter.data.models.domain.Currency
 import ba.grbo.currencyconverter.databinding.ActivityCurrencyConverterBinding
 import ba.grbo.currencyconverter.ui.viewmodels.CurrencyConverterViewModel
-import ba.grbo.currencyconverter.util.Colors
+import ba.grbo.currencyconverter.util.*
 import ba.grbo.currencyconverter.util.Constants.BACKGROUND_COLOR
 import ba.grbo.currencyconverter.util.Constants.ITEM_ICON_TINT_LIST
 import ba.grbo.currencyconverter.util.Constants.ITEM_TEXT_COLOR
-import ba.grbo.currencyconverter.util.getArgbPropertyValueHolderForProperty
-import ba.grbo.currencyconverter.util.setUp
-import ba.grbo.currencyconverter.util.updateLocale
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -50,13 +51,67 @@ class CurrencyConverterActivity : AppCompatActivity() {
     lateinit var Colors: Colors
 
     @Inject // Injecting so we force first initialization upon activity creation
-    lateinit var countries: MutableList<Country>
+    lateinit var currencies: MutableStateFlow<List<Currency>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         preSuperOnCreateSetup()
         super.onCreate(savedInstanceState)
         postSuperOnCreateSetup()
+
+        // var name = resources.getResourceEntryName(R.drawable.ic_flag_afghanistan)
+        // Timber.i("name: $name")
+        // val aa = resources.getIdentifier(name, "drawable", packageName)
+        // Timber.i("a: ${R.drawable.ic_flag_afghanistan}")
+        // Timber.i("b: $aa")
+        // name = resources.getResourceEntryName(R.string.currency_afghanistan)
+        // Timber.i("name: $name")
+
+
+        // Timber.i("date: ${Date().time}")
+
+        // val myDate = "13.03.2003 00:00:00"
+        // val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", getLocale())
+
+        /*val myDate = "2021-05-05"
+        val sdf = SimpleDateFormat("yyyy-MM-dd", getLocale())
+        val date = sdf.parse(myDate)!!
+        val timeInMillis = date.time
+
+        Timber.i("mil: $timeInMillis")
+
+        val curernt = getCurrentDate(date)
+        Timber.i("sdda: $curernt")*/
+
+        // val calendar = Calendar.getInstance()
+        // val day = calendar.get(Calendar.DATE)
+        // val month = calendar.get(Calendar.MONTH)
+        // val year = calendar.get(Calendar.YEAR)
+        // val hour = calendar.get(Calendar.HOUR)
+        // val minute = calendar.get(Calendar.MINUTE)
+        //
+        // val localDate = LocalDateTime.of(
+        //     year,
+        //     Month.of(month + 1),
+        //     day,
+        //     hour,
+        //     minute
+        // )
+        //
+        // val date = "$day $month $year $hour:$minute"
+        // Timber.i("date: $date")
+        // Timber.i("localDate: $localDate")
+        // Timber.i("currenData: ${getCurrentDate()}")
     }
+
+    fun getCurrentDate(date: Date): String {
+
+        val a = SimpleDateFormat.getDateTimeInstance(1, 3, getLocale())
+        return a.format(date)
+        // val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale("bs"))
+        // return sdf.format(Date())
+
+    }
+
 
     override fun attachBaseContext(newBase: Context) {
         val newContext = newBase.updateLocale()
@@ -181,6 +236,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
             .launchIn(lifecycleScope)
     }
 
+    @SuppressLint("Recycle")
     private fun BottomNavigationView.getAnimator(): ObjectAnimator {
         val alphaSixty = (0.6f * 255).roundToInt()
         val alphaTwenty = (0.2f * 255).roundToInt()
