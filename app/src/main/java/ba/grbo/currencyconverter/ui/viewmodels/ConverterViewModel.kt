@@ -267,8 +267,9 @@ class ConverterViewModel @Inject constructor(
         position: Int
     ) {
         if (currency.isFavorite != isFavoritesOn) {
-            // updatePlainCountries(country, isFavoritesOn)
-            updateCountries(currency, isFavoritesOn, position)
+            val updatedExchangeableCurrency = currency.copy(isFavorite = isFavoritesOn)
+            updateUnexchangeableCurrency(updatedExchangeableCurrency)
+            updateCountries(updatedExchangeableCurrency, isFavoritesOn, position)
         }
     }
 
@@ -286,32 +287,29 @@ class ConverterViewModel @Inject constructor(
     }
 
     private fun updateCountries(
-        currency: ExchangeableCurrency,
+        updatedExchangeableCurrency: ExchangeableCurrency,
         isFavoritesOn: Boolean,
         position: Int
     ) {
-        val index = _countries.value.indexOfFirst { it.code == currency.code }
+        val index = _countries.value.indexOfFirst { it.code == updatedExchangeableCurrency.code }
         if (showOnlyFavorites && !isFavoritesOn) removeUnfavoritedCountry(index, position)
         else updateCountries(
-            currency.copy(isFavorite = isFavoritesOn),
+            updatedExchangeableCurrency,
             index,
             position
         )
     }
 
-    private fun updateCountries(currency: ExchangeableCurrency, index: Int, position: Int) {
-        _countries.value[index] = currency
+    private fun updateUnexchangeableCurrency(exchangeableCurrency: ExchangeableCurrency) {
         viewModelScope.launch {
-            repository.updateUnexchangeableCurrency(currency.toDatabase())
+            repository.updateUnexchangeableCurrency(exchangeableCurrency.toDatabase())
         }
-        notifyItemChanged(position)
     }
 
-    // private fun updatePlainCountries(currency: Currency, isFavoritesOn: Boolean) {
-    //     val index = plainCountries.indexOfFirst { it.currency.code == country.currency.code }
-    //     plainCountries[index] =
-    //         country.copy(currency = country.currency.copy(isFavorite = isFavoritesOn))
-    // }
+    private fun updateCountries(currency: ExchangeableCurrency, index: Int, position: Int) {
+        _countries.value[index] = currency
+        notifyItemChanged(position)
+    }
 
     fun onCurrencyClicked(currency: ExchangeableCurrency) {
         updateSelectedCurrency(currency)
