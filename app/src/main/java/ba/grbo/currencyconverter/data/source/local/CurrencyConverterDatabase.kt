@@ -1,18 +1,16 @@
-package ba.grbo.currencyconverter.data.source.local.db
+package ba.grbo.currencyconverter.data.source.local
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import ba.grbo.currencyconverter.data.models.db.Currency
-import ba.grbo.currencyconverter.data.models.db.ExchangeRate
-import ba.grbo.currencyconverter.data.models.db.MostRecentExchangeRate
+import ba.grbo.currencyconverter.data.models.database.ExchangeRate
+import ba.grbo.currencyconverter.data.models.database.UnexchangeableCurrency
 import ba.grbo.currencyconverter.util.Constants.CURRENCY_CONVERTER_DATABASE
 
 @Database(
-    entities = [Currency::class, ExchangeRate::class],
-    views = [MostRecentExchangeRate::class],
+    entities = [UnexchangeableCurrency::class, ExchangeRate::class],
     version = 1
 )
 @TypeConverters(Converters::class)

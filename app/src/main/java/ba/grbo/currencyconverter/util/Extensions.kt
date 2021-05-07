@@ -39,6 +39,7 @@ import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionValues
 import ba.grbo.currencyconverter.R
+import ba.grbo.currencyconverter.data.models.database.ExchangeableCurrency
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Focusing
@@ -760,4 +761,8 @@ private fun getScaleAndFadeAnimator(
         scaleY,
         fade
     )
+}
+
+fun List<ExchangeableCurrency>.toDomain(context: Context) = map {
+    it.toDomain(context)
 }

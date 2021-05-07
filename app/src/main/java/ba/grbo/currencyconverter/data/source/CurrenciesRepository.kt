@@ -1,24 +1,23 @@
 package ba.grbo.currencyconverter.data.source
 
-import ba.grbo.currencyconverter.data.models.db.Currency
-import ba.grbo.currencyconverter.data.models.db.CurrencyWithExchangeRates
-import ba.grbo.currencyconverter.data.models.db.CurrencyWithMostRecentExchangeRate
-import ba.grbo.currencyconverter.data.models.db.ExchangeRate
+import ba.grbo.currencyconverter.data.models.database.*
 import kotlinx.coroutines.flow.Flow
 import java.util.*
 
 interface CurrenciesRepository {
     suspend fun insertExchangeRate(exchangeRate: ExchangeRate): Result<Boolean>
 
-    suspend fun updateCurrency(currency: Currency): Result<Boolean>
+    fun observeMostRecentExchangeRates(): Result<Flow<List<EssentialExchangeRate>>>
 
-    suspend fun getCurrencyWithCustomExchangeRatesRange(
-        code: ba.grbo.currencyconverter.data.models.domain.Currency.Code,
+    suspend fun updateUnexchangeableCurrency(unexchangeableCurrency: UnexchangeableCurrency): Result<Boolean>
+
+    suspend fun getMultiExchangeableCurrency(
+        code: String,
         fromDate: Date,
         toDate: Date
-    ): Result<CurrencyWithExchangeRates>
+    ): Result<MultiExchangeableCurrency>
 
-    suspend fun getCurrenciesWithMostRecentExchangeRate(): Result<List<CurrencyWithMostRecentExchangeRate>>
+    suspend fun getExchangeableCurrencies(): Result<List<ExchangeableCurrency>>
 
-    fun observeIsFavorite(): Result<Flow<List<Boolean>>>
+    fun observeAreUnexchangeableCurrenciesFavorite(): Result<Flow<List<Boolean>>>
 }

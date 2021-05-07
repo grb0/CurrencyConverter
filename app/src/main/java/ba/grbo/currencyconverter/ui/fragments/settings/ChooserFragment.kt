@@ -14,7 +14,7 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import ba.grbo.currencyconverter.R
-import ba.grbo.currencyconverter.data.models.domain.Currency
+import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency
 import ba.grbo.currencyconverter.ui.viewmodels.ChooserViewModel
 import ba.grbo.currencyconverter.util.collectWhenStarted
 import ba.grbo.currencyconverter.util.getEnterAndPopExitMaterialSharedXAnimators
@@ -97,10 +97,10 @@ class ChooserFragment : PreferenceFragmentCompat() {
             apply()
         }
         when (uiName) {
-            Currency.UiName.CODE.name -> {
+            ExchangeableCurrency.UiName.CODE.name -> {
                 if (filterByValue != filterCode) modifyFilterBy(filterCode)
             }
-            Currency.UiName.NAME.name -> {
+            ExchangeableCurrency.UiName.NAME.name -> {
                 if (filterByValue != filterName) modifyFilterBy(filterName)
             }
         }

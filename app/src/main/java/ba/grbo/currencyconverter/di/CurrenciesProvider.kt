@@ -1,11 +1,12 @@
 package ba.grbo.currencyconverter.di
 
 import android.content.Context
-import ba.grbo.currencyconverter.data.models.db.toDomain
-import ba.grbo.currencyconverter.data.models.domain.Currency
+import ba.grbo.currencyconverter.data.models.database.EssentialExchangeRate
+import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency
 import ba.grbo.currencyconverter.data.source.CurrenciesRepository
 import ba.grbo.currencyconverter.data.source.Result.Error
 import ba.grbo.currencyconverter.data.source.Result.Success
+import ba.grbo.currencyconverter.util.toDomain
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,11 +26,11 @@ object CurrenciesProvider {
         @ApplicationContext context: Context,
         repository: CurrenciesRepository,
         scope: CoroutineScope
-    ): MutableStateFlow<List<Currency>> {
-        val currencies = MutableStateFlow<List<Currency>>(listOf())
+    ): MutableStateFlow<List<ExchangeableCurrency>> {
+        val currencies = MutableStateFlow<List<ExchangeableCurrency>>(listOf())
 
         scope.launch {
-            val dbCurrenciesResult = repository.getCurrenciesWithMostRecentExchangeRate()
+            val dbCurrenciesResult = repository.getExchangeableCurrencies()
             val dbCurrencies = if (dbCurrenciesResult is Success) dbCurrenciesResult.data
             else {
                 dbCurrenciesResult as Error
@@ -38,14 +39,14 @@ object CurrenciesProvider {
 
             currencies.value = dbCurrencies.toDomain(context)
 
-            val dbIsFavoriteResult = repository.observeIsFavorite()
-            val dbIsFavorite = if (dbIsFavoriteResult is Success) dbIsFavoriteResult.data
+            val dbAreFavoritesResult = repository.observeAreUnexchangeableCurrenciesFavorite()
+            val dbAreFavorites = if (dbAreFavoritesResult is Success) dbAreFavoritesResult.data
             else {
-                dbIsFavoriteResult as Error
-                throw  dbIsFavoriteResult.exception
+                dbAreFavoritesResult as Error
+                throw  dbAreFavoritesResult.exception
             }
 
-            fun updateCurrencies(list: List<Boolean>) {
+            fun updateFavorites(list: List<Boolean>) {
                 list.forEachIndexed { index, isFavorite ->
                     if (scope.isActive) {
                         currencies.value[index].isFavorite = isFavorite
@@ -53,9 +54,31 @@ object CurrenciesProvider {
                 }
             }
 
-            dbIsFavorite
+            dbAreFavorites
                 .distinctUntilChanged()
-                .onEach { updateCurrencies(it) }
+                .onEach { updateFavorites(it) }
+                .flowOn(Dispatchers.Default)
+                .launchIn(scope)
+
+            val dbMostRecentExchangeRatesResult = repository.observeMostRecentExchangeRates()
+            val dbMostRecentExchangeRates = if (dbMostRecentExchangeRatesResult is Success) {
+                dbMostRecentExchangeRatesResult.data
+            } else {
+                dbMostRecentExchangeRatesResult as Error
+                throw dbMostRecentExchangeRatesResult.exception
+            }
+
+            fun updateExchangeRates(exchangeRates: List<EssentialExchangeRate>) {
+                exchangeRates.forEachIndexed { index, essentialExchangeRate ->
+                    if (scope.isActive) {
+                        currencies.value[index].exchangeRate = essentialExchangeRate
+                    }
+                }
+            }
+
+            dbMostRecentExchangeRates
+                .distinctUntilChanged()
+                .onEach { updateExchangeRates(it) }
                 .flowOn(Dispatchers.Default)
                 .launchIn(scope)
         }

@@ -27,7 +27,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import ba.grbo.currencyconverter.R
-import ba.grbo.currencyconverter.data.models.domain.Currency
+import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency
 import ba.grbo.currencyconverter.databinding.DropdownCurrencyChooserBinding
 import ba.grbo.currencyconverter.databinding.FragmentConverterBinding
 import ba.grbo.currencyconverter.di.AutohideScrollbar
@@ -59,7 +59,7 @@ class ConverterFragment : Fragment() {
     private lateinit var binding: FragmentConverterBinding
 
     @Inject
-    lateinit var uiName: Currency.UiName
+    lateinit var uiName: ExchangeableCurrency.UiName
 
     @Suppress("PropertyName")
     @Inject
@@ -298,7 +298,7 @@ class ConverterFragment : Fragment() {
             false
     }
 
-    private fun onCurrencyChanged(currency: Currency, from: Boolean) {
+    private fun onCurrencyChanged(currency: ExchangeableCurrency, from: Boolean) {
         fun updateCurrency(view: TextView) {
             view.run {
                 if (text.isEmpty()) {
@@ -317,11 +317,11 @@ class ConverterFragment : Fragment() {
         }
     }
 
-    private fun onCountriesUpdated(currencies: List<Currency>) {
+    private fun onCountriesUpdated(currencies: List<ExchangeableCurrency>) {
         (binding.dropdownMenu.currencies.adapter as CountryAdapter).submitList(currencies)
     }
 
-    private fun onSelectedCurrencyChanged(currency: Currency, from: Boolean) {
+    private fun onSelectedCurrencyChanged(currency: ExchangeableCurrency, from: Boolean) {
         if (from) onSelectedCurrencyChanged(
             currency,
             binding.fromCurrencyChooser.currency,
@@ -338,7 +338,7 @@ class ConverterFragment : Fragment() {
     }
 
     private fun onSelectedCurrencyChanged(
-        currency: Currency,
+        currency: ExchangeableCurrency,
         main: TextView,
         secondary: TextView,
         fadeIn: AlphaAnimation,
@@ -351,7 +351,7 @@ class ConverterFragment : Fragment() {
     }
 
     private fun changeCurrencyState(
-        currency: Currency,
+        currency: ExchangeableCurrency,
         fadedIn: TextView,
         fadedOut: TextView,
         fadeIn: AlphaAnimation,

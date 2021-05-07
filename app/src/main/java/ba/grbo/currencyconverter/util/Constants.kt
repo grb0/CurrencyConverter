@@ -17,7 +17,7 @@ object Constants {
     const val ANIM_TIME: Long = 150
     const val ANIM_TIME_DIFFERENTIATOR = 1f
 
-    const val CURRENCIES_TABLE = "currencies_table"
+    const val UNEXCHANGEABLE_CURRENCIES_TABLE = "unexchangeable_currencies_table"
     const val EXCHANGE_RATES_TABLE = "exchange_rates_table"
     const val CURRENCY_CONVERTER_DATABASE = "currency_converter_database"
 

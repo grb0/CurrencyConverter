@@ -1,7 +1,7 @@
 package ba.grbo.currencyconverter.di
 
 import ba.grbo.currencyconverter.data.source.LocalCurrenciesSource
-import ba.grbo.currencyconverter.data.source.local.db.CurrenciesSource
+import ba.grbo.currencyconverter.data.source.local.CurrenciesSource
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

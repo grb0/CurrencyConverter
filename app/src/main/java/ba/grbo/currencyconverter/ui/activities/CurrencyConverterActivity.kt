@@ -21,7 +21,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import ba.grbo.currencyconverter.R
-import ba.grbo.currencyconverter.data.models.domain.Currency
+import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency
 import ba.grbo.currencyconverter.databinding.ActivityCurrencyConverterBinding
 import ba.grbo.currencyconverter.ui.viewmodels.CurrencyConverterViewModel
 import ba.grbo.currencyconverter.util.*
@@ -51,12 +51,23 @@ class CurrencyConverterActivity : AppCompatActivity() {
     lateinit var Colors: Colors
 
     @Inject // Injecting so we force first initialization upon activity creation
-    lateinit var currencies: MutableStateFlow<List<Currency>>
+    lateinit var currencies: MutableStateFlow<List<ExchangeableCurrency>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         preSuperOnCreateSetup()
         super.onCreate(savedInstanceState)
         postSuperOnCreateSetup()
+
+
+        // val symbol = Char(36)
+
+        /*val locale = Locale("en", "IN")
+        val decimalFormat: DecimalFormat =
+            DecimalFormat.getCurrencyInstance(locale) as DecimalFormat
+        val dfs: DecimalFormatSymbols = DecimalFormatSymbols.getInstance(locale)
+        dfs.currencySymbol = "\u20B9"
+        decimalFormat.setDecimalFormatSymbols(dfs)
+        System.out.println(decimalFormat.format(12324.13))*/
 
         // var name = resources.getResourceEntryName(R.drawable.ic_flag_afghanistan)
         // Timber.i("name: $name")

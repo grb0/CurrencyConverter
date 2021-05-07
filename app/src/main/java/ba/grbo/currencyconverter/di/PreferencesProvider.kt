@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import ba.grbo.currencyconverter.R
-import ba.grbo.currencyconverter.data.models.domain.Currency
+import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency
 import ba.grbo.currencyconverter.util.FilterBy
 import ba.grbo.currencyconverter.util.Language
 import ba.grbo.currencyconverter.util.Theme
@@ -63,13 +63,13 @@ object ActivityScopedPreferences {
     fun provideUiName(
         sharedPreferences: SharedPreferences,
         @ApplicationContext context: Context,
-    ): Currency.UiName {
+    ): ExchangeableCurrency.UiName {
         val uiName = sharedPreferences.getString(
             context.getString(R.string.key_ui_name),
-            Currency.UiName.CODE_AND_NAME.name
-        ) ?: Currency.UiName.CODE_AND_NAME.name
+            ExchangeableCurrency.UiName.CODE_AND_NAME.name
+        ) ?: ExchangeableCurrency.UiName.CODE_AND_NAME.name
 
-        return Currency.UiName.valueOf(uiName)
+        return ExchangeableCurrency.UiName.valueOf(uiName)
     }
 
     @Provides

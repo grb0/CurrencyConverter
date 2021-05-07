@@ -4,18 +4,18 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import ba.grbo.currencyconverter.data.models.domain.Currency
+import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency
 import ba.grbo.currencyconverter.databinding.DropdownItemBinding
 import ba.grbo.currencyconverter.ui.miscs.FavoritesAnimator
 import ba.grbo.currencyconverter.util.getScaleAndFadeAnimatorProducersPair
 
 class CountryAdapter(
-    private val uiName: Currency.UiName,
+    private val uiName: ExchangeableCurrency.UiName,
     private val showScrollbar: Boolean,
-    private val onClick: (Currency) -> Unit,
+    private val onClick: (ExchangeableCurrency) -> Unit,
     private val onCurrentListChanged: () -> Unit,
-    private val onFavoritesAnimationEnd: (Currency, Boolean, Int) -> Unit,
-) : ListAdapter<Currency, CountryAdapter.CountryHolder>(CountryDiffCallbacks()) {
+    private val onFavoritesAnimationEnd: (ExchangeableCurrency, Boolean, Int) -> Unit,
+) : ListAdapter<ExchangeableCurrency, CountryAdapter.CountryHolder>(CountryDiffCallbacks()) {
     class CountryHolder private constructor(
         private val binding: DropdownItemBinding
     ) : RecyclerView.ViewHolder(binding.root) {
@@ -35,10 +35,10 @@ class CountryAdapter(
         }
 
         fun bind(
-            currency: Currency,
-            uiName: Currency.UiName,
-            onClick: (Currency) -> Unit,
-            onFavoritesAnimationEnd: (Currency, Boolean, Int) -> Unit
+            currency: ExchangeableCurrency,
+            uiName: ExchangeableCurrency.UiName,
+            onClick: (ExchangeableCurrency) -> Unit,
+            onFavoritesAnimationEnd: (ExchangeableCurrency, Boolean, Int) -> Unit
         ) {
             favoritesAnimator = FavoritesAnimator(
                 binding.favoritesAnimation.getScaleAndFadeAnimatorProducersPair(),
@@ -65,8 +65,8 @@ class CountryAdapter(
     }
 
     override fun onCurrentListChanged(
-        previousList: MutableList<Currency>,
-        currentList: MutableList<Currency>
+        previousList: MutableList<ExchangeableCurrency>,
+        currentList: MutableList<ExchangeableCurrency>
     ) {
         onCurrentListChanged()
     }

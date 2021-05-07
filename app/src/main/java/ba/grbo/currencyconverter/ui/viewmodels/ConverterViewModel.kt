@@ -2,7 +2,7 @@ package ba.grbo.currencyconverter.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ba.grbo.currencyconverter.data.models.domain.Currency
+import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency
 import ba.grbo.currencyconverter.data.source.CurrenciesRepository
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
@@ -24,12 +24,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ConverterViewModel @Inject constructor(
-    private val currencies: MutableStateFlow<List<Currency>>,
+    private val currencies: MutableStateFlow<List<ExchangeableCurrency>>,
     private val repository: CurrenciesRepository,
     filterBy: FilterBy,
 ) : ViewModel() {
     private val _countries = MutableStateFlow(currencies.value.toMutableList())
-    val countries: StateFlow<List<Currency>>
+    val countries: StateFlow<List<ExchangeableCurrency>>
         get() = _countries
 
     private val _dropdownState = MutableStateFlow<DropdownState>(Collapsed(NONE))
@@ -37,19 +37,19 @@ class ConverterViewModel @Inject constructor(
         get() = _dropdownState
 
     private val _fromCurrency = MutableStateFlow(currencies.value[0])
-    val fromCurrency: StateFlow<Currency>
+    val fromCurrency: StateFlow<ExchangeableCurrency>
         get() = _fromCurrency
 
     private val _toCurrency = MutableStateFlow(currencies.value[1])
-    val toCurrency: StateFlow<Currency>
+    val toCurrency: StateFlow<ExchangeableCurrency>
         get() = _toCurrency
 
-    private val _fromSelectedCurrency = SingleSharedFlow<Currency>()
-    val fromSelectedCurrency: SharedFlow<Currency>
+    private val _fromSelectedCurrency = SingleSharedFlow<ExchangeableCurrency>()
+    val fromSelectedCurrency: SharedFlow<ExchangeableCurrency>
         get() = _fromSelectedCurrency
 
-    private val _toSelectedCurrency = SingleSharedFlow<Currency>()
-    val toSelectedCurrency: SharedFlow<Currency>
+    private val _toSelectedCurrency = SingleSharedFlow<ExchangeableCurrency>()
+    val toSelectedCurrency: SharedFlow<ExchangeableCurrency>
         get() = _toSelectedCurrency
 
     private val _searcherState = MutableStateFlow<SearcherState>(Unfocused(NONE))
@@ -90,7 +90,7 @@ class ConverterViewModel @Inject constructor(
 
     private val onSearcherTextChanged = MutableStateFlow("")
 
-    private val filter: (Currency, String) -> Boolean
+    private val filter: (ExchangeableCurrency, String) -> Boolean
 
     private var lastClickedDropdown = NONE
     private var initialSwappingState = SwappingState.None
@@ -154,7 +154,7 @@ class ConverterViewModel @Inject constructor(
 
     private fun initializeFilter(
         filterBy: FilterBy
-    ): (Currency, String) -> Boolean = when (filterBy) {
+    ): (ExchangeableCurrency, String) -> Boolean = when (filterBy) {
         FilterBy.CODE -> { currency, query -> currency.name.code.contains(query, true) }
         FilterBy.NAME -> { currency, query -> currency.name.name.contains(query, true) }
         FilterBy.BOTH -> { currency, query -> currency.name.codeAndName.contains(query, true) }
@@ -261,7 +261,11 @@ class ConverterViewModel @Inject constructor(
         _countries.value = _countries.value.filter { it.isFavorite }.toMutableList()
     }
 
-    fun onFavoritesAnimationEnd(currency: Currency, isFavoritesOn: Boolean, position: Int) {
+    fun onFavoritesAnimationEnd(
+        currency: ExchangeableCurrency,
+        isFavoritesOn: Boolean,
+        position: Int
+    ) {
         if (currency.isFavorite != isFavoritesOn) {
             // updatePlainCountries(country, isFavoritesOn)
             updateCountries(currency, isFavoritesOn, position)
@@ -281,7 +285,11 @@ class ConverterViewModel @Inject constructor(
         _notifyItemRemoved.tryEmit(position)
     }
 
-    private fun updateCountries(currency: Currency, isFavoritesOn: Boolean, position: Int) {
+    private fun updateCountries(
+        currency: ExchangeableCurrency,
+        isFavoritesOn: Boolean,
+        position: Int
+    ) {
         val index = _countries.value.indexOfFirst { it.code == currency.code }
         if (showOnlyFavorites && !isFavoritesOn) removeUnfavoritedCountry(index, position)
         else updateCountries(
@@ -291,10 +299,10 @@ class ConverterViewModel @Inject constructor(
         )
     }
 
-    private fun updateCountries(currency: Currency, index: Int, position: Int) {
+    private fun updateCountries(currency: ExchangeableCurrency, index: Int, position: Int) {
         _countries.value[index] = currency
         viewModelScope.launch {
-            repository.updateCurrency(currency.toDatabase())
+            repository.updateUnexchangeableCurrency(currency.toDatabase())
         }
         notifyItemChanged(position)
     }
@@ -305,7 +313,7 @@ class ConverterViewModel @Inject constructor(
     //         country.copy(currency = country.currency.copy(isFavorite = isFavoritesOn))
     // }
 
-    fun onCurrencyClicked(currency: Currency) {
+    fun onCurrencyClicked(currency: ExchangeableCurrency) {
         updateSelectedCurrency(currency)
         collapseDropdown(_dropdownState.value.dropdown)
     }
@@ -339,7 +347,7 @@ class ConverterViewModel @Inject constructor(
         }
     }
 
-    private fun updateSelectedCurrency(currency: Currency) {
+    private fun updateSelectedCurrency(currency: ExchangeableCurrency) {
         if (_dropdownState.value.dropdown == FROM) {
             _fromSelectedCurrency.tryEmit(currency)
             _fromCurrency.value = currency

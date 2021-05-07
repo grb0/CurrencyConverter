@@ -8,11 +8,11 @@
 
         <variable
             name="curr"
-            type="ba.grbo.currencyconverter.data.models.domain.Currency" />
+            type="ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency" />
 
         <variable
             name="uiName"
-            type="ba.grbo.currencyconverter.data.models.domain.Currency.UiName" />
+            type="ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency.UiName" />
 
         <variable
             name="showScrollbar"

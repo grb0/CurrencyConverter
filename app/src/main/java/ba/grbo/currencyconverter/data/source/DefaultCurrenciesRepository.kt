@@ -1,9 +1,6 @@
 package ba.grbo.currencyconverter.data.source
 
-import ba.grbo.currencyconverter.data.models.db.Currency
-import ba.grbo.currencyconverter.data.models.db.CurrencyWithExchangeRates
-import ba.grbo.currencyconverter.data.models.db.CurrencyWithMostRecentExchangeRate
-import ba.grbo.currencyconverter.data.models.db.ExchangeRate
+import ba.grbo.currencyconverter.data.models.database.*
 import kotlinx.coroutines.flow.Flow
 import java.util.*
 import javax.inject.Inject
@@ -15,23 +12,27 @@ class DefaultCurrenciesRepository @Inject constructor(
         return localCurrenciesSource.insertExchangeRate(exchangeRate)
     }
 
-    override suspend fun updateCurrency(currency: Currency): Result<Boolean> {
-        return localCurrenciesSource.updateCurrency(currency)
+    override fun observeMostRecentExchangeRates(): Result<Flow<List<EssentialExchangeRate>>> {
+        return localCurrenciesSource.observeMostRecentExchangeRates()
     }
 
-    override suspend fun getCurrencyWithCustomExchangeRatesRange(
-        code: ba.grbo.currencyconverter.data.models.domain.Currency.Code,
+    override suspend fun updateUnexchangeableCurrency(unexchangeableCurrency: UnexchangeableCurrency): Result<Boolean> {
+        return localCurrenciesSource.updateUnexchangeableCurrency(unexchangeableCurrency)
+    }
+
+    override suspend fun getMultiExchangeableCurrency(
+        code: String,
         fromDate: Date,
         toDate: Date
-    ): Result<CurrencyWithExchangeRates> {
-        return localCurrenciesSource.getCurrencyWithCustomExchangeRatesRange(code, fromDate, toDate)
+    ): Result<MultiExchangeableCurrency> {
+        return localCurrenciesSource.getMultiExchangeableCurrency(code, fromDate, toDate)
     }
 
-    override suspend fun getCurrenciesWithMostRecentExchangeRate(): Result<List<CurrencyWithMostRecentExchangeRate>> {
-        return localCurrenciesSource.getCurrenciesWithMostRecentExchangeRate()
+    override suspend fun getExchangeableCurrencies(): Result<List<ExchangeableCurrency>> {
+        return localCurrenciesSource.getExchangeableCurrencies()
     }
 
-    override fun observeIsFavorite(): Result<Flow<List<Boolean>>> {
-        return localCurrenciesSource.observeIsFavorite()
+    override fun observeAreUnexchangeableCurrenciesFavorite(): Result<Flow<List<Boolean>>> {
+        return localCurrenciesSource.observeAreUnexchangeableCurrenciesFavorite()
     }
 }

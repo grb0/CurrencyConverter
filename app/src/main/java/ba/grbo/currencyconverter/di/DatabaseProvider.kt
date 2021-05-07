@@ -1,7 +1,7 @@
 package ba.grbo.currencyconverter.di
 
 import android.content.Context
-import ba.grbo.currencyconverter.data.source.local.db.CurrencyConverterDatabase
+import ba.grbo.currencyconverter.data.source.local.CurrencyConverterDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
