@@ -45,12 +45,14 @@ import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocusing
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SwappingState.*
 import ba.grbo.currencyconverter.util.*
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import javax.inject.Inject
 import kotlin.math.roundToInt
+import kotlin.system.exitProcess
 
 @Suppress("PrivatePropertyName")
 @AndroidEntryPoint
@@ -282,7 +284,21 @@ class ConverterFragment : Fragment() {
             collectWhenStarted(onFavoritesClicked, ::animateFavorites, false)
             collectWhenStarted(notifyItemChanged, ::onItemChanged, false)
             collectWhenStarted(notifyItemRemoved, ::onItemRemoved, false)
+            collectWhenStarted(databaseExceptionCaught, ::onDatabaseExceptionCaught, false)
+            collectWhenStarted(databaseExceptionAcknowledged, { shutDown() }, false)
         }
+    }
+
+    private fun onDatabaseExceptionCaught(info: Triple<Int, Int, Int>) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(info.first)
+            .setMessage(info.second)
+            .setPositiveButton(info.third) { _, _ -> viewModel.onDatabaseExceptionAcknowledged() }
+            .show()
+    }
+
+    private fun shutDown() {
+        exitProcess(0)
     }
 
     private fun onItemChanged(position: Int) {

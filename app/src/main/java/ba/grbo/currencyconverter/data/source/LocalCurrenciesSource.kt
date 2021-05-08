@@ -5,19 +5,19 @@ import kotlinx.coroutines.flow.Flow
 import java.util.*
 
 interface LocalCurrenciesSource {
-    suspend fun insertExchangeRate(exchangeRate: ExchangeRate): Result<Boolean>
+    suspend fun insertExchangeRate(exchangeRate: ExchangeRate): DatabaseResult<Boolean>
 
-    fun observeMostRecentExchangeRates(): Result<Flow<List<EssentialExchangeRate>>>
+    fun observeMostRecentExchangeRates(): DatabaseResult<Flow<List<EssentialExchangeRate>>>
 
-    suspend fun updateUnexchangeableCurrency(unexchangeableCurrency: UnexchangeableCurrency): Result<Boolean>
+    suspend fun updateUnexchangeableCurrency(unexchangeableCurrency: UnexchangeableCurrency): DatabaseResult<Boolean>
 
-    suspend fun getExchangeableCurrencies(): Result<List<ExchangeableCurrency>>
+    suspend fun getExchangeableCurrencies(): DatabaseResult<List<ExchangeableCurrency>>
 
     suspend fun getMultiExchangeableCurrency(
         code: String,
         fromDate: Date,
         toDate: Date
-    ): Result<MultiExchangeableCurrency>
+    ): DatabaseResult<MultiExchangeableCurrency>
 
-    fun observeAreUnexchangeableCurrenciesFavorite(): Result<Flow<List<Boolean>>>
+    fun observeAreUnexchangeableCurrenciesFavorite(): DatabaseResult<Flow<List<Boolean>>>
 }

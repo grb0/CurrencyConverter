@@ -202,4 +202,7 @@
     <string name="currency_platinum_ounce">Platinunze</string>
     <string name="last_updated">Letzte Aktualisierung: %s</string>
     <string name="hello_from_popular_fragment">Hallo aus PopularFragment</string>
+    <string name="database_exception_caught_message">Daten können nicht aus der Datenbank geladen werden, bitte starten Sie die App neu. Wenn das Problem weiterhin besteht, installieren Sie bitte die App neu.</string>
+    <string name="database_exception_caught_title">Fehler</string>
+    <string name="database_exception_caught_button">Gut</string>
 </resources>

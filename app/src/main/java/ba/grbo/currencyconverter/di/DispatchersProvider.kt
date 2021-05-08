@@ -14,4 +14,9 @@ object DispatchersProvider {
     @DispatcherIO
     @Provides
     fun provideDispatcherIO() = Dispatchers.IO
+
+    @ActivityRetainedScoped
+    @DispatcherDefault
+    @Provides
+    fun provideDispatcherDefault() = Dispatchers.Default
 }

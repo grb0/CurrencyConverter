@@ -1,16 +1,15 @@
 package ba.grbo.currencyconverter.data.source
 
-sealed class Result<out R> {
-    val succeeded
-        get() = this is Success && data != null
+sealed interface DatabaseResult<out R>
 
-    data class Success<out T>(val data: T) : Result<T>()
-    object Loading : Result<Nothing>()
-    data class Error(val exception: Exception) : Result<Nothing>()
+sealed interface NetworkResult<out R> {
+    override fun toString(): String
+}
 
-    override fun toString(): String = when (this) {
-        is Success<*> -> "Success[data=$data]"
-        is Loading -> "Loading"
-        is Error -> "Error[exception=$exception]"
-    }
+data class Success<out T>(val data: T) : DatabaseResult<T>, NetworkResult<T>
+
+data class Error(val exception: Exception) : DatabaseResult<Nothing>, NetworkResult<Nothing>
+
+object Loading : NetworkResult<Nothing> {
+    override fun toString(): String = "Loading"
 }

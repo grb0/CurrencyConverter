@@ -1,7 +1,9 @@
 package ba.grbo.currencyconverter.ui.viewmodels
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency
 import ba.grbo.currencyconverter.data.source.CurrenciesRepository
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown.*
@@ -15,19 +17,55 @@ import ba.grbo.currencyconverter.util.toSearcherState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class ConverterViewModel @Inject constructor(
-    private val currencies: MutableStateFlow<List<ExchangeableCurrency>>,
     private val repository: CurrenciesRepository,
     filterBy: FilterBy,
 ) : ViewModel() {
+    private val currencies: MutableStateFlow<List<ExchangeableCurrency>>
+
+    private val _databaseExceptionCaught =
+        SharedStateLikeFlow<Triple<@StringRes Int, @StringRes Int, @StringRes Int>>()
+    val databaseExceptionCaught: SharedFlow<Triple<Int, Int, Int>>
+        get() = _databaseExceptionCaught
+
+    private val _databaseExceptionAcknowledged = SharedStateLikeFlow<Unit>()
+    val databaseExceptionAcknowledged: SharedFlow<Unit>
+        get() = _databaseExceptionAcknowledged
+
+    init {
+        // Testirati tako što ćemo namjerno baciti Exception
+        repository.exception
+            .onEach {
+                Timber.i("exception: ${it.message}")
+                _databaseExceptionCaught.tryEmit(
+                    Triple(
+                        R.string.database_exception_caught_title,
+                        R.string.database_exception_caught_message,
+                        R.string.database_exception_caught_button
+                    )
+                )
+            }
+            .launchIn(viewModelScope)
+
+        repository.observeCurrencies(viewModelScope)
+
+        @Suppress("ControlFlowWithEmptyBody")
+        runBlocking {
+            while (repository.exchangeableCurrencies.value.isEmpty()) {
+            }
+        }
+
+        // we can use repository.exchangeableCurrencies
+        currencies = repository.exchangeableCurrencies
+    }
+
     private val _countries = MutableStateFlow(currencies.value.toMutableList())
     val countries: StateFlow<List<ExchangeableCurrency>>
         get() = _countries
@@ -158,6 +196,10 @@ class ConverterViewModel @Inject constructor(
         FilterBy.CODE -> { currency, query -> currency.name.code.contains(query, true) }
         FilterBy.NAME -> { currency, query -> currency.name.name.contains(query, true) }
         FilterBy.BOTH -> { currency, query -> currency.name.codeAndName.contains(query, true) }
+    }
+
+    fun onDatabaseExceptionAcknowledged() {
+        _databaseExceptionAcknowledged.tryEmit(Unit)
     }
 
     fun onFromDropdownActionClicked() {
@@ -300,10 +342,8 @@ class ConverterViewModel @Inject constructor(
         )
     }
 
-    private fun updateUnexchangeableCurrency(exchangeableCurrency: ExchangeableCurrency) {
-        viewModelScope.launch {
-            repository.updateUnexchangeableCurrency(exchangeableCurrency.toDatabase())
-        }
+    private fun updateUnexchangeableCurrency(currency: ExchangeableCurrency) {
+        viewModelScope.launch { repository.updateCurrency(currency) }
     }
 
     private fun updateCountries(currency: ExchangeableCurrency, index: Int, position: Int) {

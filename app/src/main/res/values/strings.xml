@@ -67,6 +67,11 @@
     <string name="to_label">To</string>
     <string name="last_updated">Last updated: %s</string>
 
+    <!--fragment_converter-->
+    <string name="database_exception_caught_message">Unable to load data from the database, please restart the app. If the problem persists please reinstall the app.</string>
+    <string name="database_exception_caught_title">Error</string>
+    <string name="database_exception_caught_button">OK</string>
+
     <!--Country codes-->
     <string name="currency_united_arab_emirates">United Arab Emirates Dirham</string>
     <string name="currency_afghanistan">Afghan Afghani</string>

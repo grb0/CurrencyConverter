@@ -17,3 +17,7 @@ annotation class ExtendDropdownMenuInLandscape
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class DispatcherIO
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class DispatcherDefault

@@ -202,4 +202,7 @@
     <string name="to_label">U</string>
     <string name="last_updated">Posljednje ažuriranje: %s</string>
     <string name="hello_from_popular_fragment">Pozdrav iz PopularFragmenta</string>
+    <string name="database_exception_caught_message">Podaci iz baze podataka se ne mogu učitati, molimo Vas restartujte aplikaciju. Ukoliko je problem postojan, molimo Vas reinstalirajte aplikaciju.</string>
+    <string name="database_exception_caught_title">Greška</string>
+    <string name="database_exception_caught_button">Uredu</string>
 </resources>

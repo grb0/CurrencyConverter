@@ -21,7 +21,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import ba.grbo.currencyconverter.R
-import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency
+import ba.grbo.currencyconverter.data.source.CurrenciesRepository
 import ba.grbo.currencyconverter.databinding.ActivityCurrencyConverterBinding
 import ba.grbo.currencyconverter.ui.viewmodels.CurrencyConverterViewModel
 import ba.grbo.currencyconverter.util.*
@@ -31,7 +31,6 @@ import ba.grbo.currencyconverter.util.Constants.ITEM_TEXT_COLOR
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import java.text.SimpleDateFormat
@@ -51,13 +50,12 @@ class CurrencyConverterActivity : AppCompatActivity() {
     lateinit var Colors: Colors
 
     @Inject // Injecting so we force first initialization upon activity creation
-    lateinit var currencies: MutableStateFlow<List<ExchangeableCurrency>>
+    lateinit var repository: CurrenciesRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         preSuperOnCreateSetup()
         super.onCreate(savedInstanceState)
         postSuperOnCreateSetup()
-
 
         // val symbol = Char(36)
 

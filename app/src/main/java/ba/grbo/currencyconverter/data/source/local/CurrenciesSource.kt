@@ -1,10 +1,10 @@
 package ba.grbo.currencyconverter.data.source.local
 
 import ba.grbo.currencyconverter.data.models.database.*
+import ba.grbo.currencyconverter.data.source.DatabaseResult
+import ba.grbo.currencyconverter.data.source.Error
 import ba.grbo.currencyconverter.data.source.LocalCurrenciesSource
-import ba.grbo.currencyconverter.data.source.Result
-import ba.grbo.currencyconverter.data.source.Result.Error
-import ba.grbo.currencyconverter.data.source.Result.Success
+import ba.grbo.currencyconverter.data.source.Success
 import ba.grbo.currencyconverter.di.DispatcherIO
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +17,7 @@ class CurrenciesSource @Inject constructor(
     private val currencyDao: CurrencyDao,
     @DispatcherIO private val coroutineDispatcher: CoroutineDispatcher
 ) : LocalCurrenciesSource {
-    override suspend fun insertExchangeRate(exchangeRate: ExchangeRate): Result<Boolean> {
+    override suspend fun insertExchangeRate(exchangeRate: ExchangeRate): DatabaseResult<Boolean> {
         return withContext(coroutineDispatcher) {
             try {
                 exchangeRateDao.insert(exchangeRate)
@@ -28,15 +28,16 @@ class CurrenciesSource @Inject constructor(
         }
     }
 
-    override fun observeMostRecentExchangeRates(): Result<Flow<List<EssentialExchangeRate>>> = try {
-        Success(exchangeRateDao.observeMostRecentExchangeRates())
-    } catch (e: Exception) {
-        Error(e)
-    }
+    override fun observeMostRecentExchangeRates(): DatabaseResult<Flow<List<EssentialExchangeRate>>> =
+        try {
+            Success(exchangeRateDao.observeMostRecentExchangeRates())
+        } catch (e: Exception) {
+            Error(e)
+        }
 
     override suspend fun updateUnexchangeableCurrency(
         unexchangeableCurrency: UnexchangeableCurrency
-    ): Result<Boolean> = withContext(coroutineDispatcher) {
+    ): DatabaseResult<Boolean> = withContext(coroutineDispatcher) {
         try {
             currencyDao.update(unexchangeableCurrency)
             Success(true)
@@ -45,7 +46,7 @@ class CurrenciesSource @Inject constructor(
         }
     }
 
-    override suspend fun getExchangeableCurrencies(): Result<List<ExchangeableCurrency>> {
+    override suspend fun getExchangeableCurrencies(): DatabaseResult<List<ExchangeableCurrency>> {
         return withContext(coroutineDispatcher) {
             try {
                 Success(currencyDao.getExchangeableCurrencies())
@@ -59,7 +60,7 @@ class CurrenciesSource @Inject constructor(
         code: String,
         fromDate: Date,
         toDate: Date
-    ): Result<MultiExchangeableCurrency> = withContext(coroutineDispatcher) {
+    ): DatabaseResult<MultiExchangeableCurrency> = withContext(coroutineDispatcher) {
         try {
             Success(currencyDao.getMultiExchangeableCurrency(code, fromDate, toDate))
         } catch (e: Exception) {
@@ -67,7 +68,7 @@ class CurrenciesSource @Inject constructor(
         }
     }
 
-    override fun observeAreUnexchangeableCurrenciesFavorite(): Result<Flow<List<Boolean>>> {
+    override fun observeAreUnexchangeableCurrenciesFavorite(): DatabaseResult<Flow<List<Boolean>>> {
         return try {
             Success(currencyDao.observeAreUnexchangeableCurrenciesFavorite())
         } catch (e: Exception) {
