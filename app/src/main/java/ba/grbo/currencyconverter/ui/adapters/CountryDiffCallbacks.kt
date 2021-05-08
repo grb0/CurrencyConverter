@@ -7,7 +7,7 @@ class CountryDiffCallbacks : DiffUtil.ItemCallback<ExchangeableCurrency>() {
     override fun areItemsTheSame(
         oldItem: ExchangeableCurrency,
         newItem: ExchangeableCurrency
-    ) = oldItem === newItem
+    ) = oldItem.code == newItem.code
 
     override fun areContentsTheSame(
         oldItem: ExchangeableCurrency,
