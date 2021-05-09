@@ -20,7 +20,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,7 +42,6 @@ class ConverterViewModel @Inject constructor(
         // Testirati tako što ćemo namjerno baciti Exception
         repository.exception
             .onEach {
-                Timber.i("exception: ${it.message}")
                 _databaseExceptionCaught.tryEmit(
                     Triple(
                         R.string.database_exception_caught_title,
@@ -54,16 +52,18 @@ class ConverterViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        repository.observeCurrencies(viewModelScope)
-
         @Suppress("ControlFlowWithEmptyBody")
         runBlocking {
-            while (repository.exchangeableCurrencies.value.isEmpty()) {
+            while (repository.exchangeableCurrencies.value.isEmpty() && repository.exception.replayCache.isEmpty()) {
             }
         }
 
-        // we can use repository.exchangeableCurrencies
-        currencies = repository.exchangeableCurrencies
+        currencies = if (repository.exchangeableCurrencies.value.isNotEmpty()) {
+            repository.observeCurrencies(viewModelScope)
+            repository.exchangeableCurrencies
+        } else {
+            repository.dummyExchangeableCurrencies
+        }
     }
 
     private val _countries = MutableStateFlow(currencies.value.toMutableList())

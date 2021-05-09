@@ -269,6 +269,8 @@ class ConverterFragment : Fragment() {
 
     private fun collectFlows() {
         viewModel.run {
+            collectWhenStarted(databaseExceptionCaught, ::onDatabaseExceptionCaught, false)
+            collectWhenStarted(databaseExceptionAcknowledged, { shutDown() }, false)
             fromCurrencyJob = collectWhenStarted(fromCurrency) { onCurrencyChanged(it, true) }
             toCurrencyJob = collectWhenStarted(toCurrency) { onCurrencyChanged(it, false) }
             collectWhenStarted(fromSelectedCurrency, { onSelectedCurrencyChanged(it, true) }, true)
@@ -284,16 +286,25 @@ class ConverterFragment : Fragment() {
             collectWhenStarted(onFavoritesClicked, ::animateFavorites, false)
             collectWhenStarted(notifyItemChanged, ::onItemChanged, false)
             collectWhenStarted(notifyItemRemoved, ::onItemRemoved, false)
-            collectWhenStarted(databaseExceptionCaught, ::onDatabaseExceptionCaught, false)
-            collectWhenStarted(databaseExceptionAcknowledged, { shutDown() }, false)
         }
     }
 
     private fun onDatabaseExceptionCaught(info: Triple<Int, Int, Int>) {
+        hideEverything()
+        showDialog(info)
+    }
+
+    private fun hideEverything() {
+        binding.converterLayout.visibility = View.GONE
+        activity.hideBottomNavigationAndActionBar()
+    }
+
+    private fun showDialog(info: Triple<Int, Int, Int>) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(info.first)
             .setMessage(info.second)
-            .setPositiveButton(info.third) { _, _ -> viewModel.onDatabaseExceptionAcknowledged() }
+            .setPositiveButton(info.third, null)
+            .setOnDismissListener { viewModel.onDatabaseExceptionAcknowledged() }
             .show()
     }
 

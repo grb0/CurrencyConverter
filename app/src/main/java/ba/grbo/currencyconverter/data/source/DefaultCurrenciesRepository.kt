@@ -16,6 +16,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 import java.util.*
 import javax.inject.Inject
+import ba.grbo.currencyconverter.data.models.domain.ExchangeRate as DomainExchangeRate
 import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency as DomainCurrency
 
 class DefaultCurrenciesRepository @Inject constructor(
@@ -25,6 +26,22 @@ class DefaultCurrenciesRepository @Inject constructor(
 ) : CurrenciesRepository {
     override val exchangeableCurrencies = MutableStateFlow<List<DomainCurrency>>(emptyList())
     override val exception: MutableSharedFlow<Exception> = SharedStateLikeFlow()
+
+    private val dummyExchangeableCurrency = DomainCurrency(
+        "BAM",
+        "KM",
+        "currency_bosnia_and_herzegovina",
+        "ic_flag_bosnia_and_herzegovina",
+        true,
+        DomainExchangeRate(100.0, Date()),
+        context
+    )
+
+    override val dummyExchangeableCurrencies = MutableStateFlow(
+        listOf(
+            dummyExchangeableCurrency, dummyExchangeableCurrency
+        )
+    )
 
     init {
         runBlocking {
@@ -42,7 +59,7 @@ class DefaultCurrenciesRepository @Inject constructor(
 
     private fun observeForFavoritesChange(scope: CoroutineScope) {
         observeForChange(
-            localCurrenciesSource::observeAreUnexchangeableCurrenciesFavorite,
+            ::observeAreUnexchangeableCurrenciesFavorite,
             ::updateFavorites,
             scope
         )
@@ -50,7 +67,7 @@ class DefaultCurrenciesRepository @Inject constructor(
 
     private fun observeForExchangeRatesChange(scope: CoroutineScope) {
         observeForChange(
-            localCurrenciesSource::observeMostRecentExchangeRates,
+            ::observeMostRecentExchangeRates,
             ::updateExchangeRates,
             scope
         )
@@ -115,7 +132,6 @@ class DefaultCurrenciesRepository @Inject constructor(
     }
 
     override suspend fun getExchangeableCurrencies(): DatabaseResult<List<ExchangeableCurrency>> {
-        // return Error(Exception("bacili smo je"))
         return localCurrenciesSource.getExchangeableCurrencies()
     }
 

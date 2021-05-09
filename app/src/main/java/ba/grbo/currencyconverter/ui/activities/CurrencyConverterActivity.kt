@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.MotionEvent
+import android.view.View
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
@@ -321,4 +322,9 @@ class CurrencyConverterActivity : AppCompatActivity() {
     )
 
     fun getBottomNavigationAnimator() = binding.bottomNavigation.getAnimator()
+
+    fun hideBottomNavigationAndActionBar() {
+        binding.bottomNavigation.visibility = View.GONE
+        supportActionBar?.hide()
+    }
 }
