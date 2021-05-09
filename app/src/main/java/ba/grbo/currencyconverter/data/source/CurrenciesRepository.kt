@@ -1,5 +1,6 @@
 package ba.grbo.currencyconverter.data.source
 
+import android.content.Context
 import ba.grbo.currencyconverter.data.models.database.EssentialExchangeRate
 import ba.grbo.currencyconverter.data.models.database.ExchangeRate
 import ba.grbo.currencyconverter.data.models.database.ExchangeableCurrency
@@ -18,6 +19,8 @@ interface CurrenciesRepository {
     val dummyExchangeableCurrencies: MutableStateFlow<List<DomainCurrency>>
 
     fun observeCurrencies(scope: CoroutineScope)
+
+    fun syncExchangeableCurrenciesWithLocale(scope: CoroutineScope, context: Context)
 
     suspend fun insertExchangeRate(exchangeRate: ExchangeRate): DatabaseResult<Boolean>
 

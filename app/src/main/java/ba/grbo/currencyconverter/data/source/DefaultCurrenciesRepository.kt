@@ -9,11 +9,8 @@ import ba.grbo.currencyconverter.di.DispatcherDefault
 import ba.grbo.currencyconverter.util.SharedStateLikeFlow
 import ba.grbo.currencyconverter.util.toDomain
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.runBlocking
 import java.util.*
 import javax.inject.Inject
 import ba.grbo.currencyconverter.data.models.domain.ExchangeRate as DomainExchangeRate
@@ -48,6 +45,14 @@ class DefaultCurrenciesRepository @Inject constructor(
             when (val dbResult = getExchangeableCurrencies()) {
                 is Success -> exchangeableCurrencies.value = dbResult.data.toDomain(context)
                 is Error -> exception.tryEmit(dbResult.exception)
+            }
+        }
+    }
+
+    override fun syncExchangeableCurrenciesWithLocale(scope: CoroutineScope, context: Context) {
+        scope.launch(coroutineDispatcher) {
+            exchangeableCurrencies.value = exchangeableCurrencies.value.map {
+                it.copy(context = context)
             }
         }
     }

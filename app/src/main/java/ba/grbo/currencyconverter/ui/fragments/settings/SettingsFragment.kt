@@ -14,19 +14,24 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import ba.grbo.currencyconverter.CurrencyConverterApplication
 import ba.grbo.currencyconverter.R
+import ba.grbo.currencyconverter.data.source.CurrenciesRepository
 import ba.grbo.currencyconverter.ui.viewmodels.SettingsViewModel
 import ba.grbo.currencyconverter.util.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.*
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class SettingsFragment : PreferenceFragmentCompat() {
     private val viewModel: SettingsViewModel by viewModels()
+    private val scope = CoroutineScope(Job())
+
+    @Inject
+    lateinit var repository: CurrenciesRepository
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
         setListeners()
-
     }
 
     override fun onCreateView(
@@ -42,6 +47,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
         return getExitAndPopEnterMaterialSharedXAnimators(
             nextAnim
         ) { getMaterialFadeThroughAnimator(view as ViewGroup, enter) }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
     }
 
     private fun setListeners() {
@@ -86,16 +96,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     private fun onLanguageChanged(language: String) {
         viewModel.viewModelScope.launch {
-            updateCountries(language)
+            syncCurrenciesWithLocale(language)
             recreateActivity()
         }
     }
 
-    private suspend fun updateCountries(language: String) {
+    private suspend fun syncCurrenciesWithLocale(language: String) {
         withContext(Dispatchers.Default) {
             val modifiedContext =
                 requireActivity().baseContext.updateLocale(Language.valueOf(language).toLocale())
-            // Currencies.updateCountries(modifiedContext)
+            repository.syncExchangeableCurrenciesWithLocale(scope, modifiedContext)
         }
     }
 
