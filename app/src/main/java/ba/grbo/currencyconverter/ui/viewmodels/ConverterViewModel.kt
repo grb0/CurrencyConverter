@@ -19,7 +19,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,7 +26,7 @@ class ConverterViewModel @Inject constructor(
     private val repository: CurrenciesRepository,
     filterBy: FilterBy,
 ) : ViewModel() {
-    private val currencies: MutableStateFlow<List<ExchangeableCurrency>>
+    private lateinit var currencies: MutableStateFlow<List<ExchangeableCurrency>>
 
     private val _databaseExceptionCaught =
         SharedStateLikeFlow<Triple<@StringRes Int, @StringRes Int, @StringRes Int>>()
@@ -37,6 +36,18 @@ class ConverterViewModel @Inject constructor(
     private val _databaseExceptionAcknowledged = SharedStateLikeFlow<Unit>()
     val databaseExceptionAcknowledged: SharedFlow<Unit>
         get() = _databaseExceptionAcknowledged
+
+    private lateinit var _countries: MutableStateFlow<MutableList<ExchangeableCurrency>>
+    val countries: StateFlow<List<ExchangeableCurrency>?>
+        get() = if (::_countries.isInitialized) _countries else MutableStateFlow(null)
+
+    private lateinit var _fromCurrency: MutableStateFlow<ExchangeableCurrency>
+    val fromCurrency: StateFlow<ExchangeableCurrency?>
+        get() = if (::_fromCurrency.isInitialized) _fromCurrency else MutableStateFlow(null)
+
+    private lateinit var _toCurrency: MutableStateFlow<ExchangeableCurrency>
+    val toCurrency: StateFlow<ExchangeableCurrency?>
+        get() = if (::_toCurrency.isInitialized) _toCurrency else MutableStateFlow(null)
 
     init {
         // Testirati tako što ćemo namjerno baciti Exception
@@ -52,35 +63,18 @@ class ConverterViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        @Suppress("ControlFlowWithEmptyBody")
-        runBlocking {
-            while (repository.exchangeableCurrencies.value.isEmpty() && repository.exception.replayCache.isEmpty()) {
-            }
-        }
-
-        currencies = if (repository.exchangeableCurrencies.value.isNotEmpty()) {
+        if (repository.exchangebleCurrenciesAreNotEmpty()) {
+            currencies = repository.exchangeableCurrencies
+            _countries = MutableStateFlow(currencies.value.toMutableList())
+            _fromCurrency = MutableStateFlow(currencies.value[0])
+            _toCurrency = MutableStateFlow(currencies.value[1])
             repository.observeCurrencies(viewModelScope)
-            repository.exchangeableCurrencies
-        } else {
-            repository.dummyExchangeableCurrencies
         }
     }
-
-    private val _countries = MutableStateFlow(currencies.value.toMutableList())
-    val countries: StateFlow<List<ExchangeableCurrency>>
-        get() = _countries
 
     private val _dropdownState = MutableStateFlow<DropdownState>(Collapsed(NONE))
     val dropdownState: StateFlow<DropdownState>
         get() = _dropdownState
-
-    private val _fromCurrency = MutableStateFlow(currencies.value[0])
-    val fromCurrency: StateFlow<ExchangeableCurrency>
-        get() = _fromCurrency
-
-    private val _toCurrency = MutableStateFlow(currencies.value[1])
-    val toCurrency: StateFlow<ExchangeableCurrency>
-        get() = _toCurrency
 
     private val _fromSelectedCurrency = SingleSharedFlow<ExchangeableCurrency>()
     val fromSelectedCurrency: SharedFlow<ExchangeableCurrency>
@@ -126,7 +120,7 @@ class ConverterViewModel @Inject constructor(
     val notifyItemRemoved: SharedFlow<Int>
         get() = _notifyItemRemoved
 
-    private val onSearcherTextChanged = MutableStateFlow("")
+    private val onSearcherTextChanged: MutableStateFlow<String?> = MutableStateFlow(null)
 
     private val filter: (ExchangeableCurrency, String) -> Boolean
 
@@ -180,11 +174,13 @@ class ConverterViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.Default) {
             onSearcherTextChanged
                 .collectLatest {
-                    if (it.isEmpty()) resetCountries()
-                    else {
-                        setResetButton(true)
-                        delay(DEBOUNCE_PERIOD)
-                        filterCountries(it)
+                    it?.let {
+                        if (it.isEmpty()) resetCountries()
+                        else {
+                            setResetButton(true)
+                            delay(DEBOUNCE_PERIOD)
+                            filterCountries(it)
+                        }
                     }
                 }
         }
@@ -439,9 +435,9 @@ class ConverterViewModel @Inject constructor(
         _showResetButton.tryEmit(hasText)
     }
 
-    private fun filterCountries(query: String) {
-        if (!showOnlyFavorites) filterAllCountries(query)
-        else filterFavoriteCountries(query)
+    private fun filterCountries(query: String?) {
+        if (!showOnlyFavorites) filterAllCountries(query ?: "")
+        else filterFavoriteCountries(query ?: "")
     }
 
     private fun filterAllCountries(query: String) {

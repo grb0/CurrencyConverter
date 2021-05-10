@@ -271,15 +271,19 @@ class ConverterFragment : Fragment() {
         viewModel.run {
             collectWhenStarted(databaseExceptionCaught, ::onDatabaseExceptionCaught, false)
             collectWhenStarted(databaseExceptionAcknowledged, { shutDown() }, false)
-            fromCurrencyJob = collectWhenStarted(fromCurrency) { onCurrencyChanged(it, true) }
-            toCurrencyJob = collectWhenStarted(toCurrency) { onCurrencyChanged(it, false) }
+            fromCurrencyJob = collectWhenStarted(fromCurrency) {
+                it?.let { onCurrencyChanged(it, true) }
+            }
+            toCurrencyJob = collectWhenStarted(toCurrency) {
+                it?.let { onCurrencyChanged(it, false) }
+            }
             collectWhenStarted(fromSelectedCurrency, { onSelectedCurrencyChanged(it, true) }, true)
             collectWhenStarted(toSelectedCurrency, { onSelectedCurrencyChanged(it, false) }, true)
             collectWhenStarted(dropdownState, ::onDropdownStateChanged, true)
             collectWhenStarted(showResetButton, ::showResetButton, true)
             collectWhenStarted(resetSearcher, { resetSearcher() }, false)
             collectWhenStarted(modifyDivider, ::modifyDividerDrawable, true)
-            collectWhenStarted(countries, ::onCountriesUpdated, true)
+            collectWhenStarted(countries, { it?.let { onCountriesUpdated(it) } }, true)
             collectWhenStarted(searcherState, ::onSearcherStateChanged, true)
             collectWhenStarted(swappingState, ::onSwappingStateChanged, false)
             collectWhenStarted(scrollCurrenciesToTop, { scrollCurrenciesToTop() }, false)

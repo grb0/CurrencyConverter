@@ -13,7 +13,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.util.*
 import javax.inject.Inject
-import ba.grbo.currencyconverter.data.models.domain.ExchangeRate as DomainExchangeRate
 import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency as DomainCurrency
 
 class DefaultCurrenciesRepository @Inject constructor(
@@ -24,22 +23,6 @@ class DefaultCurrenciesRepository @Inject constructor(
     override val exchangeableCurrencies = MutableStateFlow<List<DomainCurrency>>(emptyList())
     override val exception: MutableSharedFlow<Exception> = SharedStateLikeFlow()
 
-    private val dummyExchangeableCurrency = DomainCurrency(
-        "BAM",
-        "KM",
-        "currency_bosnia_and_herzegovina",
-        "ic_flag_bosnia_and_herzegovina",
-        true,
-        DomainExchangeRate(100.0, Date()),
-        context
-    )
-
-    override val dummyExchangeableCurrencies = MutableStateFlow(
-        listOf(
-            dummyExchangeableCurrency, dummyExchangeableCurrency
-        )
-    )
-
     init {
         runBlocking {
             when (val dbResult = getExchangeableCurrencies()) {
@@ -48,6 +31,12 @@ class DefaultCurrenciesRepository @Inject constructor(
             }
         }
     }
+
+    override fun exchangeableCurrenciesAreBeingLoaded(): Boolean {
+        return exchangeableCurrencies.value.isEmpty() && exception.replayCache.isEmpty()
+    }
+
+    override fun exchangebleCurrenciesAreNotEmpty() = exchangeableCurrencies.value.isNotEmpty()
 
     override fun syncExchangeableCurrenciesWithLocale(scope: CoroutineScope, context: Context) {
         scope.launch(coroutineDispatcher) {

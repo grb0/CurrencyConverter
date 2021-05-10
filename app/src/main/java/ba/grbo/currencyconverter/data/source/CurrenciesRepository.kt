@@ -16,7 +16,9 @@ interface CurrenciesRepository {
     val exchangeableCurrencies: MutableStateFlow<List<DomainCurrency>>
     val exception: MutableSharedFlow<Exception>
 
-    val dummyExchangeableCurrencies: MutableStateFlow<List<DomainCurrency>>
+    fun exchangeableCurrenciesAreBeingLoaded(): Boolean
+
+    fun exchangebleCurrenciesAreNotEmpty(): Boolean
 
     fun observeCurrencies(scope: CoroutineScope)
 
