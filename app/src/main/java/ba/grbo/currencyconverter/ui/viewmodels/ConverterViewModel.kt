@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency
+import ba.grbo.currencyconverter.data.models.domain.Miscellaneous
 import ba.grbo.currencyconverter.data.source.CurrenciesRepository
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
@@ -26,7 +27,7 @@ class ConverterViewModel @Inject constructor(
     private val repository: CurrenciesRepository,
     filterBy: FilterBy,
 ) : ViewModel() {
-    private lateinit var currencies: MutableStateFlow<List<ExchangeableCurrency>>
+    private lateinit var currencies: StateFlow<List<ExchangeableCurrency>>
 
     private val _databaseExceptionCaught =
         SharedStateLikeFlow<Triple<@StringRes Int, @StringRes Int, @StringRes Int>>()
@@ -49,25 +50,35 @@ class ConverterViewModel @Inject constructor(
     val toCurrency: StateFlow<ExchangeableCurrency?>
         get() = if (::_toCurrency.isInitialized) _toCurrency else MutableStateFlow(null)
 
+    private var _showOnlyFavorites = false
+    val showOnlyFavorites: Boolean
+        get() = _showOnlyFavorites
+
     init {
-        // Testirati tako što ćemo namjerno baciti Exception
         repository.exception
             .onEach {
-                _databaseExceptionCaught.tryEmit(
-                    Triple(
-                        R.string.database_exception_caught_title,
-                        R.string.database_exception_caught_message,
-                        R.string.database_exception_caught_button
+                it?.let {
+                    _databaseExceptionCaught.tryEmit(
+                        Triple(
+                            R.string.database_exception_caught_title,
+                            R.string.database_exception_caught_message,
+                            R.string.database_exception_caught_button
+                        )
                     )
-                )
+                }
             }
             .launchIn(viewModelScope)
 
-        if (repository.exchangebleCurrenciesAreNotEmpty()) {
+        if (repository.converterDataIsReady()) {
             currencies = repository.exchangeableCurrencies
             _countries = MutableStateFlow(currencies.value.toMutableList())
-            _fromCurrency = MutableStateFlow(currencies.value[0])
-            _toCurrency = MutableStateFlow(currencies.value[1])
+            _fromCurrency =
+                MutableStateFlow(repository.miscellaneous.lastUsedFromExchangeableCurrency)
+            _toCurrency = MutableStateFlow(repository.miscellaneous.lastUsedToExchangeableCurrency)
+            if (repository.miscellaneous.showOnlyFavorites) {
+                _showOnlyFavorites = true
+                filterCurrentCountries()
+            }
             repository.observeCurrencies(viewModelScope)
         }
     }
@@ -126,10 +137,6 @@ class ConverterViewModel @Inject constructor(
 
     private var lastClickedDropdown = NONE
     private var initialSwappingState = SwappingState.None
-
-    private var _showOnlyFavorites = false
-    val showOnlyFavorites: Boolean
-        get() = _showOnlyFavorites
 
     companion object {
         const val DEBOUNCE_PERIOD = 250L
@@ -275,10 +282,13 @@ class ConverterViewModel @Inject constructor(
     private fun swapSelectedCurrencies() {
         val fromCountry = _fromCurrency.value
         val toCountry = _toCurrency.value
+
         viewModelScope.launch {
             launch { _fromCurrency.value = toCountry }
             launch { _toCurrency.value = fromCountry }
         }
+
+        updateMiscellaneous(toCountry, fromCountry)
     }
 
     fun onResetSearcherClicked() {
@@ -293,6 +303,8 @@ class ConverterViewModel @Inject constructor(
         _showOnlyFavorites = isFavoritesOn
         if (isFavoritesOn) filterCurrentCountries() // Since they're already filtered
         else filterCountries(onSearcherTextChanged.value)
+
+        updateMiscellaneous()
     }
 
     private fun filterCurrentCountries() {
@@ -388,6 +400,35 @@ class ConverterViewModel @Inject constructor(
         } else {
             _toSelectedCurrency.tryEmit(currency)
             _toCurrency.value = currency
+        }
+
+        updateMiscellaneous(_fromCurrency.value, _toCurrency.value)
+    }
+
+    private fun updateMiscellaneous(
+        fromCurrency: ExchangeableCurrency,
+        toCurrency: ExchangeableCurrency
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateMiscellaneous(
+                Miscellaneous(
+                    showOnlyFavorites,
+                    fromCurrency,
+                    toCurrency
+                ).toDatabase(currencies.value)
+            )
+        }
+    }
+
+    private fun updateMiscellaneous() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateMiscellaneous(
+                Miscellaneous(
+                    _showOnlyFavorites,
+                    _fromCurrency.value,
+                    _toCurrency.value
+                ).toDatabase(currencies.value)
+            )
         }
     }
 

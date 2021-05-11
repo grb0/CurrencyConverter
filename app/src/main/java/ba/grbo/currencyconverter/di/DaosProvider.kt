@@ -10,8 +10,11 @@ import dagger.hilt.android.components.ActivityRetainedComponent
 @Module
 object DaosProvider {
     @Provides
-    fun provideCurrencyDao(database: CurrencyConverterDatabase) = database.currencyDao
+    fun provideExchangeRateDao(database: CurrencyConverterDatabase) = database.exchangeRateDao
 
     @Provides
-    fun provideExchangeRateDao(database: CurrencyConverterDatabase) = database.exchangeRateDao
+    fun provideMiscellaneousDao(database: CurrencyConverterDatabase) = database.miscellaneousDao
+
+    @Provides
+    fun provideCurrencyDao(database: CurrencyConverterDatabase) = database.currencyDao
 }

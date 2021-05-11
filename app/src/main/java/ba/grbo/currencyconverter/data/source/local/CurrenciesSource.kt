@@ -14,6 +14,7 @@ import javax.inject.Inject
 
 class CurrenciesSource @Inject constructor(
     private val exchangeRateDao: ExchangeRateDao,
+    private val miscellaneousDao: MiscellaneousDao,
     private val currencyDao: CurrencyDao,
     @DispatcherIO private val coroutineDispatcher: CoroutineDispatcher
 ) : LocalCurrenciesSource {
@@ -34,6 +35,27 @@ class CurrenciesSource @Inject constructor(
         } catch (e: Exception) {
             Error(e)
         }
+
+    override suspend fun updateMiscellaneous(miscellaneous: Miscellaneous): DatabaseResult<Boolean> {
+        return withContext(coroutineDispatcher) {
+            try {
+                miscellaneousDao.update(miscellaneous)
+                Success(true)
+            } catch (e: Exception) {
+                Error(e)
+            }
+        }
+    }
+
+    override suspend fun getMiscellaneous(): DatabaseResult<Miscellaneous> {
+        return withContext(coroutineDispatcher) {
+            try {
+                Success(miscellaneousDao.getMiscellaneous())
+            } catch (e: Exception) {
+                Error(e)
+            }
+        }
+    }
 
     override suspend fun updateUnexchangeableCurrency(
         unexchangeableCurrency: UnexchangeableCurrency

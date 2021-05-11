@@ -1,12 +1,8 @@
 package ba.grbo.currencyconverter.data.source
 
 import android.content.Context
-import ba.grbo.currencyconverter.data.models.database.EssentialExchangeRate
-import ba.grbo.currencyconverter.data.models.database.ExchangeRate
-import ba.grbo.currencyconverter.data.models.database.ExchangeableCurrency
-import ba.grbo.currencyconverter.data.models.database.MultiExchangeableCurrency
+import ba.grbo.currencyconverter.data.models.database.*
 import ba.grbo.currencyconverter.di.DispatcherDefault
-import ba.grbo.currencyconverter.util.SharedStateLikeFlow
 import ba.grbo.currencyconverter.util.toDomain
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
@@ -14,33 +10,41 @@ import kotlinx.coroutines.flow.*
 import java.util.*
 import javax.inject.Inject
 import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency as DomainCurrency
+import ba.grbo.currencyconverter.data.models.domain.Miscellaneous as DomainMiscellaneous
 
 class DefaultCurrenciesRepository @Inject constructor(
     private val localCurrenciesSource: LocalCurrenciesSource,
     @DispatcherDefault private val coroutineDispatcher: CoroutineDispatcher,
     @ApplicationContext context: Context,
 ) : CurrenciesRepository {
-    override val exchangeableCurrencies = MutableStateFlow<List<DomainCurrency>>(emptyList())
-    override val exception: MutableSharedFlow<Exception> = SharedStateLikeFlow()
+    private val _exchangeableCurrencies = MutableStateFlow<List<DomainCurrency>>(emptyList())
+    override val exchangeableCurrencies: StateFlow<List<DomainCurrency>>
+     get() = _exchangeableCurrencies
+
+    override lateinit var miscellaneous: DomainMiscellaneous
+    override val exception: MutableStateFlow<Exception?> = MutableStateFlow(null)
 
     init {
         runBlocking {
             when (val dbResult = getExchangeableCurrencies()) {
-                is Success -> exchangeableCurrencies.value = dbResult.data.toDomain(context)
+                is Success -> {
+                    _exchangeableCurrencies.value = dbResult.data.toDomain(context)
+                    initMiscellaneous()
+                }
                 is Error -> exception.tryEmit(dbResult.exception)
             }
         }
     }
 
-    override fun exchangeableCurrenciesAreBeingLoaded(): Boolean {
-        return exchangeableCurrencies.value.isEmpty() && exception.replayCache.isEmpty()
+    override fun converterDataIsReady(): Boolean {
+        return exchangeableCurrencies.value.isNotEmpty() && ::miscellaneous.isInitialized
     }
 
     override fun exchangebleCurrenciesAreNotEmpty() = exchangeableCurrencies.value.isNotEmpty()
 
     override fun syncExchangeableCurrenciesWithLocale(scope: CoroutineScope, context: Context) {
         scope.launch(coroutineDispatcher) {
-            exchangeableCurrencies.value = exchangeableCurrencies.value.map {
+            _exchangeableCurrencies.value = exchangeableCurrencies.value.map {
                 it.copy(context = context)
             }
         }
@@ -49,6 +53,15 @@ class DefaultCurrenciesRepository @Inject constructor(
     override fun observeCurrencies(scope: CoroutineScope) {
         observeForFavoritesChange(scope)
         observeForExchangeRatesChange(scope)
+    }
+
+    private suspend fun initMiscellaneous() {
+        when (val miscellaneous = localCurrenciesSource.getMiscellaneous()) {
+            is Success -> {
+                this.miscellaneous = miscellaneous.data.toDomain(_exchangeableCurrencies.value)
+            }
+            is Error -> exception.tryEmit(miscellaneous.exception)
+        }
     }
 
     private fun observeForFavoritesChange(scope: CoroutineScope) {
@@ -111,6 +124,10 @@ class DefaultCurrenciesRepository @Inject constructor(
 
     override fun observeMostRecentExchangeRates(): DatabaseResult<Flow<List<EssentialExchangeRate>>> {
         return localCurrenciesSource.observeMostRecentExchangeRates()
+    }
+
+    override suspend fun updateMiscellaneous(miscellaneous: Miscellaneous): DatabaseResult<Boolean> {
+        return localCurrenciesSource.updateMiscellaneous(miscellaneous)
     }
 
     override suspend fun updateCurrency(currency: DomainCurrency): DatabaseResult<Boolean> {

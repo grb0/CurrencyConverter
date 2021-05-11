@@ -19,6 +19,7 @@ object Constants {
 
     const val UNEXCHANGEABLE_CURRENCIES_TABLE = "unexchangeable_currencies_table"
     const val EXCHANGE_RATES_TABLE = "exchange_rates_table"
+    const val MISCELLANEOUS_TABLE = "miscellaneous_table"
     const val CURRENCY_CONVERTER_DATABASE = "currency_converter_database"
 
     const val PARENT_COLUMNS = "code"

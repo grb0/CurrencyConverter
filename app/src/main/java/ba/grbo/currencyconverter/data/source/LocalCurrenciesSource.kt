@@ -9,6 +9,10 @@ interface LocalCurrenciesSource {
 
     fun observeMostRecentExchangeRates(): DatabaseResult<Flow<List<EssentialExchangeRate>>>
 
+    suspend fun updateMiscellaneous(miscellaneous: Miscellaneous): DatabaseResult<Boolean>
+
+    suspend fun getMiscellaneous(): DatabaseResult<Miscellaneous>
+
     suspend fun updateUnexchangeableCurrency(unexchangeableCurrency: UnexchangeableCurrency): DatabaseResult<Boolean>
 
     suspend fun getExchangeableCurrencies(): DatabaseResult<List<ExchangeableCurrency>>

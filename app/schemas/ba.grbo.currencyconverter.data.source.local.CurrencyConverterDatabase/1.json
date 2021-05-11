@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "2fb84ef862b1f11184454b6af5d65e1c",
+    "identityHash": "264c618799a2df49c11bf9dae80db1b0",
     "entities": [
       {
         "tableName": "unexchangeable_currencies_table",
@@ -115,12 +115,50 @@
             ]
           }
         ]
+      },
+      {
+        "tableName": "miscellaneous_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `showOnlyFavorites` INTEGER NOT NULL, `lastUsedFromCurrencyPosition` INTEGER NOT NULL, `lastUsedToCurrencyPosition` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "showOnlyFavorites",
+            "columnName": "showOnlyFavorites",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUsedFromCurrencyPosition",
+            "columnName": "lastUsedFromCurrencyPosition",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUsedToCurrencyPosition",
+            "columnName": "lastUsedToCurrencyPosition",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2fb84ef862b1f11184454b6af5d65e1c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '264c618799a2df49c11bf9dae80db1b0')"
     ]
   }
 }
