@@ -4,6 +4,7 @@ import android.content.Context
 import ba.grbo.currencyconverter.data.models.database.*
 import ba.grbo.currencyconverter.di.DispatcherDefault
 import ba.grbo.currencyconverter.util.toDomain
+import ba.grbo.currencyconverter.util.updateLocale
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -28,7 +29,7 @@ class DefaultCurrenciesRepository @Inject constructor(
         runBlocking {
             when (val dbResult = getExchangeableCurrencies()) {
                 is Success -> {
-                    _exchangeableCurrencies.value = dbResult.data.toDomain(context)
+                    _exchangeableCurrencies.value = dbResult.data.toDomain(context.updateLocale())
                     initMiscellaneous()
                 }
                 is Error -> exception.tryEmit(dbResult.exception)
@@ -47,6 +48,7 @@ class DefaultCurrenciesRepository @Inject constructor(
             _exchangeableCurrencies.value = exchangeableCurrencies.value.map {
                 it.copy(context = context)
             }
+            miscellaneous = miscellaneous.syncWithLocale(_exchangeableCurrencies.value)
         }
     }
 

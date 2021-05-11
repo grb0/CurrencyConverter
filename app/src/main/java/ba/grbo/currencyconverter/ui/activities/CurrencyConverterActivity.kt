@@ -122,7 +122,6 @@ class CurrencyConverterActivity : AppCompatActivity() {
 
     }
 
-
     override fun attachBaseContext(newBase: Context) {
         val newContext = newBase.updateLocale()
         applyOverrideConfiguration(newContext.resources.configuration)
