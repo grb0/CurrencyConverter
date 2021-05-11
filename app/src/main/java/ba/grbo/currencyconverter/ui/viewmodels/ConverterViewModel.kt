@@ -79,7 +79,7 @@ class ConverterViewModel @Inject constructor(
                 _showOnlyFavorites = true
                 filterCurrentCountries()
             }
-            repository.observeCurrencies(viewModelScope)
+            repository.observeCurrenciesAndMiscellaneous(viewModelScope)
         }
     }
 

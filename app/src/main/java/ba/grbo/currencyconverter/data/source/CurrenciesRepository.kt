@@ -19,7 +19,7 @@ interface CurrenciesRepository {
 
     fun exchangebleCurrenciesAreNotEmpty(): Boolean
 
-    fun observeCurrencies(scope: CoroutineScope)
+    fun observeCurrenciesAndMiscellaneous(scope: CoroutineScope)
 
     fun syncExchangeableCurrenciesWithLocale(scope: CoroutineScope, context: Context)
 

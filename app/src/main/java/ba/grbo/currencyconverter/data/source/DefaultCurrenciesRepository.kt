@@ -19,7 +19,7 @@ class DefaultCurrenciesRepository @Inject constructor(
 ) : CurrenciesRepository {
     private val _exchangeableCurrencies = MutableStateFlow<List<DomainCurrency>>(emptyList())
     override val exchangeableCurrencies: StateFlow<List<DomainCurrency>>
-     get() = _exchangeableCurrencies
+        get() = _exchangeableCurrencies
 
     override lateinit var miscellaneous: DomainMiscellaneous
     override val exception: MutableStateFlow<Exception?> = MutableStateFlow(null)
@@ -50,7 +50,8 @@ class DefaultCurrenciesRepository @Inject constructor(
         }
     }
 
-    override fun observeCurrencies(scope: CoroutineScope) {
+    override fun observeCurrenciesAndMiscellaneous(scope: CoroutineScope) {
+        observeMiscellaneous(scope)
         observeForFavoritesChange(scope)
         observeForExchangeRatesChange(scope)
     }
@@ -60,6 +61,16 @@ class DefaultCurrenciesRepository @Inject constructor(
             is Success -> {
                 this.miscellaneous = miscellaneous.data.toDomain(_exchangeableCurrencies.value)
             }
+            is Error -> exception.tryEmit(miscellaneous.exception)
+        }
+    }
+
+    private fun observeMiscellaneous(scope: CoroutineScope) {
+        when (val miscellaneous = localCurrenciesSource.observeMiscellaneous()) {
+            is Success -> miscellaneous.data
+                .onEach { this.miscellaneous = it.toDomain(_exchangeableCurrencies.value) }
+                .flowOn(coroutineDispatcher)
+                .launchIn(scope)
             is Error -> exception.tryEmit(miscellaneous.exception)
         }
     }

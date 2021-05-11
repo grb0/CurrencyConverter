@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
 import ba.grbo.currencyconverter.data.models.database.Miscellaneous
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MiscellaneousDao {
@@ -11,5 +12,8 @@ interface MiscellaneousDao {
     fun update(miscellaneous: Miscellaneous)
 
     @Query("SELECT * FROM miscellaneous_table LIMIT 1")
-    suspend fun getMiscellaneous(): Miscellaneous
+    fun getMiscellaneous(): Miscellaneous
+
+    @Query("SELECT * FROM miscellaneous_table LIMIT 1")
+    fun observeMiscellaneous(): Flow<Miscellaneous>
 }

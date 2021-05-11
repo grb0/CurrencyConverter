@@ -13,6 +13,8 @@ interface LocalCurrenciesSource {
 
     suspend fun getMiscellaneous(): DatabaseResult<Miscellaneous>
 
+    fun observeMiscellaneous(): DatabaseResult<Flow<Miscellaneous>>
+
     suspend fun updateUnexchangeableCurrency(unexchangeableCurrency: UnexchangeableCurrency): DatabaseResult<Boolean>
 
     suspend fun getExchangeableCurrencies(): DatabaseResult<List<ExchangeableCurrency>>

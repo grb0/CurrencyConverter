@@ -57,6 +57,14 @@ class CurrenciesSource @Inject constructor(
         }
     }
 
+    override fun observeMiscellaneous(): DatabaseResult<Flow<Miscellaneous>> {
+        return try {
+            Success(miscellaneousDao.observeMiscellaneous())
+        } catch (e: Exception) {
+            Error(e)
+        }
+    }
+
     override suspend fun updateUnexchangeableCurrency(
         unexchangeableCurrency: UnexchangeableCurrency
     ): DatabaseResult<Boolean> = withContext(coroutineDispatcher) {
