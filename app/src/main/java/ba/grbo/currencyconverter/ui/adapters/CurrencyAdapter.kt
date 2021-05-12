@@ -9,13 +9,13 @@ import ba.grbo.currencyconverter.databinding.DropdownItemBinding
 import ba.grbo.currencyconverter.ui.miscs.FavoritesAnimator
 import ba.grbo.currencyconverter.util.getScaleAndFadeAnimatorProducersPair
 
-class CountryAdapter(
+class CurrencyAdapter(
     private val uiName: ExchangeableCurrency.UiName,
     private val showScrollbar: Boolean,
     private val onClick: (ExchangeableCurrency) -> Unit,
     private val onCurrentListChanged: () -> Unit,
     private val onFavoritesAnimationEnd: (ExchangeableCurrency, Boolean, Int) -> Unit,
-) : ListAdapter<ExchangeableCurrency, CountryAdapter.CountryHolder>(CountryDiffCallbacks()) {
+) : ListAdapter<ExchangeableCurrency, CurrencyAdapter.CountryHolder>(CountryDiffCallbacks()) {
     class CountryHolder private constructor(
         private val binding: DropdownItemBinding
     ) : RecyclerView.ViewHolder(binding.root) {

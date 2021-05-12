@@ -1,23 +1,23 @@
 package ba.grbo.currencyconverter.data.models.domain
 
-import ba.grbo.currencyconverter.data.models.database.Miscellaneous as DatabaseMiscellaneous1
+import ba.grbo.currencyconverter.data.models.database.Miscellaneous as DatabaseMiscellaneous
 
 data class Miscellaneous(
     val showOnlyFavorites: Boolean,
-    val lastUsedFromExchangeableCurrency: ExchangeableCurrency,
-    val lastUsedToExchangeableCurrency: ExchangeableCurrency
+    val lastUsedFromCurrency: ExchangeableCurrency,
+    val lastUsedToCurrency: ExchangeableCurrency
 ) {
-    fun toDatabase(exchangeableCurrencies: List<ExchangeableCurrency>) = DatabaseMiscellaneous1(
+    fun toDatabase(currencies: List<ExchangeableCurrency>) = DatabaseMiscellaneous(
         showOnlyFavorites,
-        exchangeableCurrencies.indexOfFirst { it.code == lastUsedFromExchangeableCurrency.code },
-        exchangeableCurrencies.indexOfFirst { it.code == lastUsedToExchangeableCurrency.code }
+        currencies.indexOfFirst { it.code == lastUsedFromCurrency.code },
+        currencies.indexOfFirst { it.code == lastUsedToCurrency.code }
     )
 
-    fun syncWithLocale(syncedExchangeableCurrencies: List<ExchangeableCurrency>): Miscellaneous {
+    fun syncWithLocale(syncedCurrencies: List<ExchangeableCurrency>): Miscellaneous {
         return Miscellaneous(
             showOnlyFavorites,
-            syncedExchangeableCurrencies.find { it.code == lastUsedFromExchangeableCurrency.code }!!,
-            syncedExchangeableCurrencies.find { it.code == lastUsedToExchangeableCurrency.code }!!
+            syncedCurrencies.find { it.code == lastUsedFromCurrency.code }!!,
+            syncedCurrencies.find { it.code == lastUsedToCurrency.code }!!
         )
     }
 }

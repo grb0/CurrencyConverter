@@ -35,7 +35,7 @@ import ba.grbo.currencyconverter.di.AutohideScrollbar
 import ba.grbo.currencyconverter.di.ExtendDropdownMenuInLandscape
 import ba.grbo.currencyconverter.di.ShowScrollbar
 import ba.grbo.currencyconverter.ui.activities.CurrencyConverterActivity
-import ba.grbo.currencyconverter.ui.adapters.CountryAdapter
+import ba.grbo.currencyconverter.ui.adapters.CurrencyAdapter
 import ba.grbo.currencyconverter.ui.miscs.Animations
 import ba.grbo.currencyconverter.ui.miscs.ObjectAnimators
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel
@@ -51,7 +51,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
-import timber.log.Timber
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
@@ -194,11 +193,11 @@ class ConverterFragment : Fragment() {
     }
 
     private fun assignAdapter() {
-        binding.dropdownMenu.currencies.adapter = CountryAdapter(
+        binding.dropdownMenu.currencies.adapter = CurrencyAdapter(
             uiName,
             showScrollbar,
             viewModel::onCurrencyClicked,
-            viewModel::onCountriesChanged,
+            viewModel::onCurrenciesChanged,
             viewModel::onFavoritesAnimationEnd
         )
     }
@@ -265,7 +264,7 @@ class ConverterFragment : Fragment() {
         }
 
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            viewModel.onCountriesScrolled(onScrolled(recyclerView))
+            viewModel.onRecyclerViewScrolled(onScrolled(recyclerView))
         }
     }
 
@@ -287,10 +286,10 @@ class ConverterFragment : Fragment() {
             collectWhenStarted(showResetButton, ::showResetButton, true)
             collectWhenStarted(resetSearcher, { resetSearcher() }, false)
             collectWhenStarted(modifyDivider, ::modifyDividerDrawable, true)
-            collectWhenStarted(countries, { it?.let { onCountriesUpdated(it) } }, true)
+            collectWhenStarted(currencies, { it?.let { onCurrenciesUpdated(it) } }, true)
             collectWhenStarted(searcherState, ::onSearcherStateChanged, true)
             collectWhenStarted(swappingState, ::onSwappingStateChanged, false)
-            collectWhenStarted(scrollCurrenciesToTop, { scrollCurrenciesToTop() }, false)
+            collectWhenStarted(scrollRecyclerViewToTop, { scrollCurrenciesToTop() }, false)
             collectWhenStarted(onFavoritesClicked, ::animateFavorites, false)
             collectWhenStarted(notifyItemChanged, ::onItemChanged, false)
             collectWhenStarted(notifyItemRemoved, ::onItemRemoved, false)
@@ -341,11 +340,11 @@ class ConverterFragment : Fragment() {
     }
 
     private fun onItemChanged(position: Int) {
-        (binding.dropdownMenu.currencies.adapter as CountryAdapter).notifyItemChanged(position)
+        (binding.dropdownMenu.currencies.adapter as CurrencyAdapter).notifyItemChanged(position)
     }
 
     private fun onItemRemoved(position: Int) {
-        (binding.dropdownMenu.currencies.adapter as CountryAdapter).notifyItemRemoved(position)
+        (binding.dropdownMenu.currencies.adapter as CurrencyAdapter).notifyItemRemoved(position)
     }
 
     private fun disableItemChangedAnimation() {
@@ -372,8 +371,8 @@ class ConverterFragment : Fragment() {
         }
     }
 
-    private fun onCountriesUpdated(currencies: List<ExchangeableCurrency>) {
-        (binding.dropdownMenu.currencies.adapter as CountryAdapter).submitList(currencies)
+    private fun onCurrenciesUpdated(currencies: List<ExchangeableCurrency>) {
+        (binding.dropdownMenu.currencies.adapter as CurrencyAdapter).submitList(currencies)
     }
 
     private fun onSelectedCurrencyChanged(currency: ExchangeableCurrency, from: Boolean) {
