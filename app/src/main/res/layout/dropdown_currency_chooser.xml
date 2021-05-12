@@ -46,11 +46,11 @@
 
             <TextView
                 android:id="@+id/currency"
+                style="@style/ChooserText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:drawablePadding="8dp"
-                style="@style/ChooserText"
                 app:drawableStartCompat="@drawable/ic_flag_united_arab_emirates"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/dropdown_action"
