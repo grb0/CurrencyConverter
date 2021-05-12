@@ -18,7 +18,7 @@ import ba.grbo.currencyconverter.util.Constants.CURRENCY_CONVERTER_DATABASE
 abstract class CurrencyConverterDatabase : RoomDatabase() {
     abstract val exchangeRateDao: ExchangeRateDao
     abstract val miscellaneousDao: MiscellaneousDao
-    abstract val currencyDao: CurrencyDao
+    abstract val unexchangeableCurrencyDao: UnexchangeableCurrencyDao
 
     companion object {
         @Volatile

@@ -16,5 +16,6 @@ object DaosProvider {
     fun provideMiscellaneousDao(database: CurrencyConverterDatabase) = database.miscellaneousDao
 
     @Provides
-    fun provideCurrencyDao(database: CurrencyConverterDatabase) = database.currencyDao
+    fun provideUnexchangeableCurrencyDao(database: CurrencyConverterDatabase) =
+        database.unexchangeableCurrencyDao
 }

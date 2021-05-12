@@ -14,7 +14,7 @@ import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency as Doma
 import ba.grbo.currencyconverter.data.models.domain.Miscellaneous as DomainMiscellaneous
 
 class DefaultCurrenciesRepository @Inject constructor(
-    private val localCurrenciesSource: LocalCurrenciesSource,
+    private val localDataSource: LocalCurrenciesSource,
     @DispatcherDefault private val coroutineDispatcher: CoroutineDispatcher,
     @ApplicationContext context: Context,
 ) : CurrenciesRepository {
@@ -59,7 +59,7 @@ class DefaultCurrenciesRepository @Inject constructor(
     }
 
     private suspend fun initMiscellaneous() {
-        when (val miscellaneous = localCurrenciesSource.getMiscellaneous()) {
+        when (val miscellaneous = localDataSource.getMiscellaneous()) {
             is Success -> {
                 this.miscellaneous = miscellaneous.data.toDomain(_exchangeableCurrencies.value)
             }
@@ -68,7 +68,7 @@ class DefaultCurrenciesRepository @Inject constructor(
     }
 
     private fun observeMiscellaneous(scope: CoroutineScope) {
-        when (val miscellaneous = localCurrenciesSource.observeMiscellaneous()) {
+        when (val miscellaneous = localDataSource.observeMiscellaneous()) {
             is Success -> miscellaneous.data
                 .onEach { this.miscellaneous = it.toDomain(_exchangeableCurrencies.value) }
                 .flowOn(coroutineDispatcher)
@@ -132,19 +132,29 @@ class DefaultCurrenciesRepository @Inject constructor(
     }
 
     override suspend fun insertExchangeRate(exchangeRate: ExchangeRate): DatabaseResult<Boolean> {
-        return localCurrenciesSource.insertExchangeRate(exchangeRate)
+        return localDataSource.insertExchangeRate(exchangeRate)
     }
 
     override fun observeMostRecentExchangeRates(): DatabaseResult<Flow<List<EssentialExchangeRate>>> {
-        return localCurrenciesSource.observeMostRecentExchangeRates()
+        return localDataSource.observeMostRecentExchangeRates()
     }
 
-    override suspend fun updateMiscellaneous(miscellaneous: Miscellaneous): DatabaseResult<Boolean> {
-        return localCurrenciesSource.updateMiscellaneous(miscellaneous)
+    override suspend fun updateMiscellaneous(miscellaneous: Miscellaneous): Boolean {
+        return update(miscellaneous, localDataSource::updateMiscellaneous)
     }
 
-    override suspend fun updateCurrency(currency: DomainCurrency): DatabaseResult<Boolean> {
-        return localCurrenciesSource.updateUnexchangeableCurrency(currency.toDatabase())
+    override suspend fun updateCurrency(currency: DomainCurrency): Boolean {
+        return update(currency.toDatabase(), localDataSource::updateUnexchangeableCurrency)
+    }
+
+    private suspend fun <T> update(
+        toUpdate: T,
+        action: suspend (T) -> DatabaseResult<Boolean>
+    ): Boolean {
+        return when (val dbResult = action(toUpdate)) {
+            is Success -> dbResult.data
+            is Error -> exception.tryEmit(dbResult.exception)
+        }
     }
 
     override suspend fun getMultiExchangeableCurrency(
@@ -152,14 +162,14 @@ class DefaultCurrenciesRepository @Inject constructor(
         fromDate: Date,
         toDate: Date
     ): DatabaseResult<MultiExchangeableCurrency> {
-        return localCurrenciesSource.getMultiExchangeableCurrency(code, fromDate, toDate)
+        return localDataSource.getMultiExchangeableCurrency(code, fromDate, toDate)
     }
 
     override suspend fun getExchangeableCurrencies(): DatabaseResult<List<ExchangeableCurrency>> {
-        return localCurrenciesSource.getExchangeableCurrencies()
+        return localDataSource.getExchangeableCurrencies()
     }
 
     override fun observeAreUnexchangeableCurrenciesFavorite(): DatabaseResult<Flow<List<Boolean>>> {
-        return localCurrenciesSource.observeAreUnexchangeableCurrenciesFavorite()
+        return localDataSource.observeAreUnexchangeableCurrenciesFavorite()
     }
 }

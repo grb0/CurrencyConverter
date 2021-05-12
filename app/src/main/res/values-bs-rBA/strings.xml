@@ -202,7 +202,14 @@
     <string name="to_label">U</string>
     <string name="last_updated">Posljednje ažuriranje: %s</string>
     <string name="hello_from_popular_fragment">Pozdrav iz PopularFragmenta</string>
-    <string name="database_exception_caught_message">Podaci iz baze podataka se ne mogu učitati, molimo Vas restartujte aplikaciju. Ukoliko je problem postojan, molimo Vas reinstalirajte aplikaciju.</string>
-    <string name="database_exception_caught_title">Greška</string>
-    <string name="database_exception_caught_button">Uredu</string>
+    <string name="title_ignore_failed_db_update">Ignoriši obavijesti o neuspjelim ažuriranjima baze podataka</string>
+
+    <string name="database_exception_caught_message">Kobna greška u bazi podataka, molimo Vas restartujte aplikaciju. Ukoliko je problem postojan, molimo Vas reinstalirajte aplikaciju.</string>
+    <string name="database_exception_caught_title">Kobna greška</string>
+    <string name="database_exception_caught_positive_button">Uredu</string>
+
+    <string name="database_update_failed_message">Baza podaka se nije mogla ažurirati, savjetujemo da restartujete aplikaciju. Ako se problem nastavi pojavljivati, molimo reinstalirajte aplikaciju.</string>
+    <string name="database_update_failed_title">Ažuriranje neuspješno</string>
+    <string name="database_update_failed_positive_button">Uredu</string>
+    <string name="database_update_failed_negative_button">Ignoriši</string>
 </resources>

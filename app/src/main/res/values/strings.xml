@@ -26,6 +26,8 @@
     <string name="title_extend_chooser_landscape">Extend dropdown menu in landscape mode</string>
     <string name="key_theme" translatable="false">theme</string>
     <string name="title_theme">Theme</string>
+    <string name="key_ignore_failed_db_update" translatable="false">ignore_failed_db_update</string>
+    <string name="title_ignore_failed_db_update">Ignore failed database update notifications</string>
     <string name="key_language" translatable="false">language</string>
     <string name="title_language">Language</string>
     <string name="key_filter_by" translatable="false">filter_by</string>
@@ -68,9 +70,15 @@
     <string name="last_updated">Last updated: %s</string>
 
     <!--fragment_converter-->
-    <string name="database_exception_caught_message">Unable to load data from the database, please restart the app. If the problem persists please reinstall the app.</string>
-    <string name="database_exception_caught_title">Error</string>
-    <string name="database_exception_caught_button">OK</string>
+    <string name="database_exception_caught_message">A fatal database error occurred, please restart the app. If the problem persists please reinstall the app.</string>
+    <string name="database_exception_caught_title">Fatal error</string>
+    <string name="database_exception_caught_positive_button">OK</string>
+
+    <string name="database_update_failed_message">Database could not update. It is advised to restart the app. If the problem persists, please reinstall the app.</string>
+    <string name="database_update_failed_title">Database update failed</string>
+    <string name="database_update_failed_positive_button">OK</string>
+    <string name="database_update_failed_negative_button">Ignore</string>
+
 
     <!--Country codes-->
     <string name="currency_united_arab_emirates">United Arab Emirates Dirham</string>

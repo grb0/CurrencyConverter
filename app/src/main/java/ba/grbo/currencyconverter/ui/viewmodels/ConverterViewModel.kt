@@ -1,20 +1,17 @@
 package ba.grbo.currencyconverter.ui.viewmodels
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency
 import ba.grbo.currencyconverter.data.models.domain.Miscellaneous
 import ba.grbo.currencyconverter.data.source.CurrenciesRepository
+import ba.grbo.currencyconverter.di.IgnoreFailedDbUpdates
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocused
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocusing
-import ba.grbo.currencyconverter.util.FilterBy
-import ba.grbo.currencyconverter.util.SharedStateLikeFlow
-import ba.grbo.currencyconverter.util.SingleSharedFlow
-import ba.grbo.currencyconverter.util.toSearcherState
+import ba.grbo.currencyconverter.util.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -26,17 +23,26 @@ import javax.inject.Inject
 class ConverterViewModel @Inject constructor(
     private val repository: CurrenciesRepository,
     filterBy: FilterBy,
+    @IgnoreFailedDbUpdates private var ignoreFailedDbUpdates: Boolean
 ) : ViewModel() {
     private lateinit var currencies: StateFlow<List<ExchangeableCurrency>>
 
     private val _databaseExceptionCaught =
-        SharedStateLikeFlow<Triple<@StringRes Int, @StringRes Int, @StringRes Int>>()
-    val databaseExceptionCaught: SharedFlow<Triple<Int, Int, Int>>
+        SharedStateLikeFlow<DialogInfo>()
+    val databaseExceptionCaught: SharedFlow<DialogInfo>
         get() = _databaseExceptionCaught
 
     private val _databaseExceptionAcknowledged = SharedStateLikeFlow<Unit>()
     val databaseExceptionAcknowledged: SharedFlow<Unit>
         get() = _databaseExceptionAcknowledged
+
+    private val _databaseUpdateFailed = SingleSharedFlow<ExtendedDialogInfo>()
+    val databaseUpdateFailed: SharedFlow<ExtendedDialogInfo>
+        get() = _databaseUpdateFailed
+
+    private val _ignoreDatabaseUpdateFailed = SingleSharedFlow<Unit>()
+    val ignoreDatebaseUpdateFailed: SharedFlow<Unit>
+        get() = _ignoreDatabaseUpdateFailed
 
     private lateinit var _countries: MutableStateFlow<MutableList<ExchangeableCurrency>>
     val countries: StateFlow<List<ExchangeableCurrency>?>
@@ -59,10 +65,11 @@ class ConverterViewModel @Inject constructor(
             .onEach {
                 it?.let {
                     _databaseExceptionCaught.tryEmit(
-                        Triple(
+                        DialogInfo(
                             R.string.database_exception_caught_title,
                             R.string.database_exception_caught_message,
-                            R.string.database_exception_caught_button
+                            Pair(R.string.database_exception_caught_positive_button, null),
+                            ::onDatabaseExceptionAcknowledged
                         )
                     )
                 }
@@ -201,8 +208,12 @@ class ConverterViewModel @Inject constructor(
         FilterBy.BOTH -> { currency, query -> currency.name.codeAndName.contains(query, true) }
     }
 
-    fun onDatabaseExceptionAcknowledged() {
+    private fun onDatabaseExceptionAcknowledged() {
         _databaseExceptionAcknowledged.tryEmit(Unit)
+    }
+
+    private fun onIgnoreDatabaseUpdateFailed() {
+        _ignoreDatabaseUpdateFailed.tryEmit(Unit)
     }
 
     fun onFromDropdownActionClicked() {
@@ -351,7 +362,29 @@ class ConverterViewModel @Inject constructor(
     }
 
     private fun updateUnexchangeableCurrency(currency: ExchangeableCurrency) {
-        viewModelScope.launch { repository.updateCurrency(currency) }
+        viewModelScope.launch {
+            val updated = repository.updateCurrency(currency)
+            if (!updated && !ignoreFailedDbUpdates) onDatabaseUpdateFailed()
+        }
+    }
+
+    private fun onDatabaseUpdateFailed() {
+        _databaseUpdateFailed.tryEmit(
+            ExtendedDialogInfo(
+                R.string.database_update_failed_title,
+                R.string.database_update_failed_message,
+                Pair(R.string.database_update_failed_positive_button, null),
+                null,
+                Pair(
+                    R.string.database_update_failed_negative_button,
+                    ::onIgnoreDatabaseUpdateFailed
+                )
+            )
+        )
+    }
+
+    fun onFailedDbUpdatedNotificationsIgnored() {
+        ignoreFailedDbUpdates = true
     }
 
     private fun updateCountries(currency: ExchangeableCurrency, index: Int, position: Int) {
@@ -410,26 +443,20 @@ class ConverterViewModel @Inject constructor(
         toCurrency: ExchangeableCurrency
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.updateMiscellaneous(
+            val updated = repository.updateMiscellaneous(
                 Miscellaneous(
                     showOnlyFavorites,
                     fromCurrency,
                     toCurrency
                 ).toDatabase(currencies.value)
             )
+
+            if (!updated && !ignoreFailedDbUpdates) onDatabaseUpdateFailed()
         }
     }
 
     private fun updateMiscellaneous() {
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.updateMiscellaneous(
-                Miscellaneous(
-                    _showOnlyFavorites,
-                    _fromCurrency.value,
-                    _toCurrency.value
-                ).toDatabase(currencies.value)
-            )
-        }
+        updateMiscellaneous(_fromCurrency.value, _toCurrency.value)
     }
 
     fun onDropdownCollapsed() {

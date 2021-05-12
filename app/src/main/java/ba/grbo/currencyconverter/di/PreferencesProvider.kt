@@ -13,8 +13,10 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityRetainedComponent
 import dagger.hilt.android.components.FragmentComponent
+import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.FragmentScoped
+import dagger.hilt.android.scopes.ViewModelScoped
 import dagger.hilt.components.SingletonComponent
 import java.util.*
 import javax.inject.Singleton
@@ -120,5 +122,20 @@ object FragmentScoped {
     ) = sharedPreferences.getBoolean(
         context.getString(R.string.key_extend_chooser_landscape),
         true
+    )
+}
+
+@Module
+@InstallIn(ViewModelComponent::class)
+object ViewModelScoped {
+    @ViewModelScoped
+    @IgnoreFailedDbUpdates
+    @Provides
+    fun provideIgnoreDatabaseUpdateFailedNotifications(
+        sharedPreferences: SharedPreferences,
+        @ApplicationContext context: Context
+    ) = sharedPreferences.getBoolean(
+        context.getString(R.string.key_ignore_failed_db_update),
+        false
     )
 }

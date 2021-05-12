@@ -22,7 +22,7 @@ import java.util.*
 )
 data class ExchangeRate(
     @PrimaryKey(autoGenerate = true)
-    val id: Int,
+    val id: Long,
     @ColumnInfo(index = true)
     val code: String,
     override val value: Double,

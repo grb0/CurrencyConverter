@@ -11,26 +11,26 @@ import kotlinx.coroutines.flow.Flow
 import java.util.*
 
 @Dao
-abstract class CurrencyDao(database: CurrencyConverterDatabase) {
+abstract class UnexchangeableCurrencyDao(database: CurrencyConverterDatabase) {
     private val exchangeRateDao = database.exchangeRateDao
 
     @Update
-    abstract suspend fun update(currency: UnexchangeableCurrency)
+    abstract suspend fun update(currency: UnexchangeableCurrency): Int
 
     @Query("SELECT * FROM unexchangeable_currencies_table WHERE code = :code")
-    abstract suspend fun getUnexchangeableCurrency(code: String): UnexchangeableCurrency
+    abstract suspend fun get(code: String): UnexchangeableCurrency
 
     @Query("SELECT * FROM unexchangeable_currencies_table")
-    abstract suspend fun getUnexchangeableCurrencies(): List<UnexchangeableCurrency>
+    abstract suspend fun getAll(): List<UnexchangeableCurrency>
 
     @Transaction
-    open suspend fun getMultiExchangeableCurrency(
+    open suspend fun getMulti(
         code: String,
         fromDate: Date,
         toDate: Date
     ): MultiExchangeableCurrency {
-        val unexchangeableCurrency = getUnexchangeableCurrency(code)
-        val exchangeRates = exchangeRateDao.getExchangeRates(
+        val unexchangeableCurrency = get(code)
+        val exchangeRates = exchangeRateDao.getCustomRange(
             code,
             fromDate,
             toDate
@@ -41,8 +41,8 @@ abstract class CurrencyDao(database: CurrencyConverterDatabase) {
 
     @Transaction
     open suspend fun getExchangeableCurrencies(): List<ExchangeableCurrency> {
-        val unexchangeableCurrencies = getUnexchangeableCurrencies()
-        val mostRecentExchangeRates = exchangeRateDao.getMostRecentExchangeRates()
+        val unexchangeableCurrencies = getAll()
+        val mostRecentExchangeRates = exchangeRateDao.getMostRecent()
 
         return unexchangeableCurrencies.zip(mostRecentExchangeRates).map {
             it.first.toExchangeableCurrency(it.second)
@@ -50,5 +50,5 @@ abstract class CurrencyDao(database: CurrencyConverterDatabase) {
     }
 
     @Query("SELECT isFavorite FROM unexchangeable_currencies_table")
-    abstract fun observeAreUnexchangeableCurrenciesFavorite(): Flow<List<Boolean>>
+    abstract fun observeIsFavorite(): Flow<List<Boolean>>
 }

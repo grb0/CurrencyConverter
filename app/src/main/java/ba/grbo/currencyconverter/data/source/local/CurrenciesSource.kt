@@ -15,14 +15,13 @@ import javax.inject.Inject
 class CurrenciesSource @Inject constructor(
     private val exchangeRateDao: ExchangeRateDao,
     private val miscellaneousDao: MiscellaneousDao,
-    private val currencyDao: CurrencyDao,
+    private val currencyDao: UnexchangeableCurrencyDao,
     @DispatcherIO private val coroutineDispatcher: CoroutineDispatcher
 ) : LocalCurrenciesSource {
     override suspend fun insertExchangeRate(exchangeRate: ExchangeRate): DatabaseResult<Boolean> {
         return withContext(coroutineDispatcher) {
             try {
-                exchangeRateDao.insert(exchangeRate)
-                Success(true)
+                Success(exchangeRateDao.insert(exchangeRate) == exchangeRate.id)
             } catch (e: Exception) {
                 Error(e)
             }
@@ -31,7 +30,7 @@ class CurrenciesSource @Inject constructor(
 
     override fun observeMostRecentExchangeRates(): DatabaseResult<Flow<List<EssentialExchangeRate>>> =
         try {
-            Success(exchangeRateDao.observeMostRecentExchangeRates())
+            Success(exchangeRateDao.observeMostRecent())
         } catch (e: Exception) {
             Error(e)
         }
@@ -39,8 +38,7 @@ class CurrenciesSource @Inject constructor(
     override suspend fun updateMiscellaneous(miscellaneous: Miscellaneous): DatabaseResult<Boolean> {
         return withContext(coroutineDispatcher) {
             try {
-                miscellaneousDao.update(miscellaneous)
-                Success(true)
+                Success(miscellaneousDao.update(miscellaneous) != 0)
             } catch (e: Exception) {
                 Error(e)
             }
@@ -50,7 +48,7 @@ class CurrenciesSource @Inject constructor(
     override suspend fun getMiscellaneous(): DatabaseResult<Miscellaneous> {
         return withContext(coroutineDispatcher) {
             try {
-                Success(miscellaneousDao.getMiscellaneous())
+                Success(miscellaneousDao.get())
             } catch (e: Exception) {
                 Error(e)
             }
@@ -59,7 +57,7 @@ class CurrenciesSource @Inject constructor(
 
     override fun observeMiscellaneous(): DatabaseResult<Flow<Miscellaneous>> {
         return try {
-            Success(miscellaneousDao.observeMiscellaneous())
+            Success(miscellaneousDao.observe())
         } catch (e: Exception) {
             Error(e)
         }
@@ -69,8 +67,7 @@ class CurrenciesSource @Inject constructor(
         unexchangeableCurrency: UnexchangeableCurrency
     ): DatabaseResult<Boolean> = withContext(coroutineDispatcher) {
         try {
-            currencyDao.update(unexchangeableCurrency)
-            Success(true)
+            Success(currencyDao.update(unexchangeableCurrency) != 0)
         } catch (e: Exception) {
             Error(e)
         }
@@ -92,7 +89,7 @@ class CurrenciesSource @Inject constructor(
         toDate: Date
     ): DatabaseResult<MultiExchangeableCurrency> = withContext(coroutineDispatcher) {
         try {
-            Success(currencyDao.getMultiExchangeableCurrency(code, fromDate, toDate))
+            Success(currencyDao.getMulti(code, fromDate, toDate))
         } catch (e: Exception) {
             Error(e)
         }
@@ -100,7 +97,7 @@ class CurrenciesSource @Inject constructor(
 
     override fun observeAreUnexchangeableCurrenciesFavorite(): DatabaseResult<Flow<List<Boolean>>> {
         return try {
-            Success(currencyDao.observeAreUnexchangeableCurrenciesFavorite())
+            Success(currencyDao.observeIsFavorite())
         } catch (e: Exception) {
             Error(e)
         }

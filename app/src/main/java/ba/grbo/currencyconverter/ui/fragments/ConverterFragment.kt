@@ -23,6 +23,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
@@ -50,6 +51,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
+import timber.log.Timber
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
@@ -271,6 +273,8 @@ class ConverterFragment : Fragment() {
         viewModel.run {
             collectWhenStarted(databaseExceptionCaught, ::onDatabaseExceptionCaught, false)
             collectWhenStarted(databaseExceptionAcknowledged, { shutDown() }, false)
+            collectWhenStarted(databaseUpdateFailed, ::onDatabaseUpdateFailed, false)
+            collectWhenStarted(ignoreDatebaseUpdateFailed, { ignoreDatabaseUpdateFailed() }, false)
             fromCurrencyJob = collectWhenStarted(fromCurrency) {
                 it?.let { onCurrencyChanged(it, true) }
             }
@@ -293,9 +297,30 @@ class ConverterFragment : Fragment() {
         }
     }
 
-    private fun onDatabaseExceptionCaught(info: Triple<Int, Int, Int>) {
+    private fun ignoreDatabaseUpdateFailed() {
+        lifecycleScope.launch {
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+            sharedPreferences.edit().run {
+                putBoolean(getString(R.string.key_ignore_failed_db_update), true)
+                apply()
+            }
+            viewModel.onFailedDbUpdatedNotificationsIgnored()
+        }
+    }
+
+    private fun onDatabaseExceptionCaught(dialogInfo: DialogInfo) {
         hideEverything()
-        showDialog(info)
+        createAlertDialog(dialogInfo)
+            .setOnDismissListener { dialogInfo.onDismiss?.invoke() }
+            .show()
+    }
+
+    private fun onDatabaseUpdateFailed(dialogInfo: ExtendedDialogInfo) {
+        createAlertDialog(dialogInfo)
+            .setNegativeButton(dialogInfo.negativeButton.first) { _, _ ->
+                dialogInfo.negativeButton.second?.invoke()
+            }
+            .show()
     }
 
     private fun hideEverything() {
@@ -303,14 +328,13 @@ class ConverterFragment : Fragment() {
         activity.hideBottomNavigationAndActionBar()
     }
 
-    private fun showDialog(info: Triple<Int, Int, Int>) {
+    private fun createAlertDialog(dialogInfo: DialogInfo) =
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(info.first)
-            .setMessage(info.second)
-            .setPositiveButton(info.third, null)
-            .setOnDismissListener { viewModel.onDatabaseExceptionAcknowledged() }
-            .show()
-    }
+            .setTitle(dialogInfo.title)
+            .setMessage(dialogInfo.message)
+            .setPositiveButton(dialogInfo.positiveButton.first) { _, _ ->
+                dialogInfo.positiveButton.second?.invoke()
+            }
 
     private fun shutDown() {
         exitProcess(0)

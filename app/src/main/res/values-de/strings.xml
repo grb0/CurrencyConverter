@@ -202,7 +202,15 @@
     <string name="currency_platinum_ounce">Platinunze</string>
     <string name="last_updated">Letzte Aktualisierung: %s</string>
     <string name="hello_from_popular_fragment">Hallo aus PopularFragment</string>
-    <string name="database_exception_caught_message">Daten können nicht aus der Datenbank geladen werden, bitte starten Sie die App neu. Wenn das Problem weiterhin besteht, installieren Sie bitte die App neu.</string>
-    <string name="database_exception_caught_title">Fehler</string>
-    <string name="database_exception_caught_button">Gut</string>
+    <string name="title_ignore_failed_db_update">Benachrichtigungen über fehlgeschlagene Datenbankaktualisierungen ignorieren</string>
+
+    <string name="database_exception_caught_message">Ein schwerwiegender Datenbankfehler ist aufgetreten, bitte starten Sie die App neu. Wenn das Problem weiterhin besteht, installieren Sie bitte die App neu.</string>
+    <string name="database_exception_caught_title">Schwerwiegender Fehler</string>
+    <string name="database_exception_caught_positive_button">Gut</string>
+
+    <string name="database_update_failed_message">Die Datenbank konnte nicht aktualisiert werden. Es wird empfohlen, die App neu zu starten. Wenn das Problem weiterhin besteht, installieren Sie die App bitte neu.</string>
+    <string name="database_update_failed_title">Die Datenbankaktualisierung fehlgeschlagen</string>
+    <string name="database_update_failed_positive_button">Gut</string>
+    <string name="database_update_failed_negative_button">Ignorieren</string>
+
 </resources>

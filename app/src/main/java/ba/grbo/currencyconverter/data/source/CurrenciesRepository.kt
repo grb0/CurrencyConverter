@@ -27,9 +27,9 @@ interface CurrenciesRepository {
 
     fun observeMostRecentExchangeRates(): DatabaseResult<Flow<List<EssentialExchangeRate>>>
 
-    suspend fun updateMiscellaneous(miscellaneous: Miscellaneous): DatabaseResult<Boolean>
+    suspend fun updateMiscellaneous(miscellaneous: Miscellaneous): Boolean
 
-    suspend fun updateCurrency(currency: DomainCurrency): DatabaseResult<Boolean>
+    suspend fun updateCurrency(currency: DomainCurrency): Boolean
 
     suspend fun getMultiExchangeableCurrency(
         code: String,

@@ -12,6 +12,10 @@ annotation class AutohideScrollbar
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
+annotation class IgnoreFailedDbUpdates
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
 annotation class ExtendDropdownMenuInLandscape
 
 @Qualifier

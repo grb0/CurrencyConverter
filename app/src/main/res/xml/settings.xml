@@ -32,5 +32,9 @@
             android:title="@string/title_theme"
             app:icon="@drawable/ic_night"
             app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="@string/key_ignore_failed_db_update"
+            android:title="@string/title_ignore_failed_db_update" />
     </PreferenceCategory>
 </PreferenceScreen>
