@@ -184,18 +184,21 @@ class ConverterViewModel @Inject constructor(
 
     init {
         filter = initializeFilter(filterBy)
+        collectOnSearcherTextChanged()
+    }
+
+    private fun collectOnSearcherTextChanged() {
         viewModelScope.launch(Dispatchers.Default) {
-            onSearcherTextChanged
-                .collectLatest {
-                    it?.let {
-                        if (it.isEmpty()) resetCountries()
-                        else {
-                            setResetButton(true)
-                            delay(DEBOUNCE_PERIOD)
-                            filterCurrencies(it)
-                        }
+            onSearcherTextChanged.collectLatest {
+                it?.let {
+                    if (it.isEmpty()) resetCountries()
+                    else {
+                        setResetButton(true)
+                        delay(DEBOUNCE_PERIOD)
+                        filterCurrencies(it)
                     }
                 }
+            }
         }
     }
 
