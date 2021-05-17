@@ -108,8 +108,8 @@ class ChooserFragment : PreferenceFragmentCompat() {
 
     private fun collectFlows() {
         viewModel.run {
-            collectWhenStarted(toDropdownMenuFragment, ::navigateToDropdownMenuFragment, false)
-            collectWhenStarted(uiNameChanged, ::onUiNameChanged, true)
+            collectWhenStarted(toDropdownMenuFragment, false, ::navigateToDropdownMenuFragment)
+            collectWhenStarted(uiNameChanged, true, ::onUiNameChanged)
         }
     }
 

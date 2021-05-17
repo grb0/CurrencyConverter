@@ -27,6 +27,7 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.AttrRes
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
@@ -97,48 +98,68 @@ private fun <T> Flow<T>.collect(
     lifecycle: Lifecycle,
     lifecycleState: Lifecycle.State,
     scope: LifecycleCoroutineScope,
-    action: suspend (T) -> Unit,
-    distinctUntilChanged: Boolean = true
+    distinctUntilChanged: Boolean,
+    onEach: suspend (T) -> Unit
 ) {
     if (distinctUntilChanged) distinctUntilChanged()
         .flowWithLifecycle(lifecycle, lifecycleState)
-        .onEach { action(it) }
+        .onEach { onEach(it) }
         .launchIn(scope)
     else flowWithLifecycle(lifecycle, lifecycleState)
-        .onEach { action(it) }
+        .onEach { onEach(it) }
         .launchIn(scope)
 }
 
-private fun <T> Fragment.collect(
+fun <T> Fragment.collectWhenStarted(
     flow: Flow<T>,
-    action: suspend (T) -> Unit,
-    lifecycleState: Lifecycle.State,
-    distinctUntilChanged: Boolean = true,
+    distinctUntilChanged: Boolean,
+    onEach: suspend (T) -> Unit
 ) {
     flow.collect(
         viewLifecycleOwner.lifecycle,
-        lifecycleState,
+        Lifecycle.State.STARTED,
         viewLifecycleOwner.lifecycleScope,
-        action,
         distinctUntilChanged,
+        onEach
     )
 }
 
 fun <T> Fragment.collectWhenStarted(
     flow: Flow<T>,
-    action: suspend (T) -> Unit,
-    distinctUntilChanged: Boolean
+    distinctUntilChanged: Boolean,
+    onEach: suspend () -> Unit
 ) {
-    collect(flow, action, Lifecycle.State.STARTED, distinctUntilChanged)
+    collectWhenStarted(flow, distinctUntilChanged) { _ -> onEach()}
 }
 
 fun <T> Fragment.collectWhenStarted(
     flow: Flow<T>,
-    action: suspend (T) -> Unit
+    onEach: suspend (T) -> Unit
 ): Job {
-    return flow.flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
-        .onEach { action(it) }
+    return flow
+        .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+        .onEach { onEach(it) }
         .launchIn(viewLifecycleOwner.lifecycleScope)
+}
+
+fun <T> AppCompatActivity.collectWhenStarted(
+    flow: Flow<T>,
+    onEach: suspend (T) -> Unit
+) {
+    flow.collect(
+        lifecycle,
+        Lifecycle.State.STARTED,
+        lifecycleScope,
+        false,
+        onEach
+    )
+}
+
+fun <T> AppCompatActivity.collectWhenStarted(
+    flow: Flow<T>,
+    onEach: suspend () -> Unit
+) {
+    collectWhenStarted(flow) { _ -> onEach() }
 }
 
 fun ObjectAnimator.setUp(resources: Resources): ObjectAnimator {

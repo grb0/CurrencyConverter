@@ -62,9 +62,9 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     private fun collectFlows() {
         viewModel.run {
-            collectWhenStarted(toChooserFragment, ::navigateToChooserFragment, false)
-            collectWhenStarted(languageChanged, ::onLanguageChanged, true)
-            collectWhenStarted(themeChanged, ::onThemeChanged, true)
+            collectWhenStarted(toChooserFragment, false, ::navigateToChooserFragment)
+            collectWhenStarted(languageChanged, true, ::onLanguageChanged)
+            collectWhenStarted(themeChanged, true, ::onThemeChanged)
         }
     }
 

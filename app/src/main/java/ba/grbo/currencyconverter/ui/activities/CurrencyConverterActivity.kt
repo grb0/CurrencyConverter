@@ -14,9 +14,6 @@ import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.ColorUtils
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.flowWithLifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -31,11 +28,6 @@ import ba.grbo.currencyconverter.util.Constants.ITEM_ICON_TINT_LIST
 import ba.grbo.currencyconverter.util.Constants.ITEM_TEXT_COLOR
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import java.text.SimpleDateFormat
-import java.util.*
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -54,9 +46,9 @@ class CurrencyConverterActivity : AppCompatActivity() {
     lateinit var repository: CurrenciesRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        preSuperOnCreateSetup()
+        beforeOnCreate()
         super.onCreate(savedInstanceState)
-        postSuperOnCreateSetup()
+        afterOnCreate()
 
         // val symbol = Char(36)
 
@@ -113,14 +105,15 @@ class CurrencyConverterActivity : AppCompatActivity() {
         // Timber.i("currenData: ${getCurrentDate()}")
     }
 
-    fun getCurrentDate(date: Date): String {
-
-        val a = SimpleDateFormat.getDateTimeInstance(1, 3, getLocale())
-        return a.format(date)
-        // val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale("bs"))
-        // return sdf.format(Date())
-
-    }
+    // fun getCurrentDate(date: Date): String {
+    //
+    //     val a = SimpleDateFormat.getDateTimeInstance(1, 3, getLocale())
+    //     return a.format(date)
+    //
+    //     // val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale("bs"))
+    //     // return sdf.format(Date())
+    //
+    // }
 
     override fun attachBaseContext(newBase: Context) {
         val newContext = newBase.updateLocale()
@@ -140,23 +133,25 @@ class CurrencyConverterActivity : AppCompatActivity() {
         return navController.navigateUp()
     }
 
-    private fun preSuperOnCreateSetup() {
+    // Intercept back button, so we go can implement custom behavior
+    override fun onBackPressed() {
+        viewModel.onBackPressed()
+    }
+
+    private fun beforeOnCreate() {
         setTheme(R.style.Theme_CurrencyConverter)
     }
 
-    private fun postSuperOnCreateSetup() {
-        initBinding()
-        initNavController()
+    private fun afterOnCreate() {
+        initVars()
         setupActionBarWithNavController()
         setListeners()
-        collectFlows()
+        viewModel.collectFlows()
     }
 
-    private fun initBinding() {
+    private fun initVars() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_currency_converter)
-    }
 
-    private fun initNavController() {
         val fragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
         navController = (fragment as NavHostFragment).navController
     }
@@ -176,11 +171,11 @@ class CurrencyConverterActivity : AppCompatActivity() {
     }
 
     private fun setListeners() {
-        addBottomNavigatonListeners()
-        addNavControllerListeners()
+        setBottomNavigatonListeners()
+        setNavControllerListeners()
     }
 
-    private fun addBottomNavigatonListeners() {
+    private fun setBottomNavigatonListeners() {
         binding.bottomNavigation.run {
             setOnNavigationItemSelectedListener {
                 viewModel.onNavigationItemSelected(it.itemId)
@@ -193,7 +188,7 @@ class CurrencyConverterActivity : AppCompatActivity() {
         }
     }
 
-    private fun addNavControllerListeners() {
+    private fun setNavControllerListeners() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             viewModel.onDestinationChanged(
                 destination.id,
@@ -202,19 +197,12 @@ class CurrencyConverterActivity : AppCompatActivity() {
         }
     }
 
-    // Intercept back button, so we go can implement custom behavior
-    override fun onBackPressed() {
-        viewModel.onBackPressed()
-    }
-
-    private fun collectFlows() {
-        viewModel.run {
-            destinationId.collect(::onDestinationIdChanged)
-            actionBarTitle.collect(::setActionBarTitle)
-            selectedItemId.collect(::onSelectedItemIdChanged)
-            pressBack.collect { pressBack() }
-            exitApp.collect { exitApp() }
-        }
+    private fun CurrencyConverterViewModel.collectFlows() {
+        collectWhenStarted(destinationId, ::onDestinationIdChanged)
+        collectWhenStarted(selectedItemId, ::onSelectedItemIdChanged)
+        collectWhenStarted(actionBarTitle, ::onActionBarTitleChanged)
+        collectWhenStarted(pressBack, ::pressBack)
+        collectWhenStarted(exitApp, ::finish)
     }
 
     private fun onDestinationIdChanged(@IdRes destinationId: Int) {
@@ -222,27 +210,17 @@ class CurrencyConverterActivity : AppCompatActivity() {
         navController.navigate(destinationId)
     }
 
-    private fun setActionBarTitle(title: String) {
-        supportActionBar?.title = title
-    }
-
     private fun onSelectedItemIdChanged(@IdRes itemId: Int) {
         // Triggers OnNavigationItemSelectedListener
         binding.bottomNavigation.selectedItemId = itemId
     }
 
+    private fun onActionBarTitleChanged(title: String) {
+        supportActionBar?.title = title
+    }
+
     private fun pressBack() {
         super.onBackPressed()
-    }
-
-    private fun exitApp() {
-        finish()
-    }
-
-    private fun <T> Flow<T>.collect(onEach: (T) -> Unit) {
-        flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
-            .onEach { onEach(it) }
-            .launchIn(lifecycleScope)
     }
 
     @SuppressLint("Recycle")

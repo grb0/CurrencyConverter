@@ -118,7 +118,7 @@ class ConverterFragment : Fragment() {
         initMotions()
         setUpRecyclerView()
         setListeners()
-        collectFlows()
+        viewModel.collectFlows()
         return root
     }
 
@@ -268,32 +268,26 @@ class ConverterFragment : Fragment() {
         }
     }
 
-    private fun collectFlows() {
-        viewModel.run {
-            collectWhenStarted(databaseExceptionCaught, ::onDatabaseExceptionCaught, false)
-            collectWhenStarted(databaseExceptionAcknowledged, { shutDown() }, false)
-            collectWhenStarted(databaseUpdateFailed, ::onDatabaseUpdateFailed, false)
-            collectWhenStarted(ignoreDatebaseUpdateFailed, { ignoreDatabaseUpdateFailed() }, false)
-            fromCurrencyJob = collectWhenStarted(fromCurrency) {
-                it?.let { onCurrencyChanged(it, true) }
-            }
-            toCurrencyJob = collectWhenStarted(toCurrency) {
-                it?.let { onCurrencyChanged(it, false) }
-            }
-            collectWhenStarted(fromSelectedCurrency, { onSelectedCurrencyChanged(it, true) }, true)
-            collectWhenStarted(toSelectedCurrency, { onSelectedCurrencyChanged(it, false) }, true)
-            collectWhenStarted(dropdownState, ::onDropdownStateChanged, true)
-            collectWhenStarted(showResetButton, ::showResetButton, true)
-            collectWhenStarted(resetSearcher, { resetSearcher() }, false)
-            collectWhenStarted(modifyDivider, ::modifyDividerDrawable, true)
-            collectWhenStarted(currencies, { it?.let { onCurrenciesUpdated(it) } }, true)
-            collectWhenStarted(searcherState, ::onSearcherStateChanged, true)
-            collectWhenStarted(swappingState, ::onSwappingStateChanged, false)
-            collectWhenStarted(scrollRecyclerViewToTop, { scrollCurrenciesToTop() }, false)
-            collectWhenStarted(onFavoritesClicked, ::animateFavorites, false)
-            collectWhenStarted(notifyItemChanged, ::onItemChanged, false)
-            collectWhenStarted(notifyItemRemoved, ::onItemRemoved, false)
-        }
+    private fun ConverterViewModel.collectFlows() {
+        collectWhenStarted(databaseExceptionCaught, false, ::onDatabaseExceptionCaught)
+        collectWhenStarted(databaseExceptionAcknowledged, false, ::shutDown)
+        collectWhenStarted(databaseUpdateFailed, false, ::onDatabaseUpdateFailed)
+        collectWhenStarted(ignoreDatebaseUpdateFailed, false, ::ignoreDatabaseUpdateFailed)
+        fromCurrencyJob = collectWhenStarted(fromCurrency, ::onFromCurrencyChanged)
+        toCurrencyJob = collectWhenStarted(toCurrency, ::onToCurrencyChanged)
+        collectWhenStarted(fromSelectedCurrency, true, ::onFromSelectedCurrencyChanged)
+        collectWhenStarted(toSelectedCurrency, true, ::onToSelectedCurrencyChanged)
+        collectWhenStarted(dropdownState, true, ::onDropdownStateChanged)
+        collectWhenStarted(showResetButton, true, ::showResetButton)
+        collectWhenStarted(resetSearcher, false, ::resetSearcher)
+        collectWhenStarted(modifyDivider, true, ::modifyDividerDrawable)
+        collectWhenStarted(currencies, true, ::onCurrenciesUpdated)
+        collectWhenStarted(searcherState, true, ::onSearcherStateChanged)
+        collectWhenStarted(swappingState, false, ::onSwappingStateChanged)
+        collectWhenStarted(scrollRecyclerViewToTop, false, ::scrollCurrenciesToTop)
+        collectWhenStarted(onFavoritesClicked, false, ::animateFavorites)
+        collectWhenStarted(notifyItemChanged, false, ::onItemChanged)
+        collectWhenStarted(notifyItemRemoved, false, ::onItemRemoved)
     }
 
     private fun ignoreDatabaseUpdateFailed() {
@@ -352,42 +346,71 @@ class ConverterFragment : Fragment() {
             false
     }
 
-    private fun onCurrencyChanged(currency: ExchangeableCurrency, from: Boolean) {
-        fun updateCurrency(view: TextView) {
+    private fun onCurrencyChanged(
+        currency: ExchangeableCurrency?,
+        view: TextView,
+        job: Job
+    ) {
+        currency?.let {
             view.run {
                 if (text.isEmpty()) {
-                    text = currency.getUiName(uiName)
-                    setCompoundDrawablesWithIntrinsicBounds(currency.flag, null, null, null)
+                    text = it.getUiName(uiName)
+                    setCompoundDrawablesWithIntrinsicBounds(it.flag, null, null, null)
                 }
             }
-        }
-
-        if (from) {
-            updateCurrency(binding.fromCurrencyChooser.currency)
-            fromCurrencyJob.cancel()
-        } else {
-            updateCurrency(binding.toCurrencyChooser.currency)
-            toCurrencyJob.cancel()
+            job.cancel()
         }
     }
 
-    private fun onCurrenciesUpdated(currencies: List<ExchangeableCurrency>) {
-        (binding.dropdownMenu.currencies.adapter as CurrencyAdapter).submitList(currencies)
+    private fun onFromCurrencyChanged(currency: ExchangeableCurrency?) {
+        onCurrencyChanged(
+            currency,
+            binding.fromCurrencyChooser.currency,
+            fromCurrencyJob
+        )
     }
 
-    private fun onSelectedCurrencyChanged(currency: ExchangeableCurrency, from: Boolean) {
-        if (from) onSelectedCurrencyChanged(
+    private fun onToCurrencyChanged(currency: ExchangeableCurrency?) {
+        onCurrencyChanged(
+            currency,
+            binding.toCurrencyChooser.currency,
+            toCurrencyJob
+        )
+    }
+
+    private fun onCurrenciesUpdated(currencies: List<ExchangeableCurrency>?) {
+        currencies?.let {
+            (binding.dropdownMenu.currencies.adapter as CurrencyAdapter).submitList(it)
+        }
+    }
+
+    private fun onSelectedCurrencyChanged(
+        currency: ExchangeableCurrency,
+        main: TextView,
+        double: TextView
+    ) {
+        onSelectedCurrencyChanged(
+            currency,
+            main,
+            double,
+            Animations.FADE_IN,
+            Animations.FADE_OUT
+        )
+    }
+
+    private fun onFromSelectedCurrencyChanged(currency: ExchangeableCurrency) {
+        onSelectedCurrencyChanged(
             currency,
             binding.fromCurrencyChooser.currency,
             binding.fromCurrencyChooser.currencyDouble,
-            Animations.FADE_IN,
-            Animations.FADE_OUT
-        ) else onSelectedCurrencyChanged(
+        )
+    }
+
+    private fun onToSelectedCurrencyChanged(currency: ExchangeableCurrency) {
+        onSelectedCurrencyChanged(
             currency,
             binding.toCurrencyChooser.currency,
             binding.toCurrencyChooser.currencyDouble,
-            Animations.FADE_IN,
-            Animations.FADE_OUT
         )
     }
 

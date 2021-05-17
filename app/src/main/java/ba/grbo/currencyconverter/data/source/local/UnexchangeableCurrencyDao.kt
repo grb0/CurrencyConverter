@@ -24,7 +24,7 @@ abstract class UnexchangeableCurrencyDao(database: CurrencyConverterDatabase) {
     abstract suspend fun getAll(): List<UnexchangeableCurrency>
 
     @Transaction
-    open suspend fun getMulti(
+    open suspend fun getMultiExchangeableCurrency(
         code: String,
         fromDate: Date,
         toDate: Date
@@ -42,7 +42,7 @@ abstract class UnexchangeableCurrencyDao(database: CurrencyConverterDatabase) {
     @Transaction
     open suspend fun getExchangeableCurrencies(): List<ExchangeableCurrency> {
         val unexchangeableCurrencies = getAll()
-        val mostRecentExchangeRates = exchangeRateDao.getMostRecent()
+        val mostRecentExchangeRates = exchangeRateDao.getAllMostRecent()
 
         return unexchangeableCurrencies.zip(mostRecentExchangeRates).map {
             it.first.toExchangeableCurrency(it.second)

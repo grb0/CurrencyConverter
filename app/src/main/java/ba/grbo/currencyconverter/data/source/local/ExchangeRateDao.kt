@@ -14,17 +14,17 @@ interface ExchangeRateDao {
     @Insert
     suspend fun insert(exchangeRate: ExchangeRate): Long
 
-    @Query("SELECT * FROM exchange_rates_table WHERE code = :code AND date >= :fromDate AND date <= :toDate")
+    @Query("SELECT value, date FROM exchange_rates_table WHERE code = :code AND date >= :fromDate AND date <= :toDate")
     suspend fun getCustomRange(
         code: String,
         fromDate: Date,
         toDate: Date,
-    ): List<ExchangeRate>
+    ): List<EssentialExchangeRate>
 
     @Query("SELECT value, date FROM exchange_rates_table GROUP BY code HAVING MAX(date)")
-    suspend fun getMostRecent(): List<EssentialExchangeRate>
+    suspend fun getAllMostRecent(): List<EssentialExchangeRate>
 
     // Provjeriti da li ovaj flow daje tačne vrijednosti kada je noviji exchange rate ubaci
     @Query("SELECT value, date FROM exchange_rates_table GROUP BY code HAVING MAX(date)")
-    fun observeMostRecent(): Flow<List<EssentialExchangeRate>>
+    fun observeAllMostRecent(): Flow<List<EssentialExchangeRate>>
 }

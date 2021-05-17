@@ -74,8 +74,8 @@ class DropdownMenuFragment : PreferenceFragmentCompat() {
 
     private fun collectFlows() {
         viewModel.run {
-            collectWhenStarted(showScrollbarChanged, ::onShowScrollbarChanged, true)
-            collectWhenStarted(filterBy, ::onFilterByChanged, true)
+            collectWhenStarted(showScrollbarChanged, true, ::onShowScrollbarChanged)
+            collectWhenStarted(filterBy, true, ::onFilterByChanged)
         }
     }
 
