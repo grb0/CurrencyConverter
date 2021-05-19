@@ -31,9 +31,7 @@ import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency
 import ba.grbo.currencyconverter.databinding.DropdownCurrencyChooserBinding
 import ba.grbo.currencyconverter.databinding.FragmentConverterBinding
-import ba.grbo.currencyconverter.di.AutohideScrollbar
-import ba.grbo.currencyconverter.di.ExtendDropdownMenuInLandscape
-import ba.grbo.currencyconverter.di.ShowScrollbar
+import ba.grbo.currencyconverter.di.*
 import ba.grbo.currencyconverter.ui.activities.CurrencyConverterActivity
 import ba.grbo.currencyconverter.ui.adapters.CurrencyAdapter
 import ba.grbo.currencyconverter.ui.miscs.Animations
@@ -48,8 +46,7 @@ import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SwappingState.
 import ba.grbo.currencyconverter.util.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -67,6 +64,10 @@ class ConverterFragment : Fragment() {
     @Suppress("PropertyName")
     @Inject
     lateinit var Colors: Colors
+
+    @Inject
+    @DispatcherIO
+    lateinit var dispatcherIO: CoroutineDispatcher
 
     @Inject
     @ShowScrollbar
@@ -111,38 +112,90 @@ class ConverterFragment : Fragment() {
     }
 
     private fun setup(inflater: LayoutInflater, container: ViewGroup?): View {
-        initActivity()
-        initOrientation()
-        val root = initBinding(inflater, container)
-        setDropdownsBackground()
-        initMotions()
-        setUpRecyclerView()
+        initVars(inflater, container)
         setListeners()
         viewModel.collectFlows()
-        return root
+        return binding.root
     }
 
-    private fun initActivity() {
+    private fun initVars(inflater: LayoutInflater, container: ViewGroup?) {
         activity = requireActivity() as CurrencyConverterActivity
-    }
-
-    private fun initOrientation() {
         orientation = resources.configuration.orientation
+        binding = FragmentConverterBinding.inflate(inflater, container, false).also {
+            it.lastUpdate = "03 May 2021 14:20"
+            it.from = getString(R.string.from_label)
+            it.to = getString(R.string.to_label)
+            it.showOnlyFavorites = viewModel.showOnlyFavorites
+            it.showScrollbar = showScrollbar
+            it.extended = orientation.isLandscape && extendDropdownMenuInLandscape
+            it.lastTo = viewModel.wasLastClickedTo()
+
+            setDropdownBackground(it.fromCurrencyChooser.currencyLayout)
+            setDropdownBackground(it.toCurrencyChooser.currencyLayout)
+            setupRecyclerView(it.dropdownMenu.currencies)
+        }
+        Animations = Animations(resources)
+        Animators = ObjectAnimators(
+            binding,
+            activity.getBottomNavigationAnimator(),
+            Colors,
+            orientation.isLandscape,
+            resources.displayMetrics.widthPixels.toFloat(),
+            viewModel::onFavoritesAnimationEnd,
+        )
     }
 
-    private fun initBinding(
-        inflater: LayoutInflater,
-        container: ViewGroup?
-    ) = FragmentConverterBinding.inflate(inflater, container, false).also {
-        it.lastUpdate = "03 May 2021 14:20"
-        it.from = getString(R.string.from_label)
-        it.to = getString(R.string.to_label)
-        it.showOnlyFavorites = viewModel.showOnlyFavorites
-        it.showScrollbar = showScrollbar
-        it.extended = orientation.isLandscape && extendDropdownMenuInLandscape
-        it.lastTo = viewModel.wasLastClickedTo()
-        binding = it
-    }.root
+    private fun setDropdownBackground(dropdown: ConstraintLayout) {
+        dropdown.background = dropdown.getGradientDrawable(Colors.WHITE, Colors.BORDER)
+    }
+
+    private fun setupRecyclerView(recyclerView: RecyclerView) {
+        disableItemChangedAnimation(recyclerView)
+        assignAdapter(recyclerView)
+        modifyHeightInPortraitMode(recyclerView, addVerticalDivider(recyclerView))
+        if (showScrollbar) initializeFastScroller(recyclerView)
+    }
+
+    private fun disableItemChangedAnimation(recyclerView: RecyclerView) {
+        (recyclerView.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+    }
+
+    private fun assignAdapter(recyclerView: RecyclerView) {
+        recyclerView.adapter = CurrencyAdapter(
+            uiName,
+            showScrollbar,
+            viewModel::onCurrencyClicked,
+            viewModel::onCurrenciesChanged,
+            viewModel::onFavoritesAnimationEnd
+        )
+    }
+
+    private fun modifyHeightInPortraitMode(
+        recyclerView: RecyclerView,
+        verticalDivider: DividerItemDecoration
+    ) {
+        // Only in portrait mode
+        if (!orientation.isLandscape) {
+            val countryHolder = recyclerView.adapter!!.createViewHolder(
+                recyclerView,
+                0
+            )
+            val verticalDividersHeight = ((verticalDivider.drawable?.intrinsicHeight ?: 3) * 4)
+            val countryHoldersHeight = countryHolder.itemView.layoutParams.height * 4
+            recyclerViewHeight = verticalDividersHeight + countryHoldersHeight
+            recyclerView.layoutParams.height = recyclerViewHeight
+
+            // Let it not be in vain :)
+            recyclerView.recycledViewPool.putRecycledView(countryHolder)
+        }
+    }
+
+    private fun addVerticalDivider(recyclerView: RecyclerView): DividerItemDecoration {
+        return DividerItemDecoration(
+            requireContext(),
+            DividerItemDecoration.VERTICAL
+        ).also { recyclerView.addItemDecoration(it) }
+    }
 
     private fun initializeFastScroller(recyclerView: RecyclerView) {
         val thumb = ContextCompat.getDrawable(
@@ -156,88 +209,20 @@ class ConverterFragment : Fragment() {
             .build()
     }
 
-    private fun setDropdownsBackground() {
-        setDropdownBackground(binding.fromCurrencyChooser.currencyLayout)
-        setDropdownBackground(binding.toCurrencyChooser.currencyLayout)
-    }
-
-    private fun setDropdownBackground(dropdown: ConstraintLayout) {
-        dropdown.background = dropdown.getGradientDrawable(Colors.WHITE, Colors.BORDER)
-    }
-
-    private fun initMotions() {
-        initAnimations()
-        initAnimators()
-    }
-
-    private fun initAnimations() {
-        Animations = Animations(resources)
-    }
-
-    private fun initAnimators() {
-        Animators = ObjectAnimators(
-            binding,
-            activity.getBottomNavigationAnimator(),
-            Colors,
-            orientation.isLandscape,
-            resources.displayMetrics.widthPixels.toFloat(),
-            viewModel::onFavoritesAnimationEnd,
-        )
-    }
-
-    private fun setUpRecyclerView() {
-        disableItemChangedAnimation()
-        assignAdapter()
-        modifyHeightInPortraitMode(addVerticalDivider())
-        if (showScrollbar) initializeFastScroller(binding.dropdownMenu.currencies)
-    }
-
-    private fun assignAdapter() {
-        binding.dropdownMenu.currencies.adapter = CurrencyAdapter(
-            uiName,
-            showScrollbar,
-            viewModel::onCurrencyClicked,
-            viewModel::onCurrenciesChanged,
-            viewModel::onFavoritesAnimationEnd
-        )
-    }
-
-    private fun addVerticalDivider(): DividerItemDecoration {
-        return DividerItemDecoration(
-            requireContext(),
-            DividerItemDecoration.VERTICAL
-        ).also { binding.dropdownMenu.currencies.addItemDecoration(it) }
-    }
-
-    private fun modifyHeightInPortraitMode(verticalDivider: DividerItemDecoration) {
-        // Only in portrait mode
-        if (!orientation.isLandscape) {
-            val countryHolder = binding.dropdownMenu.currencies.adapter!!.createViewHolder(
-                binding.dropdownMenu.currencies,
-                0
-            )
-            val verticalDividersHeight = ((verticalDivider.drawable?.intrinsicHeight ?: 3) * 4)
-            val countryHoldersHeight = countryHolder.itemView.layoutParams.height * 4
-            recyclerViewHeight = verticalDividersHeight + countryHoldersHeight
-            binding.dropdownMenu.currencies.layoutParams.height = recyclerViewHeight
-
-            // Let it not be in vain :)
-            binding.dropdownMenu.currencies.recycledViewPool.putRecycledView(countryHolder)
-        }
-    }
-
     private fun setListeners() {
-        binding.fromCurrencyChooser.run {
-            dropdownAction.setOnClickListener { viewModel.onFromDropdownActionClicked() }
-            currencyLayout.setOnClickListener { viewModel.onFromDropdownClicked() }
-            dropdownTitle.setOnClickListener { viewModel.onFromTitleClicked() }
-        }
+        setCurrencyChooserListeners(
+            binding.fromCurrencyChooser,
+            viewModel::onFromDropdownActionClicked,
+            viewModel::onFromDropdownClicked,
+            viewModel::onFromTitleClicked
+        )
 
-        binding.toCurrencyChooser.run {
-            dropdownAction.setOnClickListener { viewModel.onToDropdownActionClicked() }
-            currencyLayout.setOnClickListener { viewModel.onToDropdownClicked() }
-            dropdownTitle.setOnClickListener { viewModel.onToTitleClicked() }
-        }
+        setCurrencyChooserListeners(
+            binding.toCurrencyChooser,
+            viewModel::onToDropdownActionClicked,
+            viewModel::onToDropdownClicked,
+            viewModel::onToTitleClicked
+        )
 
         binding.run {
             dropdownSwapper.setOnClickListener { viewModel.onDropdownSwapperClicked() }
@@ -254,6 +239,19 @@ class ConverterFragment : Fragment() {
                 currencies.addOnScrollListener(getOnScrollListener { !it.canScrollVertically(-1) })
                 favorites.setOnClickListener { viewModel.onFavoritesClicked() }
             }
+        }
+    }
+
+    private fun setCurrencyChooserListeners(
+        currencyChooser: DropdownCurrencyChooserBinding,
+        onDropdownActionClicked: () -> Unit,
+        onDropdownClicked: () -> Unit,
+        onTitleClicked: () -> Unit
+    ) {
+        currencyChooser.run {
+            dropdownAction.setOnClickListener { onDropdownActionClicked() }
+            currencyLayout.setOnClickListener { onDropdownClicked() }
+            dropdownTitle.setOnClickListener { onTitleClicked() }
         }
     }
 
@@ -290,29 +288,10 @@ class ConverterFragment : Fragment() {
         collectWhenStarted(notifyItemRemoved, false, ::onItemRemoved)
     }
 
-    private fun ignoreDatabaseUpdateFailed() {
-        lifecycleScope.launch {
-            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
-            sharedPreferences.edit().run {
-                putBoolean(getString(R.string.key_ignore_failed_db_update), true)
-                apply()
-            }
-            viewModel.onFailedDbUpdatedNotificationsIgnored()
-        }
-    }
-
     private fun onDatabaseExceptionCaught(dialogInfo: DialogInfo) {
         hideEverything()
         createAlertDialog(dialogInfo)
             .setOnDismissListener { dialogInfo.onDismiss?.invoke() }
-            .show()
-    }
-
-    private fun onDatabaseUpdateFailed(dialogInfo: ExtendedDialogInfo) {
-        createAlertDialog(dialogInfo)
-            .setNegativeButton(dialogInfo.negativeButton.first) { _, _ ->
-                dialogInfo.negativeButton.second?.invoke()
-            }
             .show()
     }
 
@@ -333,32 +312,22 @@ class ConverterFragment : Fragment() {
         exitProcess(0)
     }
 
-    private fun onItemChanged(position: Int) {
-        (binding.dropdownMenu.currencies.adapter as CurrencyAdapter).notifyItemChanged(position)
-    }
-
-    private fun onItemRemoved(position: Int) {
-        (binding.dropdownMenu.currencies.adapter as CurrencyAdapter).notifyItemRemoved(position)
-    }
-
-    private fun disableItemChangedAnimation() {
-        (binding.dropdownMenu.currencies.itemAnimator as SimpleItemAnimator).supportsChangeAnimations =
-            false
-    }
-
-    private fun onCurrencyChanged(
-        currency: ExchangeableCurrency?,
-        view: TextView,
-        job: Job
-    ) {
-        currency?.let {
-            view.run {
-                if (text.isEmpty()) {
-                    text = it.getUiName(uiName)
-                    setCompoundDrawablesWithIntrinsicBounds(it.flag, null, null, null)
-                }
+    private fun onDatabaseUpdateFailed(dialogInfo: ExtendedDialogInfo) {
+        createAlertDialog(dialogInfo)
+            .setNegativeButton(dialogInfo.negativeButton.first) { _, _ ->
+                dialogInfo.negativeButton.second?.invoke()
             }
-            job.cancel()
+            .show()
+    }
+
+    private fun ignoreDatabaseUpdateFailed() {
+        lifecycleScope.launch(dispatcherIO) {
+            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
+            sharedPreferences.edit().run {
+                putBoolean(getString(R.string.key_ignore_failed_db_update), true)
+                apply()
+            }
+            viewModel.onFailedDbUpdatedNotificationsIgnored()
         }
     }
 
@@ -378,24 +347,20 @@ class ConverterFragment : Fragment() {
         )
     }
 
-    private fun onCurrenciesUpdated(currencies: List<ExchangeableCurrency>?) {
-        currencies?.let {
-            (binding.dropdownMenu.currencies.adapter as CurrencyAdapter).submitList(it)
-        }
-    }
-
-    private fun onSelectedCurrencyChanged(
-        currency: ExchangeableCurrency,
-        main: TextView,
-        double: TextView
+    private fun onCurrencyChanged(
+        currency: ExchangeableCurrency?,
+        view: TextView,
+        job: Job
     ) {
-        onSelectedCurrencyChanged(
-            currency,
-            main,
-            double,
-            Animations.FADE_IN,
-            Animations.FADE_OUT
-        )
+        currency?.let {
+            view.run {
+                if (text.isEmpty()) {
+                    text = it.getUiName(uiName)
+                    setCompoundDrawablesWithIntrinsicBounds(it.flag, null, null, null)
+                }
+            }
+            job.cancel()
+        }
     }
 
     private fun onFromSelectedCurrencyChanged(currency: ExchangeableCurrency) {
@@ -411,6 +376,20 @@ class ConverterFragment : Fragment() {
             currency,
             binding.toCurrencyChooser.currency,
             binding.toCurrencyChooser.currencyDouble,
+        )
+    }
+
+    private fun onSelectedCurrencyChanged(
+        currency: ExchangeableCurrency,
+        main: TextView,
+        double: TextView
+    ) {
+        onSelectedCurrencyChanged(
+            currency,
+            main,
+            double,
+            Animations.FADE_IN,
+            Animations.FADE_OUT
         )
     }
 
@@ -480,45 +459,59 @@ class ConverterFragment : Fragment() {
         } // When collapsed do nothing
     }
 
-    private fun showResetButton(showButton: Boolean) {
-        if (showButton) setAnimationListenerAndStartAnimation(Animations.FADE_IN, true)
-        else setAnimationListenerAndStartAnimation(Animations.FADE_OUT, false)
+    private fun onDropdownExpanding(dropdown: Dropdown) {
+        expandDropdown(dropdown)
+        setOnScreenTouched(dropdown, false)
+        viewModel.onDropdownExpanded(dropdown)
     }
 
-    private fun setAnimationListenerAndStartAnimation(
-        animation: AlphaAnimation,
-        fadinIn: Boolean
-    ) {
-        animation.setAnimationListener(
-            getAnimationListener(
-                binding.dropdownMenu.resetSearcher,
-                fadinIn,
-                Animations.FADE_IN,
-                Animations.FADE_OUT
-            )
-        )
-        binding.dropdownMenu.resetSearcher.startAnimation(animation)
+    private fun expandDropdown(dropdown: Dropdown) {
+        modifyCurrenciesCardPosition(dropdown)
+        Animators.startObjectAnimators(dropdown, viewLifecycleOwner.lifecycleScope)
     }
 
-    private fun resetSearcher() {
-        binding.dropdownMenu.currenciesSearcher.setText("")
-    }
-
-    private fun modifyDividerDrawable(topReached: Boolean) {
-        val drawable = if (topReached) R.drawable.divider_top else R.drawable.divider_bottom
-        binding.dropdownMenu.divider.setBackgroundResource(drawable)
-    }
-
-    private fun onSearcherStateChanged(state: SearcherState) = when (state) {
-        is Focusing -> onSearcherFocused(state.dropdown)
-        is Unfocusing -> onSearcherUnfocused(state.dropdown)
-        else -> {
-            // Do nothing
+    private fun modifyCurrenciesCardPosition(dropdown: Dropdown) {
+        val landscapeModificator = orientation.isLandscape && extendDropdownMenuInLandscape
+        if (viewModel.shouldModifyCurrenciesCardPosition(dropdown, landscapeModificator)) {
+            val viewId = if (dropdown == FROM) binding.fromCurrencyChooser.dropdownLayout.id
+            else binding.toCurrencyChooser.dropdownLayout.id
+            modifyCurrenciesCardPosition(viewId)
         }
     }
 
-    private fun onSearcherFocused(dropdown: Dropdown) {
-        setOnScreenTouched(dropdown, true)
+    private fun modifyCurrenciesCardPosition(viewId: Int) {
+        ConstraintSet().apply {
+            clone(binding.converterLayout)
+            connect(
+                binding.dropdownMenu.currenciesCard.id,
+                ConstraintSet.TOP,
+                viewId,
+                ConstraintSet.BOTTOM
+            )
+            connect(
+                binding.dropdownMenu.currenciesCard.id,
+                ConstraintSet.BOTTOM,
+                binding.converterLayout.id,
+                ConstraintSet.BOTTOM
+            )
+            connect(
+                binding.dropdownMenu.currenciesCard.id,
+                ConstraintSet.START,
+                viewId,
+                ConstraintSet.START
+            )
+            connect(
+                binding.dropdownMenu.currenciesCard.id,
+                ConstraintSet.END,
+                viewId,
+                ConstraintSet.END
+            )
+            applyTo(binding.converterLayout)
+        }
+    }
+
+    private fun setOnScreenTouched(dropdown: Dropdown, includeSearcher: Boolean) {
+        activity.onScreenTouched = { event -> onScreenTouched(event, dropdown, includeSearcher) }
     }
 
     private fun onScreenTouched(
@@ -576,6 +569,112 @@ class ConverterFragment : Fragment() {
         }
     }
 
+    private fun isPointInsideViewBounds(view: View, point: Point): Boolean = Rect().run {
+        // Get view rectangle
+        view.getDrawingRect(this)
+
+        // Apply offset
+        IntArray(2).also { locationOnScreen ->
+            view.getLocationOnScreen(locationOnScreen)
+            offset(locationOnScreen[0], locationOnScreen[1])
+        }
+
+        // Check if rectangle contains point
+        contains(point.x, point.y)
+    }
+
+    private fun onDropdownCollapsing(dropdown: Dropdown) {
+        collapseDropdown(dropdown)
+        removeOnScreenTouched()
+        viewModel.onDropdownCollapsed()
+    }
+
+    private fun collapseDropdown(dropdown: Dropdown) {
+        Animators.reverseObjectAnimators(dropdown, viewLifecycleOwner.lifecycleScope)
+    }
+
+    private fun removeOnScreenTouched() {
+        activity.onScreenTouched = null
+    }
+
+    private fun showResetButton(showButton: Boolean) {
+        if (showButton) setAnimationListenerAndStartAnimation(Animations.FADE_IN, true)
+        else setAnimationListenerAndStartAnimation(Animations.FADE_OUT, false)
+    }
+
+    private fun setAnimationListenerAndStartAnimation(
+        animation: AlphaAnimation,
+        fadinIn: Boolean
+    ) {
+        animation.setAnimationListener(
+            getAnimationListener(
+                binding.dropdownMenu.resetSearcher,
+                fadinIn,
+                Animations.FADE_IN,
+                Animations.FADE_OUT
+            )
+        )
+        binding.dropdownMenu.resetSearcher.startAnimation(animation)
+    }
+
+    private fun resetSearcher() {
+        binding.dropdownMenu.currenciesSearcher.setText("")
+    }
+
+    private fun modifyDividerDrawable(topReached: Boolean) {
+        val drawable = if (topReached) R.drawable.divider_top else R.drawable.divider_bottom
+        binding.dropdownMenu.divider.setBackgroundResource(drawable)
+    }
+
+    private fun onCurrenciesUpdated(currencies: List<ExchangeableCurrency>?) {
+        currencies?.let {
+            (binding.dropdownMenu.currencies.adapter as CurrencyAdapter).submitList(it)
+        }
+    }
+
+    private fun onSearcherStateChanged(state: SearcherState) = when (state) {
+        is Focusing -> onSearcherFocused(state.dropdown)
+        is Unfocusing -> onSearcherUnfocused(state.dropdown)
+        else -> {
+            // Do nothing
+        }
+    }
+
+    private fun onSwappingStateChanged(state: SwappingState) {
+        when (state) {
+            Swapping -> onSwapping()
+            SwappingInterrupted -> onSwappingInterrupted()
+            Swapped -> onSwapped()
+            SwappedWithInterruption -> onSwappedWithInterruption()
+            ReverseSwapping -> onReverseSwapping()
+            ReverseSwappingInterrupted -> onReverseSwappingInterrupted()
+            ReverseSwapped -> onReverseSwapped()
+            ReverseSwappedWithInterruption -> onReverseSwappedWithInterruption()
+            None -> {
+            } // Do nothing
+        }
+    }
+
+    private fun scrollCurrenciesToTop() {
+        binding.dropdownMenu.currencies.scrollToPosition(0)
+    }
+
+    private fun animateFavorites(favorites: Boolean) {
+        Animators.onFavoritesClicked(favorites)
+    }
+
+    private fun onItemChanged(position: Int) {
+        (binding.dropdownMenu.currencies.adapter as CurrencyAdapter).notifyItemChanged(position)
+    }
+
+    private fun onItemRemoved(position: Int) {
+        (binding.dropdownMenu.currencies.adapter as CurrencyAdapter).notifyItemRemoved(position)
+    }
+
+    private fun onSearcherFocused(dropdown: Dropdown) {
+        setOnScreenTouched(dropdown, true)
+    }
+
     private fun onSearcherUnfocused(dropdown: Dropdown) {
         releaseFocus()
         hideKeyboard()
@@ -599,29 +698,6 @@ class ConverterFragment : Fragment() {
 
     private fun restoreOriginalOnScreenTouched(dropdown: Dropdown) {
         setOnScreenTouched(dropdown, false)
-    }
-
-    private fun scrollCurrenciesToTop() {
-        binding.dropdownMenu.currencies.scrollToPosition(0)
-    }
-
-    private fun animateFavorites(favorites: Boolean) {
-        Animators.onFavoritesClicked(favorites)
-    }
-
-    private fun onSwappingStateChanged(state: SwappingState) {
-        when (state) {
-            Swapping -> onSwapping()
-            SwappingInterrupted -> onSwappingInterrupted()
-            Swapped -> onSwapped()
-            SwappedWithInterruption -> onSwappedWithInterruption()
-            ReverseSwapping -> onReverseSwapping()
-            ReverseSwappingInterrupted -> onReverseSwappingInterrupted()
-            ReverseSwapped -> onReverseSwapped()
-            ReverseSwappedWithInterruption -> onReverseSwappedWithInterruption()
-            None -> {
-            } // Do nothing
-        }
     }
 
     private fun onSwapping() {
@@ -754,88 +830,5 @@ class ConverterFragment : Fragment() {
             override fun onAnimationRepeat(animation: Animator?) {
             }
         })
-    }
-
-    private fun onDropdownExpanding(dropdown: Dropdown) {
-        expandDropdown(dropdown)
-        setOnScreenTouched(dropdown, false)
-        viewModel.onDropdownExpanded(dropdown)
-    }
-
-    private fun expandDropdown(dropdown: Dropdown) {
-        modifyCurrenciesCardPosition(dropdown)
-        Animators.startObjectAnimators(dropdown, viewLifecycleOwner.lifecycleScope)
-    }
-
-    private fun modifyCurrenciesCardPosition(dropdown: Dropdown) {
-        val landscapeModificator = orientation.isLandscape && extendDropdownMenuInLandscape
-        if (viewModel.shouldModifyCurrenciesCardPosition(dropdown, landscapeModificator)) {
-            val viewId = if (dropdown == FROM) binding.fromCurrencyChooser.dropdownLayout.id
-            else binding.toCurrencyChooser.dropdownLayout.id
-            modifyCurrenciesCardPosition(viewId)
-        }
-    }
-
-    private fun modifyCurrenciesCardPosition(viewId: Int) {
-        ConstraintSet().apply {
-            clone(binding.converterLayout)
-            connect(
-                binding.dropdownMenu.currenciesCard.id,
-                ConstraintSet.TOP,
-                viewId,
-                ConstraintSet.BOTTOM
-            )
-            connect(
-                binding.dropdownMenu.currenciesCard.id,
-                ConstraintSet.BOTTOM,
-                binding.converterLayout.id,
-                ConstraintSet.BOTTOM
-            )
-            connect(
-                binding.dropdownMenu.currenciesCard.id,
-                ConstraintSet.START,
-                viewId,
-                ConstraintSet.START
-            )
-            connect(
-                binding.dropdownMenu.currenciesCard.id,
-                ConstraintSet.END,
-                viewId,
-                ConstraintSet.END
-            )
-            applyTo(binding.converterLayout)
-        }
-    }
-
-    private fun setOnScreenTouched(dropdown: Dropdown, includeSearcher: Boolean) {
-        activity.onScreenTouched = { event -> onScreenTouched(event, dropdown, includeSearcher) }
-    }
-
-    private fun removeOnScreenTouched() {
-        activity.onScreenTouched = null
-    }
-
-    private fun isPointInsideViewBounds(view: View, point: Point): Boolean = Rect().run {
-        // Get view rectangle
-        view.getDrawingRect(this)
-
-        // Apply offset
-        IntArray(2).also { locationOnScreen ->
-            view.getLocationOnScreen(locationOnScreen)
-            offset(locationOnScreen[0], locationOnScreen[1])
-        }
-
-        // Check if rectangle contains point
-        contains(point.x, point.y)
-    }
-
-    private fun onDropdownCollapsing(dropdown: Dropdown) {
-        collapseDropdown(dropdown)
-        removeOnScreenTouched()
-        viewModel.onDropdownCollapsed()
-    }
-
-    private fun collapseDropdown(dropdown: Dropdown) {
-        Animators.reverseObjectAnimators(dropdown, viewLifecycleOwner.lifecycleScope)
     }
 }
