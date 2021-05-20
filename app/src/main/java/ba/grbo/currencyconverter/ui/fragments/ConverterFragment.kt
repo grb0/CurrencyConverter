@@ -31,7 +31,10 @@ import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency
 import ba.grbo.currencyconverter.databinding.DropdownCurrencyChooserBinding
 import ba.grbo.currencyconverter.databinding.FragmentConverterBinding
-import ba.grbo.currencyconverter.di.*
+import ba.grbo.currencyconverter.di.AutohideScrollbar
+import ba.grbo.currencyconverter.di.DispatcherIO
+import ba.grbo.currencyconverter.di.ExtendDropdownMenuInLandscape
+import ba.grbo.currencyconverter.di.ShowScrollbar
 import ba.grbo.currencyconverter.ui.activities.CurrencyConverterActivity
 import ba.grbo.currencyconverter.ui.adapters.CurrencyAdapter
 import ba.grbo.currencyconverter.ui.miscs.Animations
@@ -46,7 +49,9 @@ import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SwappingState.
 import ba.grbo.currencyconverter.util.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -679,7 +684,7 @@ class ConverterFragment : Fragment() {
         releaseFocus()
         hideKeyboard()
         if (viewModel.dropdownState.value !is Collapsed) restoreOriginalOnScreenTouched(dropdown)
-        viewModel.onSearcherUnfocused(dropdown)
+        viewModel.onSearcherUnfocused()
     }
 
     private fun releaseFocus() {

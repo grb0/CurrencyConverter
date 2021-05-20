@@ -405,9 +405,9 @@ class ConverterViewModel @Inject constructor(
         dropdownTitleTouched: Boolean,
         currenciesCardTouched: Boolean
     ): Boolean {
-        val shouldCollapse =
-            !currencyLayoutTouched && !dropdownTitleTouched && !currenciesCardTouched
-        return shouldCollapse.also { if (it) _dropdownState.value = Collapsing(dropdown) }
+        return (!currencyLayoutTouched && !dropdownTitleTouched && !currenciesCardTouched).also {
+            if (it) _dropdownState.value = Collapsing(dropdown)
+        }
     }
 
     fun onScreenTouched(
@@ -417,14 +417,16 @@ class ConverterViewModel @Inject constructor(
         currenciesCardTouched: Boolean,
         currenciesSearcherTouched: Boolean
     ): Boolean {
-        val shouldUnfocus = currenciesCardTouched && !currenciesSearcherTouched
-        return if (shouldUnfocus) {
+        return if (currenciesCardTouched && !currenciesSearcherTouched) {
             _searcherState.value = Unfocusing(dropdown)
             false
         } else {
-            val shouldCollapse =
-                !currencyLayoutTouched && !dropdownTitleTouched && !currenciesCardTouched
-            shouldCollapse.also { if (it) _dropdownState.value = Collapsing(dropdown) }
+            (!currencyLayoutTouched && !dropdownTitleTouched && !currenciesCardTouched).also {
+                if (it) {
+                    _searcherState.value = Unfocusing(dropdown)
+                    _dropdownState.value = Collapsing(dropdown)
+                }
+            }
         }
     }
 
@@ -473,8 +475,8 @@ class ConverterViewModel @Inject constructor(
         _searcherState.value = focused.toSearcherState(_dropdownState.value.dropdown)
     }
 
-    fun onSearcherUnfocused(dropdown: Dropdown) {
-        _searcherState.value = Unfocused(dropdown)
+    fun onSearcherUnfocused() {
+        _searcherState.value = Unfocused(NONE)
     }
 
     fun onSearcherTextChanged(query: String) {
@@ -531,6 +533,7 @@ class ConverterViewModel @Inject constructor(
     }
 
     private fun collapseDropdown(dropdown: Dropdown) {
+        if (_searcherState.value != Unfocused(NONE))  _searcherState.value = Unfocusing(dropdown)
         _dropdownState.value = Collapsing(dropdown)
     }
 
