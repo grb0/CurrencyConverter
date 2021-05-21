@@ -18,9 +18,9 @@ class ObjectAnimators(
     onFavoritesAnimationEnd: (Boolean) -> Unit
 ) {
     private val fadeInAnimatorProducer =
-        binding.dropdownMenu.currenciesCard.getFadeInAnimatorProducer()
+        binding.dropdownMenu.dropdownMenuCard.getFadeInAnimatorProducer()
     private val fadeOutAnimatorProducer =
-        binding.dropdownMenu.currenciesCard.getFadeOutAnimatorProducer()
+        binding.dropdownMenu.dropdownMenuCard.getFadeOutAnimatorProducer()
 
     private val favoritesAnimator = FavoritesAnimator(
         binding.dropdownMenu.favoritesAnimation.getRotateAroundYAnimatorProducersPair(),

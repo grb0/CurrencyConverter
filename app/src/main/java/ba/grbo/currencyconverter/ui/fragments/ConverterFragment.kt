@@ -488,25 +488,25 @@ class ConverterFragment : Fragment() {
         ConstraintSet().apply {
             clone(binding.converterLayout)
             connect(
-                binding.dropdownMenu.currenciesCard.id,
+                binding.dropdownMenu.dropdownMenuCard.id,
                 ConstraintSet.TOP,
                 viewId,
                 ConstraintSet.BOTTOM
             )
             connect(
-                binding.dropdownMenu.currenciesCard.id,
+                binding.dropdownMenu.dropdownMenuCard.id,
                 ConstraintSet.BOTTOM,
                 binding.converterLayout.id,
                 ConstraintSet.BOTTOM
             )
             connect(
-                binding.dropdownMenu.currenciesCard.id,
+                binding.dropdownMenu.dropdownMenuCard.id,
                 ConstraintSet.START,
                 viewId,
                 ConstraintSet.START
             )
             connect(
-                binding.dropdownMenu.currenciesCard.id,
+                binding.dropdownMenu.dropdownMenuCard.id,
                 ConstraintSet.END,
                 viewId,
                 ConstraintSet.END
@@ -548,7 +548,7 @@ class ConverterFragment : Fragment() {
         )
 
         val currenciesCardTouched = isPointInsideViewBounds(
-            binding.dropdownMenu.currenciesCard,
+            binding.dropdownMenu.dropdownMenuCard,
             touchPoint
         )
 

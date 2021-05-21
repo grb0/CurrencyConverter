@@ -58,25 +58,25 @@ fun ConstraintLayout.bindCustomConstraints(
     ConstraintSet().apply {
         clone(this@bindCustomConstraints)
         connect(
-            targetBinding.currenciesCard.id,
+            targetBinding.dropdownMenuCard.id,
             ConstraintSet.TOP,
             view.id,
             if (extended) ConstraintSet.TOP else ConstraintSet.BOTTOM
         )
         connect(
-            targetBinding.currenciesCard.id,
+            targetBinding.dropdownMenuCard.id,
             ConstraintSet.BOTTOM,
             id,
             ConstraintSet.BOTTOM
         )
         connect(
-            targetBinding.currenciesCard.id,
+            targetBinding.dropdownMenuCard.id,
             ConstraintSet.START,
             view.id,
             ConstraintSet.START
         )
         connect(
-            targetBinding.currenciesCard.id,
+            targetBinding.dropdownMenuCard.id,
             ConstraintSet.END,
             view.id,
             ConstraintSet.END
