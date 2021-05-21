@@ -212,4 +212,6 @@
     <string name="database_update_failed_title">Ažuriranje neuspješno</string>
     <string name="database_update_failed_positive_button">Uredu</string>
     <string name="database_update_failed_negative_button">Ignoriši</string>
+
+    <string name="empty_tray">Prazna ladica</string>
 </resources>

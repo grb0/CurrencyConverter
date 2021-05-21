@@ -56,6 +56,10 @@ class ConverterViewModel @Inject constructor(
     val toCurrency: StateFlow<ExchangeableCurrency?>
         get() = if (::_toCurrency.isInitialized) _toCurrency else MutableStateFlow(null)
 
+    private val _currenciesEmpty = MutableStateFlow(false)
+    val currenciesEmpty: SharedFlow<Boolean>
+        get() = _currenciesEmpty
+
     private var _showOnlyFavorites = false
     val showOnlyFavorites: Boolean
         get() = _showOnlyFavorites
@@ -321,7 +325,19 @@ class ConverterViewModel @Inject constructor(
     }
 
     private fun filterCurrentCurrencies() {
-        _currencies.value = _currencies.value.filter { it.isFavorite }.toMutableList()
+        setCurrencies(_currencies.value.filter { it.isFavorite }.toMutableList())
+    }
+
+    private fun setCurrencies(currencies: MutableList<ExchangeableCurrency>) {
+        _currencies.value = currencies
+        checkIfCurrenciesAreEmpty()
+    }
+
+    private fun checkIfCurrenciesAreEmpty() {
+        if (_currencies.value.isEmpty() && !_currenciesEmpty.value) _currenciesEmpty.value = true
+        else if (_currencies.value.isNotEmpty() && _currenciesEmpty.value) {
+            _currenciesEmpty.value = false
+        }
     }
 
     fun onFavoritesAnimationEnd(
@@ -343,6 +359,7 @@ class ConverterViewModel @Inject constructor(
     private fun removeUnfavoritedCurrency(index: Int, position: Int) {
         _currencies.value.removeAt(index)
         notifyItemRemoved(position)
+        checkIfCurrenciesAreEmpty()
     }
 
     private fun notifyItemRemoved(position: Int) {
@@ -496,7 +513,7 @@ class ConverterViewModel @Inject constructor(
         _scrollRecyclerViewToTop.tryEmit(Unit)
     }
 
-    fun shouldModifyCurrenciesCardPosition(
+    fun shouldModifyDropdownMenuPosition(
         dropdown: Dropdown,
         landscapeModificator: Boolean
     ): Boolean {
@@ -513,15 +530,17 @@ class ConverterViewModel @Inject constructor(
     }
 
     private fun filterAllCurrencies(query: String) {
-        _currencies.value = if (query.isEmpty()) plainCurrencies.value.toMutableList()
-        else plainCurrencies.value.filter { filter(it, query) }.toMutableList()
-
+        setCurrencies(
+            if (query.isEmpty()) plainCurrencies.value.toMutableList()
+            else plainCurrencies.value.filter { filter(it, query) }.toMutableList()
+        )
     }
 
     private fun filterFavoriteCurrencies(query: String) {
-        _currencies.value =
+        setCurrencies(
             if (query.isEmpty()) plainCurrencies.value.filter { it.isFavorite }.toMutableList()
             else plainCurrencies.value.filter { it.isFavorite && filter(it, query) }.toMutableList()
+        )
     }
 
     private fun mutateDropdown(dropdown: Dropdown) {
@@ -533,7 +552,7 @@ class ConverterViewModel @Inject constructor(
     }
 
     private fun collapseDropdown(dropdown: Dropdown) {
-        if (_searcherState.value != Unfocused(NONE))  _searcherState.value = Unfocusing(dropdown)
+        if (_searcherState.value != Unfocused(NONE)) _searcherState.value = Unfocusing(dropdown)
         _dropdownState.value = Collapsing(dropdown)
     }
 

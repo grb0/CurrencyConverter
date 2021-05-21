@@ -213,4 +213,5 @@
     <string name="database_update_failed_positive_button">Gut</string>
     <string name="database_update_failed_negative_button">Ignorieren</string>
 
+    <string name="empty_tray">Leerer Ablagekasten</string>
 </resources>

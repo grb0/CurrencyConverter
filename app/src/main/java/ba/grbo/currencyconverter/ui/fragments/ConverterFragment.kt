@@ -137,7 +137,7 @@ class ConverterFragment : Fragment() {
 
             setDropdownBackground(it.fromCurrencyChooser.currencyLayout)
             setDropdownBackground(it.toCurrencyChooser.currencyLayout)
-            setupRecyclerView(it.dropdownMenu.currencies)
+            setupRecyclerView(it.dropdownMenu.currenciesLayout, it.dropdownMenu.currencies)
         }
         Animations = Animations(resources)
         Animators = ObjectAnimators(
@@ -154,10 +154,17 @@ class ConverterFragment : Fragment() {
         dropdown.background = dropdown.getGradientDrawable(Colors.WHITE, Colors.BORDER)
     }
 
-    private fun setupRecyclerView(recyclerView: RecyclerView) {
+    private fun setupRecyclerView(
+        currencyLayout: ConstraintLayout,
+        recyclerView: RecyclerView
+    ) {
         disableItemChangedAnimation(recyclerView)
         assignAdapter(recyclerView)
-        modifyHeightInPortraitMode(recyclerView, addVerticalDivider(recyclerView))
+        modifyDropdownMenuHeightInPortraitMode(
+            currencyLayout,
+            recyclerView,
+            addVerticalDivider(recyclerView)
+        )
         if (showScrollbar) initializeFastScroller(recyclerView)
     }
 
@@ -175,7 +182,8 @@ class ConverterFragment : Fragment() {
         )
     }
 
-    private fun modifyHeightInPortraitMode(
+    private fun modifyDropdownMenuHeightInPortraitMode(
+        currencyLayout: ConstraintLayout,
         recyclerView: RecyclerView,
         verticalDivider: DividerItemDecoration
     ) {
@@ -186,9 +194,9 @@ class ConverterFragment : Fragment() {
                 0
             )
             val verticalDividersHeight = ((verticalDivider.drawable?.intrinsicHeight ?: 3) * 4)
-            val countryHoldersHeight = countryHolder.itemView.layoutParams.height * 4
-            recyclerViewHeight = verticalDividersHeight + countryHoldersHeight
-            recyclerView.layoutParams.height = recyclerViewHeight
+            val currencyHoldersHeight = countryHolder.itemView.layoutParams.height * 4
+            recyclerViewHeight = verticalDividersHeight + currencyHoldersHeight
+            currencyLayout.layoutParams.height = recyclerViewHeight
 
             // Let it not be in vain :)
             recyclerView.recycledViewPool.putRecycledView(countryHolder)
@@ -291,6 +299,7 @@ class ConverterFragment : Fragment() {
         collectWhenStarted(onFavoritesClicked, false, ::animateFavorites)
         collectWhenStarted(notifyItemChanged, false, ::onItemChanged)
         collectWhenStarted(notifyItemRemoved, false, ::onItemRemoved)
+        collectWhenStarted(currenciesEmpty, true, ::onCurrencyVisibilityChanged)
     }
 
     private fun onDatabaseExceptionCaught(dialogInfo: DialogInfo) {
@@ -471,20 +480,20 @@ class ConverterFragment : Fragment() {
     }
 
     private fun expandDropdown(dropdown: Dropdown) {
-        modifyCurrenciesCardPosition(dropdown)
+        modifyDropdownMenuPosition(dropdown)
         Animators.startObjectAnimators(dropdown, viewLifecycleOwner.lifecycleScope)
     }
 
-    private fun modifyCurrenciesCardPosition(dropdown: Dropdown) {
+    private fun modifyDropdownMenuPosition(dropdown: Dropdown) {
         val landscapeModificator = orientation.isLandscape && extendDropdownMenuInLandscape
-        if (viewModel.shouldModifyCurrenciesCardPosition(dropdown, landscapeModificator)) {
+        if (viewModel.shouldModifyDropdownMenuPosition(dropdown, landscapeModificator)) {
             val viewId = if (dropdown == FROM) binding.fromCurrencyChooser.dropdownLayout.id
             else binding.toCurrencyChooser.dropdownLayout.id
-            modifyCurrenciesCardPosition(viewId)
+            modifyDropdownMenuPosition(viewId)
         }
     }
 
-    private fun modifyCurrenciesCardPosition(viewId: Int) {
+    private fun modifyDropdownMenuPosition(viewId: Int) {
         ConstraintSet().apply {
             clone(binding.converterLayout)
             connect(
@@ -603,23 +612,31 @@ class ConverterFragment : Fragment() {
     }
 
     private fun showResetButton(showButton: Boolean) {
-        if (showButton) setAnimationListenerAndStartAnimation(Animations.FADE_IN, true)
-        else setAnimationListenerAndStartAnimation(Animations.FADE_OUT, false)
+        if (showButton) setAnimationListenerAndStartAnimation(
+            binding.dropdownMenu.resetSearcher,
+            Animations.FADE_IN,
+            true
+        ) else setAnimationListenerAndStartAnimation(
+            binding.dropdownMenu.resetSearcher,
+            Animations.FADE_OUT,
+            false
+        )
     }
 
     private fun setAnimationListenerAndStartAnimation(
+        view: View,
         animation: AlphaAnimation,
         fadinIn: Boolean
     ) {
         animation.setAnimationListener(
             getAnimationListener(
-                binding.dropdownMenu.resetSearcher,
+                view,
                 fadinIn,
                 Animations.FADE_IN,
                 Animations.FADE_OUT
             )
         )
-        binding.dropdownMenu.resetSearcher.startAnimation(animation)
+        view.startAnimation(animation)
     }
 
     private fun resetSearcher() {
@@ -674,6 +691,16 @@ class ConverterFragment : Fragment() {
 
     private fun onItemRemoved(position: Int) {
         (binding.dropdownMenu.currencies.adapter as CurrencyAdapter).notifyItemRemoved(position)
+    }
+
+    private fun onCurrencyVisibilityChanged(visibility: Boolean) {
+        if (visibility) {
+            binding.dropdownMenu.currencies.visibility = View.INVISIBLE
+            binding.dropdownMenu.currenciesEmptyLayout.visibility = View.VISIBLE
+        } else {
+            binding.dropdownMenu.currenciesEmptyLayout.visibility = View.INVISIBLE
+            binding.dropdownMenu.currencies.visibility = View.VISIBLE
+        }
     }
 
     private fun onSearcherFocused(dropdown: Dropdown) {

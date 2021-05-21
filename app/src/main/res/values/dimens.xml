@@ -8,6 +8,7 @@
     <dimen name="reset_searcher_ripple">20dp</dimen>
     <dimen name="divider_height">1.4dp</dimen>
     <dimen name="logo_size">200dp</dimen>
+    <dimen name="empty_tray_icon_size">50dp</dimen>
 
     <dimen name="swap_vertical_icon">28dp</dimen>
     <dimen name="swap_vertical_ripple">25dp</dimen>

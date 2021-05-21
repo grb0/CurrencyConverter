@@ -68,6 +68,7 @@
     <string name="from_label">From</string>
     <string name="to_label">To</string>
     <string name="last_updated">Last updated: %s</string>
+    <string name="empty_tray">Empty tray</string>
 
     <!--fragment_converter-->
     <string name="database_exception_caught_message">A fatal database error occurred, please restart the app. If the problem persists please reinstall the app.</string>
@@ -250,4 +251,5 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_from_history_fragment">Hello there from HistoryFragment</string>
     <string name="hello_from_popular_fragment">Hello there from PopularFragment</string>
+
 </resources>

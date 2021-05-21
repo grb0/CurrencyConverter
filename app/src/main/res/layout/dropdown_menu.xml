@@ -125,21 +125,49 @@
                 app:layout_constraintTop_toBottomOf="@+id/currencies_searcher"
                 tools:visibility="visible" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/currencies"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/currencies_layout"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:scrollbars="none"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/divider"
-                app:layout_constraintVertical_bias="0.0"
-                tools:itemCount="4"
-                tools:listitem="@layout/dropdown_item"
-                tools:visibility="visible" />
+                app:layout_constraintVertical_bias="0.0">
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/currencies"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scrollbars="none"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="parent"
+                    tools:itemCount="4"
+                    tools:listitem="@layout/dropdown_item"
+                    tools:visibility="visible" />
+
+                <LinearLayout
+                    android:id="@+id/currencies_empty_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="parent">
+
+                    <ImageView
+                        android:id="@+id/currencies_empty"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@string/empty_tray"
+                        android:src="@drawable/ic_empty_tray" />
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
 
