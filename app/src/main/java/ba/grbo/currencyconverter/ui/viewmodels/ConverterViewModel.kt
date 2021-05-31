@@ -292,6 +292,7 @@ class ConverterViewModel @Inject constructor(
 
     fun resetInternalState() {
         _swappingState.value = SwappingState.None
+        _searcherState.value = Unfocused(NONE)
     }
 
     fun wasLastClickedTo() = lastClickedDropdown == TO
@@ -492,8 +493,8 @@ class ConverterViewModel @Inject constructor(
         _searcherState.value = focused.toSearcherState(_dropdownState.value.dropdown)
     }
 
-    fun onSearcherUnfocused() {
-        _searcherState.value = Unfocused(NONE)
+    fun onSearcherUnfocused(dropdown: Dropdown) {
+        _searcherState.value = Unfocused(dropdown)
     }
 
     fun onSearcherTextChanged(query: String) {

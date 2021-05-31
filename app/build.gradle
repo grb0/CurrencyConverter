@@ -113,6 +113,10 @@ dependencies {
     implementation "androidx.room:room-ktx:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
     // endregion
+
+    // region Listen for Keyboard events
+    implementation "net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:3.0.0-RC3"
+    // endregion
     // endregion
 
     // region androidTest

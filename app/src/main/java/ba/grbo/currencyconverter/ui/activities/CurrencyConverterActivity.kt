@@ -304,4 +304,8 @@ class CurrencyConverterActivity : AppCompatActivity() {
         binding.bottomNavigation.visibility = View.GONE
         supportActionBar?.hide()
     }
+
+    fun getBottomNavHeight() = binding.bottomNavigation.height
+
+    fun getRootView() = binding.root
 }

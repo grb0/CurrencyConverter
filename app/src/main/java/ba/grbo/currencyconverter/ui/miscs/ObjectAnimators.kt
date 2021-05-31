@@ -1,6 +1,8 @@
 package ba.grbo.currencyconverter.ui.miscs
 
 import android.animation.ObjectAnimator
+import android.graphics.Rect
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.LifecycleCoroutineScope
 import ba.grbo.currencyconverter.databinding.FragmentConverterBinding
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown
@@ -26,6 +28,8 @@ class ObjectAnimators(
         binding.dropdownMenu.favoritesAnimation.getRotateAroundYAnimatorProducersPair(),
         onFavoritesAnimationEnd
     )
+
+    private lateinit var ScreenAnimators: Screen
 
     private var CURRENCIES_CARD_FADE_IN_DEFAULT = fadeInAnimatorProducer(0f)
     private var CURRENCIES_CARD_FADE_OUT_DEFAULT = fadeOutAnimatorProducer(1f)
@@ -183,6 +187,10 @@ class ObjectAnimators(
         val CURRENCY: ObjectAnimator
     }
 
+    interface Screen {
+        val FROM_DROPDOWN: ObjectAnimator
+        val TO_DROPDOWN: ObjectAnimator
+    }
 
     private fun ObjectAnimator.begin() {
         if (isRunning) reverse()
@@ -307,5 +315,56 @@ class ObjectAnimators(
 
     fun onFavoritesClicked(favorites: Boolean) {
         favoritesAnimator.onFavoritesClicked(favorites)
+    }
+
+    fun isScreenAnimatorsInitialized() = ::ScreenAnimators.isInitialized
+
+    fun initScreenAnimators(
+        root: ConstraintLayout,
+        fromChooserEndY: Float,
+        toChooserEndY: Float,
+        dropdownHeight: Int,
+        bottomNavHeight: Int
+    ) {
+        val margin = 8f.toPixels(root.resources)
+        val rect = Rect()
+        root.getWindowVisibleDisplayFrame(rect)
+        val parentHeight = root.height
+
+        val softKeyboardHeight = parentHeight - rect.height()
+        val staticTranslation = bottomNavHeight + margin
+
+        val fromDropdownVisiblePart = parentHeight - (fromChooserEndY + softKeyboardHeight)
+        val fromDropdownInvisiblePart = dropdownHeight - fromDropdownVisiblePart
+        val fromDropdownTranslation = -fromDropdownInvisiblePart - staticTranslation
+
+        val toDropdownVisiblePart = parentHeight - (toChooserEndY + softKeyboardHeight)
+        val toDropdownInvisiblePart = dropdownHeight - toDropdownVisiblePart
+        val toDropdownTranslation = -toDropdownInvisiblePart - staticTranslation
+
+        ScreenAnimators = object : Screen {
+            override val FROM_DROPDOWN = root.getVerticalTranslationAnimator(
+                fromDropdownTranslation
+            )
+            override val TO_DROPDOWN = root.getVerticalTranslationAnimator(
+                toDropdownTranslation
+            )
+        }
+    }
+
+    fun animateRootFromDropdownExpanded() {
+        ScreenAnimators.FROM_DROPDOWN.begin()
+    }
+
+    fun animateReverseRootFromDropdownExpanded() {
+        ScreenAnimators.FROM_DROPDOWN.reverse()
+    }
+
+    fun animateRootToDropdownExpanded() {
+        ScreenAnimators.TO_DROPDOWN.begin()
+    }
+
+    fun animateReverseRootToDropdownExpanded() {
+        ScreenAnimators.TO_DROPDOWN.reverse()
     }
 }

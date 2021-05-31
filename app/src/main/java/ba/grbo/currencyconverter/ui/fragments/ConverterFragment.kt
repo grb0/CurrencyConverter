@@ -42,6 +42,7 @@ import ba.grbo.currencyconverter.ui.miscs.ObjectAnimators
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown.FROM
+import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown.TO
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Focusing
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocusing
@@ -53,6 +54,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
@@ -253,6 +255,44 @@ class ConverterFragment : Fragment() {
                 favorites.setOnClickListener { viewModel.onFavoritesClicked() }
             }
         }
+
+        KeyboardVisibilityEvent.setEventListener(
+            requireActivity(),
+            viewLifecycleOwner
+        ) {
+            if (!orientation.isLandscape) {
+                if (it) {
+                    if (!Animators.isScreenAnimatorsInitialized()) initAnimatorsLateinitVars()
+
+                    animateRootScreen(
+                        Animators::animateRootFromDropdownExpanded,
+                        Animators::animateRootToDropdownExpanded
+                    )
+                } else animateRootScreen(
+                    Animators::animateReverseRootFromDropdownExpanded,
+                    Animators::animateReverseRootToDropdownExpanded
+                )
+            }
+        }
+    }
+
+    private fun initAnimatorsLateinitVars() {
+        Animators.initScreenAnimators(
+            activity.getRootView(),
+            getChooserEndY(binding.fromCurrencyChooser),
+            getChooserEndY(binding.toCurrencyChooser),
+            binding.dropdownMenu.dropdownMenuCard.height,
+            activity.getBottomNavHeight()
+        )
+    }
+
+    private fun animateRootScreen(animation: () -> Unit, reverseAnimation: () -> Unit) {
+        if (viewModel.searcherState.value.dropdown == FROM) animation()
+        else if (viewModel.searcherState.value.dropdown == TO) reverseAnimation()
+    }
+
+    private fun getChooserEndY(binding: DropdownCurrencyChooserBinding): Float {
+        return binding.dropdownLayout.y + binding.dropdownLayout.height
     }
 
     private fun setCurrencyChooserListeners(
@@ -711,7 +751,7 @@ class ConverterFragment : Fragment() {
         releaseFocus()
         hideKeyboard()
         if (viewModel.dropdownState.value !is Collapsed) restoreOriginalOnScreenTouched(dropdown)
-        viewModel.onSearcherUnfocused()
+        viewModel.onSearcherUnfocused(dropdown)
     }
 
     private fun releaseFocus() {

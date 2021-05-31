@@ -129,7 +129,7 @@ fun <T> Fragment.collectWhenStarted(
     distinctUntilChanged: Boolean,
     onEach: suspend () -> Unit
 ) {
-    collectWhenStarted(flow, distinctUntilChanged) { _ -> onEach()}
+    collectWhenStarted(flow, distinctUntilChanged) { _ -> onEach() }
 }
 
 fun <T> Fragment.collectWhenStarted(
@@ -542,6 +542,19 @@ private fun RecyclerView.setChildrenClickability(clickable: Boolean) {
     for (i in 0 until childCount) {
         getChildAt(i).isClickable = clickable
     }
+}
+
+@SuppressLint("Recycle")
+fun ConstraintLayout.getVerticalTranslationAnimator(
+    translation: Float
+): ObjectAnimator = ObjectAnimator.ofFloat(
+    this,
+    View.TRANSLATION_Y,
+    translationY,
+    translation
+).apply {
+    duration = 125
+    interpolator = AccelerateInterpolator()
 }
 
 @SuppressLint("Recycle")
