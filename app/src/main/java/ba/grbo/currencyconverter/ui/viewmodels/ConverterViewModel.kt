@@ -373,12 +373,14 @@ class ConverterViewModel @Inject constructor(
         position: Int
     ) {
         val index = _currencies.value.indexOfFirst { it.code == updatedCurrency.code }
-        if (showOnlyFavorites && !isFavoritesOn) removeUnfavoritedCurrency(index, position)
-        else updateCurrencies(
-            updatedCurrency,
-            index,
-            position
-        )
+        if (index != -1) {
+            if (showOnlyFavorites && !isFavoritesOn) removeUnfavoritedCurrency(index, position)
+            else updateCurrencies(
+                updatedCurrency,
+                index,
+                position
+            )
+        }
     }
 
     private fun updateCurrency(currency: ExchangeableCurrency) {
