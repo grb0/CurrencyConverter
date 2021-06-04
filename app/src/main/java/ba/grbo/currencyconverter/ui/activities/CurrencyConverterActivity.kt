@@ -206,7 +206,6 @@ class CurrencyConverterActivity : AppCompatActivity() {
     }
 
     private fun onDestinationIdChanged(@IdRes destinationId: Int) {
-        navController.popBackStack() // Remove current destination
         navController.navigate(destinationId)
     }
 

@@ -439,21 +439,25 @@ fun getMaterialFadeThroughAnimator(viewGroup: ViewGroup, enter: Boolean): Animat
 
 fun Fragment.getExitAndPopEnterMaterialSharedXAnimators(
     nextAnim: Int,
-    onElse: (Int) -> Animator
+    materialFadeThroughAnimator: () -> Animator,
+    onElse: (Int, () -> Animator) -> Animator
 ) = when (nextAnim) {
     android.R.anim.fade_out -> view.getMaterialSharedXAxisExitBackwardAnimator()
     android.R.anim.slide_in_left -> {
         view.getMaterialSharedXAxisEnterForwardAnimator(viewLifecycleOwner.lifecycleScope)
     }
-    else -> onElse(nextAnim)
+    else -> onElse(nextAnim, materialFadeThroughAnimator)
 }
 
-fun Fragment.getEnterAndPopExitMaterialSharedXAnimators(nextAnim: Int) = when (nextAnim) {
+fun Fragment.getEnterAndPopExitMaterialSharedXAnimators(
+    nextAnim: Int,
+    onElse: () -> Animator
+) = when (nextAnim) {
     android.R.anim.fade_in -> {
         view.getMaterialSharedXAxisEnterBackwardAnimator(viewLifecycleOwner.lifecycleScope)
     }
     android.R.anim.slide_out_right -> view.getMaterialSharedXAxisExitForwardAnimator()
-    else -> throw IllegalArgumentException("Unknown nextAnim: $nextAnim")
+    else -> onElse()
 }
 
 fun View?.getMaterialSharedXAxisEnterForwardAnimator(scope: CoroutineScope): Animator {

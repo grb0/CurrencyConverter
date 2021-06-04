@@ -13,10 +13,7 @@ import androidx.preference.PreferenceManager
 import androidx.preference.SwitchPreference
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.ui.viewmodels.DropdownMenuViewModel
-import ba.grbo.currencyconverter.util.FilterBy
-import ba.grbo.currencyconverter.util.collectWhenStarted
-import ba.grbo.currencyconverter.util.getEnterAndPopExitMaterialSharedXAnimators
-import ba.grbo.currencyconverter.util.putString
+import ba.grbo.currencyconverter.util.*
 
 class DropdownMenuFragment : PreferenceFragmentCompat() {
     private val viewModel: DropdownMenuViewModel by viewModels()
@@ -46,7 +43,9 @@ class DropdownMenuFragment : PreferenceFragmentCompat() {
     }
 
     override fun onCreateAnimator(transit: Int, enter: Boolean, nextAnim: Int): Animator {
-        return getEnterAndPopExitMaterialSharedXAnimators(nextAnim)
+        return getEnterAndPopExitMaterialSharedXAnimators(nextAnim) {
+            getMaterialFadeThroughAnimator(view as ViewGroup, enter)
+        }
     }
 
     private fun initVariables() {

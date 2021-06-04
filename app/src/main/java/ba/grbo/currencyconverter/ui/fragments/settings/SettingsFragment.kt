@@ -45,8 +45,10 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
     override fun onCreateAnimator(transit: Int, enter: Boolean, nextAnim: Int): Animator {
         return getExitAndPopEnterMaterialSharedXAnimators(
-            nextAnim
-        ) { getMaterialFadeThroughAnimator(view as ViewGroup, enter) }
+            nextAnim,
+            { getMaterialFadeThroughAnimator(view as ViewGroup, enter) },
+            { _, materialFadeThroughAnimator -> materialFadeThroughAnimator() }
+        )
     }
 
     override fun onDestroy() {

@@ -16,10 +16,7 @@ import androidx.preference.PreferenceManager
 import ba.grbo.currencyconverter.R
 import ba.grbo.currencyconverter.data.models.domain.ExchangeableCurrency
 import ba.grbo.currencyconverter.ui.viewmodels.ChooserViewModel
-import ba.grbo.currencyconverter.util.collectWhenStarted
-import ba.grbo.currencyconverter.util.getEnterAndPopExitMaterialSharedXAnimators
-import ba.grbo.currencyconverter.util.getExitAndPopEnterMaterialSharedXAnimators
-import ba.grbo.currencyconverter.util.putString
+import ba.grbo.currencyconverter.util.*
 
 class ChooserFragment : PreferenceFragmentCompat() {
     private val viewModel: ChooserViewModel by viewModels()
@@ -45,10 +42,10 @@ class ChooserFragment : PreferenceFragmentCompat() {
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
-
     override fun onCreateAnimator(transit: Int, enter: Boolean, nextAnim: Int): Animator {
         return getExitAndPopEnterMaterialSharedXAnimators(
             nextAnim,
+            { getMaterialFadeThroughAnimator(view as ViewGroup, enter) },
             ::getEnterAndPopExitMaterialSharedXAnimators
         )
     }

@@ -6,6 +6,7 @@ import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 import ba.grbo.currencyconverter.R
 
+@Suppress("PropertyName")
 class Colors(private val context: Context) {
     val WHITE = getColorFromResource(R.color.white)
     val BLACK = getColorFromResource(R.color.black)
