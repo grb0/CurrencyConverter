@@ -44,7 +44,6 @@ import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.*
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown.FROM
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.Dropdown.TO
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.DropdownState.*
-import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Focusing
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocusing
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SwappingState.*
 import ba.grbo.currencyconverter.util.*
@@ -268,10 +267,13 @@ class ConverterFragment : Fragment() {
                         Animators::animateRootFromDropdownExpanded,
                         Animators::animateRootToDropdownExpanded
                     )
-                } else animateRootScreen(
-                    Animators::animateReverseRootFromDropdownExpanded,
-                    Animators::animateReverseRootToDropdownExpanded
-                )
+                } else {
+                    releaseFocus()
+                    animateRootScreen(
+                        Animators::animateReverseRootFromDropdownExpanded,
+                        Animators::animateReverseRootToDropdownExpanded
+                    )
+                }
             }
         }
     }
@@ -515,7 +517,7 @@ class ConverterFragment : Fragment() {
 
     private fun onDropdownExpanding(dropdown: Dropdown) {
         expandDropdown(dropdown)
-        setOnScreenTouched(dropdown, false)
+        setOnScreenTouched(dropdown)
         viewModel.onDropdownExpanded(dropdown)
     }
 
@@ -564,14 +566,13 @@ class ConverterFragment : Fragment() {
         }
     }
 
-    private fun setOnScreenTouched(dropdown: Dropdown, includeSearcher: Boolean) {
-        activity.onScreenTouched = { event -> onScreenTouched(event, dropdown, includeSearcher) }
+    private fun setOnScreenTouched(dropdown: Dropdown) {
+        activity.onScreenTouched = { event -> onScreenTouched(event, dropdown) }
     }
 
     private fun onScreenTouched(
         event: MotionEvent,
-        dropdown: Dropdown,
-        includeSearcher: Boolean
+        dropdown: Dropdown
     ): Boolean {
         val touchPoint = Point(event.rawX.roundToInt(), event.rawY.roundToInt())
 
@@ -601,26 +602,12 @@ class ConverterFragment : Fragment() {
             touchPoint
         )
 
-        return if (includeSearcher) {
-            val currenciesSearcherTouched = isPointInsideViewBounds(
-                binding.dropdownMenu.currenciesSearcher,
-                touchPoint
-            )
-            viewModel.onScreenTouched(
-                dropdown,
-                currencyLayoutTouched,
-                dropdownTitleTouched,
-                currenciesCardTouched,
-                currenciesSearcherTouched
-            )
-        } else {
-            viewModel.onScreenTouched(
-                dropdown,
-                currencyLayoutTouched,
-                dropdownTitleTouched,
-                currenciesCardTouched
-            )
-        }
+        return viewModel.onScreenTouched(
+            dropdown,
+            currencyLayoutTouched,
+            dropdownTitleTouched,
+            currenciesCardTouched
+        )
     }
 
     private fun isPointInsideViewBounds(view: View, point: Point): Boolean = Rect().run {
@@ -695,7 +682,6 @@ class ConverterFragment : Fragment() {
     }
 
     private fun onSearcherStateChanged(state: SearcherState) = when (state) {
-        is Focusing -> onSearcherFocused(state.dropdown)
         is Unfocusing -> onSearcherUnfocused(state.dropdown)
         else -> {
             // Do nothing
@@ -743,14 +729,9 @@ class ConverterFragment : Fragment() {
         }
     }
 
-    private fun onSearcherFocused(dropdown: Dropdown) {
-        setOnScreenTouched(dropdown, true)
-    }
-
     private fun onSearcherUnfocused(dropdown: Dropdown) {
         releaseFocus()
         hideKeyboard()
-        if (viewModel.dropdownState.value !is Collapsed) restoreOriginalOnScreenTouched(dropdown)
         viewModel.onSearcherUnfocused(dropdown)
     }
 
@@ -766,10 +747,6 @@ class ConverterFragment : Fragment() {
 
     private fun getInputMethodManager(): InputMethodManager {
         return requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-    }
-
-    private fun restoreOriginalOnScreenTouched(dropdown: Dropdown) {
-        setOnScreenTouched(dropdown, false)
     }
 
     private fun onSwapping() {
@@ -856,15 +833,9 @@ class ConverterFragment : Fragment() {
         double: TextView
     ) {
         val data = if (binding.currency.isVisible) {
-            Pair(
-                binding.currency.text,
-                binding.currency.compoundDrawables[0]
-            )
+            Pair(binding.currency.text, binding.currency.compoundDrawables[0])
         } else {
-            Pair(
-                binding.currencyDouble.text,
-                binding.currencyDouble.compoundDrawables[0]
-            )
+            Pair(binding.currencyDouble.text, binding.currencyDouble.compoundDrawables[0])
         }
 
         double.run {
@@ -872,10 +843,9 @@ class ConverterFragment : Fragment() {
             setCompoundDrawablesWithIntrinsicBounds(data.second, null, null, null)
         }
 
+        if (binding.currency.isVisible) binding.currency.visibility = View.INVISIBLE
+        else binding.currencyDouble.visibility = View.INVISIBLE
 
-        if (binding.currency.isVisible) {
-            binding.currency.visibility = View.INVISIBLE
-        } else binding.currencyDouble.visibility = View.INVISIBLE
         double.visibility = View.VISIBLE
     }
 

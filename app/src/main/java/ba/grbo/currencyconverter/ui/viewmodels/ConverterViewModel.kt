@@ -426,27 +426,7 @@ class ConverterViewModel @Inject constructor(
         currenciesCardTouched: Boolean
     ): Boolean {
         return (!currencyLayoutTouched && !dropdownTitleTouched && !currenciesCardTouched).also {
-            if (it) _dropdownState.value = Collapsing(dropdown)
-        }
-    }
-
-    fun onScreenTouched(
-        dropdown: Dropdown,
-        currencyLayoutTouched: Boolean,
-        dropdownTitleTouched: Boolean,
-        currenciesCardTouched: Boolean,
-        currenciesSearcherTouched: Boolean
-    ): Boolean {
-        return if (currenciesCardTouched && !currenciesSearcherTouched) {
-            _searcherState.value = Unfocusing(dropdown)
-            false
-        } else {
-            (!currencyLayoutTouched && !dropdownTitleTouched && !currenciesCardTouched).also {
-                if (it) {
-                    _searcherState.value = Unfocusing(dropdown)
-                    _dropdownState.value = Collapsing(dropdown)
-                }
-            }
+            if (it) collapseDropdown(dropdown)
         }
     }
 
@@ -555,7 +535,7 @@ class ConverterViewModel @Inject constructor(
     }
 
     private fun collapseDropdown(dropdown: Dropdown) {
-        if (_searcherState.value != Unfocused(NONE)) _searcherState.value = Unfocusing(dropdown)
+        if (_searcherState.value !is Unfocused) _searcherState.value = Unfocusing(dropdown)
         _dropdownState.value = Collapsing(dropdown)
     }
 
