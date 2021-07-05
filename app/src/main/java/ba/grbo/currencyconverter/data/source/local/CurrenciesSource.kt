@@ -28,6 +28,22 @@ class CurrenciesSource @Inject constructor(
         }
     }
 
+    // TODO convert every observe method in this way
+    // fun observeMostRecentExchangeRates() = exchangeRateDao.observeAllMostRecent().toDatabaseResult()
+    // fun observeMiscellaneousTwo() = miscellaneousDao.observe().toDatabaseResult()
+
+    // TODO convert every one-shot method in this way
+    // suspend fun insertExchangeRate(exchangeRate: ExchangeRate): DatabaseResult<Boolean> {
+    //     return withContext(coroutineDispatcher) {
+    //         toDatabaseResult { (exchangeRateDao.insert(exchangeRate) == exchangeRate.id) }
+    //     }
+    // }
+    // suspend fun getMiscellaneous(): DatabaseResult<Miscellaneous> {
+    //     return withContext(coroutineDispatcher) {
+    //         toDatabaseResult(miscellaneousDao::get)
+    //     }
+    // }
+
     override fun observeMostRecentExchangeRates(): DatabaseResult<Flow<List<EssentialExchangeRate>>> =
         try {
             Success(exchangeRateDao.observeAllMostRecent())

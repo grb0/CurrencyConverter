@@ -18,6 +18,9 @@ class DefaultCurrenciesRepository @Inject constructor(
     @DispatcherDefault private val coroutineDispatcher: CoroutineDispatcher,
     @ApplicationContext context: Context,
 ) : CurrenciesRepository {
+    // TODO once localDataSource return values are refactored
+    // private val _miscellanous = localDataSource.observeMiscellaneous().stateIn(...)
+
     private val _exchangeableCurrencies = MutableStateFlow<List<DomainCurrency>>(emptyList())
     override val exchangeableCurrencies: StateFlow<List<DomainCurrency>>
         get() = _exchangeableCurrencies
