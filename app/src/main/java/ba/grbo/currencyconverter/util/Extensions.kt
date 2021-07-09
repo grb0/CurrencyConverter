@@ -211,6 +211,8 @@ fun Context.updateLocale(locale: Locale): Context {
     return context
 }
 
+// Note: If a value is emitted, before the flow is being collected (observed), the emitted value
+// is lost
 @Suppress("FunctionName", "UNCHECKED_CAST")
 fun <T> SingleSharedFlow() = MutableSharedFlow<T>(
     onBufferOverflow = BufferOverflow.DROP_OLDEST,
