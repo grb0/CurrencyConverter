@@ -436,7 +436,7 @@ class ConverterViewModel @Inject constructor(
         viewModelScope.updateMiscellaneous()
     }
 
-    private fun CoroutineScope.updateMiscellaneous() = launch(Dispatchers.IO) {
+    private fun CoroutineScope.updateMiscellaneous() = launch {
         val updated = repository.updateMiscellaneous(
             Miscellaneous(
                 showOnlyFavorites,
