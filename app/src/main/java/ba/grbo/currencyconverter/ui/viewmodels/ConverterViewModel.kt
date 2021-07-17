@@ -13,6 +13,7 @@ import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.
 import ba.grbo.currencyconverter.ui.viewmodels.ConverterViewModel.SearcherState.Unfocusing
 import ba.grbo.currencyconverter.util.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -188,11 +189,11 @@ class ConverterViewModel @Inject constructor(
 
     init {
         filter = initializeFilter(filterBy)
-        collectOnSearcherTextChanged()
+        viewModelScope.collectOnSearcherTextChanged()
     }
 
-    private fun collectOnSearcherTextChanged() {
-        viewModelScope.launch(Dispatchers.Default) {
+    private fun CoroutineScope.collectOnSearcherTextChanged() {
+        launch(Dispatchers.Default) {
             onSearcherTextChanged.collectLatest {
                 it?.let {
                     if (it.isEmpty()) resetCountries()
@@ -299,14 +300,10 @@ class ConverterViewModel @Inject constructor(
 
     private fun swapSelectedCurrencies() {
         val fromCountry = _fromCurrency.value
-        val toCountry = _toCurrency.value
+        _fromCurrency.value = _toCurrency.value
+        _toCurrency.value = fromCountry
 
-        viewModelScope.launch {
-            launch { _fromCurrency.value = toCountry }
-            launch { _toCurrency.value = fromCountry }
-        }
-
-        updateMiscellaneous(toCountry, fromCountry)
+        viewModelScope.updateMiscellaneous()
     }
 
     fun onResetSearcherClicked() {
@@ -322,7 +319,7 @@ class ConverterViewModel @Inject constructor(
         if (isFavoritesOn) filterCurrentCurrencies() // Since they're already filtered
         else filterCurrencies(onSearcherTextChanged.value)
 
-        updateMiscellaneous()
+        viewModelScope.updateMiscellaneous()
     }
 
     private fun filterCurrentCurrencies() {
@@ -348,7 +345,7 @@ class ConverterViewModel @Inject constructor(
     ) {
         if (currency.isFavorite != isFavoritesOn) {
             val updatedCurrency = currency.copy(isFavorite = isFavoritesOn)
-            updateCurrency(updatedCurrency)
+            viewModelScope.updateCurrency(updatedCurrency)
             updateCurrencies(updatedCurrency, isFavoritesOn, position)
         }
     }
@@ -383,8 +380,8 @@ class ConverterViewModel @Inject constructor(
         }
     }
 
-    private fun updateCurrency(currency: ExchangeableCurrency) {
-        viewModelScope.launch {
+    private fun CoroutineScope.updateCurrency(currency: ExchangeableCurrency) {
+        launch {
             val updated = repository.updateCurrency(currency)
             if (!updated && !ignoreFailedDbUpdates) onDatabaseUpdateFailed()
         }
@@ -439,28 +436,21 @@ class ConverterViewModel @Inject constructor(
             _toCurrency.value = currency
         }
 
-        updateMiscellaneous(_fromCurrency.value, _toCurrency.value)
+        viewModelScope.updateMiscellaneous()
     }
 
-    private fun updateMiscellaneous(
-        fromCurrency: ExchangeableCurrency,
-        toCurrency: ExchangeableCurrency
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
+    private fun CoroutineScope.updateMiscellaneous() {
+        launch(Dispatchers.IO) {
             val updated = repository.updateMiscellaneous(
                 Miscellaneous(
                     showOnlyFavorites,
-                    fromCurrency,
-                    toCurrency
+                    _fromCurrency.value,
+                    _toCurrency.value
                 ).toDatabase(plainCurrencies.value)
             )
 
             if (!updated && !ignoreFailedDbUpdates) onDatabaseUpdateFailed()
         }
-    }
-
-    private fun updateMiscellaneous() {
-        updateMiscellaneous(_fromCurrency.value, _toCurrency.value)
     }
 
     fun onDropdownCollapsed() {
