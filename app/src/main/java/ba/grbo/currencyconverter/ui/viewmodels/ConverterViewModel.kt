@@ -192,20 +192,19 @@ class ConverterViewModel @Inject constructor(
         viewModelScope.collectOnSearcherTextChanged()
     }
 
-    private fun CoroutineScope.collectOnSearcherTextChanged() {
-        launch(Dispatchers.Default) {
-            onSearcherTextChanged.collectLatest {
-                it?.let {
-                    if (it.isEmpty()) resetCountries()
-                    else {
-                        setResetButton(true)
-                        delay(DEBOUNCE_PERIOD)
-                        filterCurrencies(it)
-                    }
+    private fun CoroutineScope.collectOnSearcherTextChanged() = launch(Dispatchers.Default) {
+        onSearcherTextChanged.collectLatest {
+            it?.let {
+                if (it.isEmpty()) resetCountries()
+                else {
+                    setResetButton(true)
+                    delay(DEBOUNCE_PERIOD)
+                    filterCurrencies(it)
                 }
             }
         }
     }
+
 
     private fun initializeFilter(
         filterBy: FilterBy
@@ -380,11 +379,9 @@ class ConverterViewModel @Inject constructor(
         }
     }
 
-    private fun CoroutineScope.updateCurrency(currency: ExchangeableCurrency) {
-        launch {
-            val updated = repository.updateCurrency(currency)
-            if (!updated && !ignoreFailedDbUpdates) onDatabaseUpdateFailed()
-        }
+    private fun CoroutineScope.updateCurrency(currency: ExchangeableCurrency) = launch {
+        val updated = repository.updateCurrency(currency)
+        if (!updated && !ignoreFailedDbUpdates) onDatabaseUpdateFailed()
     }
 
     private fun onDatabaseUpdateFailed() {
@@ -439,18 +436,16 @@ class ConverterViewModel @Inject constructor(
         viewModelScope.updateMiscellaneous()
     }
 
-    private fun CoroutineScope.updateMiscellaneous() {
-        launch(Dispatchers.IO) {
-            val updated = repository.updateMiscellaneous(
-                Miscellaneous(
-                    showOnlyFavorites,
-                    _fromCurrency.value,
-                    _toCurrency.value
-                ).toDatabase(plainCurrencies.value)
-            )
+    private fun CoroutineScope.updateMiscellaneous() = launch(Dispatchers.IO) {
+        val updated = repository.updateMiscellaneous(
+            Miscellaneous(
+                showOnlyFavorites,
+                _fromCurrency.value,
+                _toCurrency.value
+            ).toDatabase(plainCurrencies.value)
+        )
 
-            if (!updated && !ignoreFailedDbUpdates) onDatabaseUpdateFailed()
-        }
+        if (!updated && !ignoreFailedDbUpdates) onDatabaseUpdateFailed()
     }
 
     fun onDropdownCollapsed() {
