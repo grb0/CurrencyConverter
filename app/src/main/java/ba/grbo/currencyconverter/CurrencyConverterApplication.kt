@@ -5,10 +5,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
-import ba.grbo.currencyconverter.util.Language
-import ba.grbo.currencyconverter.util.Theme
-import ba.grbo.currencyconverter.util.getLanguage
-import ba.grbo.currencyconverter.util.updateLocale
+import ba.grbo.currencyconverter.util.*
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 import javax.inject.Inject
@@ -22,7 +19,7 @@ class CurrencyConverterApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         setTheme(theme)
-        initializeTimber()
+        initTimber()
     }
 
     override fun attachBaseContext(base: Context) {
@@ -53,20 +50,7 @@ class CurrencyConverterApplication : Application() {
         return true
     }
 
-    private fun initializeTimber() {
-        val tree = object : Timber.DebugTree() {
-            override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                super.log(priority, "ba.grbo -> $tag", message, t)
-            }
-
-            override fun createStackElementTag(element: StackTraceElement): String {
-                return String.format(
-                    "%s -> %s",
-                    super.createStackElementTag(element),
-                    element.methodName
-                )
-            }
-        }
-        if (BuildConfig.DEBUG) Timber.plant(tree)
+    private fun initTimber() {
+        Timber.plant(if (BuildConfig.DEBUG) Trees.Debug else Trees.Release)
     }
 }
