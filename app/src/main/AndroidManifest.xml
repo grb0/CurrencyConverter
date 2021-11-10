@@ -14,7 +14,8 @@
         <activity
             android:windowSoftInputMode="adjustPan"
             android:name=".ui.activities.CurrencyConverterActivity"
-            android:theme="@style/Theme.SplashScreen">
+            android:theme="@style/Theme.SplashScreen"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

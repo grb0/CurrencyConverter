@@ -6,13 +6,13 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "ba.grbo.currencyconverter"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
 
@@ -65,10 +65,10 @@ dependencies {
 
     // region main
     // region Defaults
-    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'com.google.android.material:material:1.4.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
     // endregion
 
     // region Hilt
@@ -92,7 +92,7 @@ dependencies {
     // endregion
 
     // region Safe way to collect Flows
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0-alpha03'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
     // endregion
 
     // region Ripple effect
